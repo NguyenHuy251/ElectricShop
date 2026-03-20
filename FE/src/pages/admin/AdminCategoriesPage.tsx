@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { categories } from '../../data/mockData';
+import { useProducts } from '../../hooks/useProducts';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
+import Input from '../../components/ui/Input';
+
+const AdminCategoriesPage: React.FC = () => {
+  const { products } = useProducts();
+  const [addModal, setAddModal] = useState(false);
+  const [form, setForm] = useState({ name: '', icon: '📦', slug: '' });
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, margin: 0 }}>Quản lý danh mục</h1>
+          <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '13px' }}>
+            {categories.length} danh mục sản phẩm
+          </p>
+        </div>
+        <Button onClick={() => setAddModal(true)}>+ Thêm danh mục</Button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
+        {categories.map((cat) => {
+          const count = products.filter((p) => p.categoryId === cat.id).length;
+          return (
+            <div
+              key={cat.id}
+              style={{
+                background: '#fff', borderRadius: '12px', padding: '20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                border: '1.5px solid #e5e7eb',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '48px', height: '48px', borderRadius: '12px',
+                    background: '#eff6ff', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', fontSize: '24px',
+                  }}
+                >
+                  {cat.icon}
+                </div>
+                <div>
+                  <div style={{ fontSize: '15px', fontWeight: 700 }}>{cat.name}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>{count} sản phẩm</div>
+                </div>
+              </div>
+              <Button size="sm" variant="ghost">✏️</Button>
+            </div>
+          );
+        })}
+      </div>
+
+      <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Thêm danh mục mới" size="sm">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <Input label="Tên danh mục" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required />
+          <Input label="Icon (emoji)" value={form.icon} onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))} />
+          <Input label="Slug (URL)" value={form.slug} onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))} placeholder="ten-danh-muc" />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <Button variant="ghost" onClick={() => setAddModal(false)}>Hủy</Button>
+            <Button onClick={() => setAddModal(false)}>Thêm danh mục</Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+export default AdminCategoriesPage;
