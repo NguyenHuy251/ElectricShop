@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { AlertOutlined, LockOutlined, MailOutlined, SettingOutlined, ThunderboltOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -58,7 +59,7 @@ const LoginPage: React.FC = () => {
       >
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}>⚡</div>
+          <div style={{ fontSize: '40px', marginBottom: '8px' }}><ThunderboltOutlined style={{ color: '#f59e0b' }} /></div>
           <h1 style={{ margin: 0, fontSize: '24px', color: '#1e3a5f' }}>ElectricShop</h1>
           <p style={{ margin: '6px 0 0', color: '#6b7280', fontSize: '14px' }}>
             Đăng nhập vào tài khoản của bạn
@@ -78,9 +79,9 @@ const LoginPage: React.FC = () => {
         >
           <strong>Tài khoản demo:</strong>
           <br />
-          👤 User: user@example.com / user123
+          <UserOutlined style={{ marginRight: 6 }} />User: user@example.com / user123
           <br />
-          ⚙️ Admin: admin@electricshop.vn / admin123
+          <SettingOutlined style={{ marginRight: 6 }} />Admin: admin@electricshop.vn / admin123
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -91,7 +92,7 @@ const LoginPage: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            leftIcon="✉"
+            leftIcon={<MailOutlined />}
           />
           <Input
             label="Mật khẩu"
@@ -100,7 +101,7 @@ const LoginPage: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            leftIcon="🔒"
+            leftIcon={<LockOutlined />}
           />
 
           {error && (
@@ -114,7 +115,7 @@ const LoginPage: React.FC = () => {
                 fontSize: '13px',
               }}
             >
-              ⚠️ {error}
+              <AlertOutlined style={{ marginRight: 6 }} />{error}
             </div>
           )}
 

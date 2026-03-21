@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { users } from '../../data/mockData';
 import { formatDate } from '../../utils/helpers';
 import Badge from '../../components/ui/Badge';
@@ -39,7 +40,7 @@ const AdminUsersPage: React.FC = () => {
       <div style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
         <input
           type="text"
-          placeholder="🔍 Tìm kiếm theo tên hoặc email..."
+          placeholder="Tìm kiếm theo tên hoặc email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -84,7 +85,7 @@ const AdminUsersPage: React.FC = () => {
                     bg={user.role === 'admin' ? '#fef3c7' : '#eff6ff'}
                     color={user.role === 'admin' ? '#92400e' : '#1d4ed8'}
                   >
-                    {user.role === 'admin' ? '⚙️ Admin' : '👤 Khách hàng'}
+                    {user.role === 'admin' ? <><SettingOutlined /> Admin</> : <><UserOutlined /> Khách hàng</>}
                   </Badge>
                 </td>
                 <td style={{ padding: '12px 16px', fontSize: '13px', color: '#6b7280' }}>

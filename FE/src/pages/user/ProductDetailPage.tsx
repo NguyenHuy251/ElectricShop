@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  AlertOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  CreditCardOutlined,
+  RollbackOutlined,
+  SafetyCertificateOutlined,
+  ShoppingCartOutlined,
+  TruckOutlined,
+} from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
 import { useCart } from '../../hooks/useCart';
 import { categories } from '../../data/mockData';
 import { formatCurrency, calcDiscountPercent } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ui/ProductCard';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +30,7 @@ const ProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 16px' }}>
-        <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
+        <div style={{ fontSize: '64px', marginBottom: '16px' }}><AlertOutlined /></div>
         <h2>Không tìm thấy sản phẩm</h2>
         <Button onClick={() => navigate('/products')}>← Quay lại</Button>
       </div>
@@ -83,7 +94,7 @@ const ProductDetailPage: React.FC = () => {
         {/* Info */}
         <div>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
-            {category?.icon} {category?.name} • {product.brand}
+            {category && getCategoryIcon(category, { marginRight: 6 })} {category?.name} • {product.brand}
           </div>
           <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#111827', margin: '0 0 12px', lineHeight: 1.3 }}>
             {product.name}
@@ -135,10 +146,13 @@ const ProductDetailPage: React.FC = () => {
             }}
           >
             {product.stock > 5
-              ? `✅ Còn hàng (${product.stock} sản phẩm)`
+              ? `Còn hàng (${product.stock} sản phẩm)`
               : product.stock > 0
-              ? `⚠️ Chỉ còn ${product.stock} sản phẩm`
-              : '❌ Hết hàng'}
+              ? `Chỉ còn ${product.stock} sản phẩm`
+              : 'Hết hàng'}
+            <span style={{ marginLeft: 8 }}>
+              {product.stock > 5 ? <CheckCircleOutlined /> : product.stock > 0 ? <AlertOutlined /> : <CloseCircleOutlined />}
+            </span>
           </div>
 
           {/* Quantity */}
@@ -172,7 +186,7 @@ const ProductDetailPage: React.FC = () => {
               disabled={product.stock === 0}
               style={{ flex: 1 }}
             >
-              {isInCart(product.id) ? '✓ Đã thêm vào giỏ' : '🛒 Thêm vào giỏ hàng'}
+              {isInCart(product.id) ? <><CheckCircleOutlined /> Đã thêm vào giỏ</> : <><ShoppingCartOutlined /> Thêm vào giỏ hàng</>}
             </Button>
             <Button
               variant="danger"
@@ -186,9 +200,14 @@ const ProductDetailPage: React.FC = () => {
 
           {/* Features */}
           <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {['🚚 Miễn phí vận chuyển toàn quốc', '🔧 Bảo hành chính hãng 12 tháng', '↩️ Đổi trả trong 30 ngày', '💳 Thanh toán khi nhận hàng'].map((benefit) => (
-              <div key={benefit} style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {benefit}
+            {[
+              { key: 'ship', icon: <TruckOutlined />, text: 'Miễn phí vận chuyển toàn quốc' },
+              { key: 'warranty', icon: <SafetyCertificateOutlined />, text: 'Bảo hành chính hãng 12 tháng' },
+              { key: 'return', icon: <RollbackOutlined />, text: 'Đổi trả trong 30 ngày' },
+              { key: 'cod', icon: <CreditCardOutlined />, text: 'Thanh toán khi nhận hàng' },
+            ].map((benefit) => (
+              <div key={benefit.key} style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {benefit.icon} {benefit.text}
               </div>
             ))}
           </div>

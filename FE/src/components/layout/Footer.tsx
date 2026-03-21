@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { EnvironmentOutlined, MailOutlined, PhoneOutlined, ThunderboltOutlined } from '@ant-design/icons';
 
 const Footer: React.FC = () => (
   <footer style={{
@@ -14,16 +15,16 @@ const Footer: React.FC = () => (
       {/* Brand */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <span style={{ fontSize: '28px' }}>⚡</span>
+          <ThunderboltOutlined style={{ fontSize: '28px', color: '#f59e0b' }} />
           <span style={{ fontSize: '20px', fontWeight: 800, color: '#fff' }}>ElectricShop</span>
         </div>
         <p style={{ fontSize: '13px', lineHeight: 1.7, margin: 0 }}>
           Cửa hàng điện gia dụng uy tín hàng đầu Việt Nam. Sản phẩm chính hãng, bảo hành tận nơi.
         </p>
         <div style={{ marginTop: '16px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span>📍 123 Nguyễn Huệ, Quận 1, TP.HCM</span>
-          <span>☎ Hotline: 1800 9999</span>
-          <span>✉ info@electricshop.vn</span>
+          <span><EnvironmentOutlined style={{ marginRight: 6 }} />123 Nguyễn Huệ, Quận 1, TP.HCM</span>
+          <span><PhoneOutlined style={{ marginRight: 6 }} />Hotline: 1800 9999</span>
+          <span><MailOutlined style={{ marginRight: 6 }} />info@electricshop.vn</span>
         </div>
       </div>
 

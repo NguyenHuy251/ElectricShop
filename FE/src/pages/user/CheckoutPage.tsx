@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
+import { CheckCircleOutlined, CreditCardOutlined, FileTextOutlined, HomeOutlined } from '@ant-design/icons';
 import { cartTotalSelector } from '../../recoil/selectors/cartSelectors';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
@@ -60,7 +61,7 @@ const CheckoutPage: React.FC = () => {
   if (success) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 16px', maxWidth: '500px', margin: '0 auto' }}>
-        <div style={{ fontSize: '72px', marginBottom: '16px' }}>🎉</div>
+        <div style={{ fontSize: '72px', marginBottom: '16px' }}><CheckCircleOutlined style={{ color: '#10b981' }} /></div>
         <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>
           Đặt hàng thành công!
         </h2>
@@ -98,7 +99,7 @@ const CheckoutPage: React.FC = () => {
             {/* Delivery */}
             <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
               <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700 }}>
-                📍 Thông tin giao hàng
+                <HomeOutlined style={{ marginRight: 8 }} />Thông tin giao hàng
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <Input
@@ -153,12 +154,12 @@ const CheckoutPage: React.FC = () => {
             {/* Payment */}
             <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
               <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700 }}>
-                💳 Phương thức thanh toán
+                <CreditCardOutlined style={{ marginRight: 8 }} />Phương thức thanh toán
               </h3>
               {[
-                { value: 'cod', label: '💵 Thanh toán khi nhận hàng', desc: 'COD - Trả tiền mặt khi nhận hàng' },
-                { value: 'bank', label: '🏦 Chuyển khoản ngân hàng', desc: 'Chuyển khoản trước khi giao hàng' },
-                { value: 'vnpay', label: '📱 VNPay', desc: 'Thanh toán qua ví điện tử VNPay' },
+                { value: 'cod', label: 'Thanh toán khi nhận hàng', desc: 'COD - Trả tiền mặt khi nhận hàng' },
+                { value: 'bank', label: 'Chuyển khoản ngân hàng', desc: 'Chuyển khoản trước khi giao hàng' },
+                { value: 'vnpay', label: 'VNPay', desc: 'Thanh toán qua ví điện tử VNPay' },
               ].map((opt) => (
                 <label
                   key={opt.value}
@@ -189,7 +190,7 @@ const CheckoutPage: React.FC = () => {
           {/* Order Summary */}
           <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', position: 'sticky', top: '20px' }}>
             <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700 }}>
-              📋 Đơn hàng ({cart.length} sản phẩm)
+              <FileTextOutlined style={{ marginRight: 8 }} />Đơn hàng ({cart.length} sản phẩm)
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>

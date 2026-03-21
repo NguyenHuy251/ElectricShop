@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
+import { DeleteOutlined, EyeOutlined, HeartFilled, HeartOutlined, ShoppingCartOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { wishlistAtom } from '../../recoil/atoms/wishlistAtom';
 import { useCart } from '../../hooks/useCart';
 import { formatCurrency, calcDiscountPercent } from '../../utils/helpers';
@@ -19,7 +20,7 @@ const WishlistPage: React.FC = () => {
   if (wishlist.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 16px' }}>
-        <div style={{ fontSize: 72, marginBottom: 16 }}>❤️</div>
+        <div style={{ fontSize: 72, marginBottom: 16 }}><HeartOutlined /></div>
         <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
           Danh sách yêu thích trống
         </h2>
@@ -27,7 +28,7 @@ const WishlistPage: React.FC = () => {
           Hãy thêm những sản phẩm bạn yêu thích để dễ dàng tìm lại sau này.
         </p>
         <Button size="lg" onClick={() => navigate('/products')}>
-          🛍️ Khám phá sản phẩm
+          <ShoppingOutlined /> Khám phá sản phẩm
         </Button>
       </div>
     );
@@ -37,10 +38,10 @@ const WishlistPage: React.FC = () => {
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>
-          ❤️ Yêu thích ({wishlist.length} sản phẩm)
+          <HeartFilled style={{ color: '#ef4444', marginRight: 8 }} />Yêu thích ({wishlist.length} sản phẩm)
         </h1>
         <Button variant="ghost" size="sm" onClick={clearWishlist}>
-          🗑️ Xóa tất cả
+          <DeleteOutlined /> Xóa tất cả
         </Button>
       </div>
 
@@ -100,7 +101,7 @@ const WishlistPage: React.FC = () => {
                   }}
                   title="Xóa khỏi yêu thích"
                 >
-                  ❤️
+                  <HeartFilled style={{ color: '#ef4444' }} />
                 </button>
               </div>
 
@@ -138,7 +139,7 @@ const WishlistPage: React.FC = () => {
                     ? 'Hết hàng'
                     : isInCart(product.id)
                     ? '✓ Đã thêm'
-                    : '🛒 Thêm giỏ'}
+                    : <><ShoppingCartOutlined /> Thêm giỏ</>}
                 </Button>
                 <button
                   onClick={() => navigate(`/products/${product.id}`)}
@@ -148,7 +149,7 @@ const WishlistPage: React.FC = () => {
                     color: '#374151', fontWeight: 500, flexShrink: 0,
                   }}
                 >
-                  Chi tiết
+                  <EyeOutlined /> Chi tiết
                 </button>
               </div>
             </div>
@@ -169,7 +170,7 @@ const WishlistPage: React.FC = () => {
           wishlist.filter((p) => p.stock > 0).forEach((p) => addToCart(p));
           navigate('/cart');
         }}>
-          🛒 Thêm tất cả vào giỏ →
+          <ShoppingCartOutlined /> Thêm tất cả vào giỏ →
         </Button>
       </div>
     </div>

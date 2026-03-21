@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HeartOutlined, InboxOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
@@ -20,14 +21,14 @@ const OrderHistoryPage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24 }}>📦 Đơn hàng của tôi</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24 }}><InboxOutlined style={{ marginRight: 8 }} />Đơn hàng của tôi</h1>
 
       {userOrders.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 16px', background: '#fff', borderRadius: 12 }}>
-          <div style={{ fontSize: 72, marginBottom: 16 }}>📭</div>
+          <div style={{ fontSize: 72, marginBottom: 16 }}><InboxOutlined /></div>
           <h3 style={{ color: '#374151', marginBottom: 8 }}>Bạn chưa có đơn hàng nào</h3>
           <p style={{ color: '#6b7280', marginBottom: 24 }}>Hãy mua sắm và tận hưởng những ưu đãi tuyệt vời!</p>
-          <Button onClick={() => navigate('/products')}>🛍️ Mua sắm ngay</Button>
+          <Button onClick={() => navigate('/products')}><ShoppingOutlined /> Mua sắm ngay</Button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -165,7 +166,7 @@ const OrderHistoryPage: React.FC = () => {
 
             {selectedOrder.note && (
               <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', borderRadius: 8, fontSize: 13, color: '#92400e' }}>
-                📝 Ghi chú: {selectedOrder.note}
+                <HeartOutlined style={{ marginRight: 6 }} />Ghi chú: {selectedOrder.note}
               </div>
             )}
           </div>

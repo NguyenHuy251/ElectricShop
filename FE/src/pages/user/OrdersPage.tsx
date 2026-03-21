@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FileTextOutlined, InboxOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
@@ -14,7 +15,7 @@ const OrdersPage: React.FC = () => {
   if (userOrders.length === 0) {
     return (
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
-        <div style={{ fontSize: '72px', marginBottom: '16px' }}>📦</div>
+        <div style={{ fontSize: '72px', marginBottom: '16px' }}><InboxOutlined /></div>
         <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>
           Chưa có đơn hàng nào
         </h2>
@@ -25,7 +26,7 @@ const OrdersPage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '24px 16px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>📦 Đơn hàng của tôi</h1>
+      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}><InboxOutlined style={{ marginRight: 8 }} />Đơn hàng của tôi</h1>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {userOrders.map((order) => (
@@ -142,11 +143,11 @@ const OrdersPage: React.FC = () => {
 
             {/* Delivery info */}
             <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '13px', color: '#6b7280' }}>📍 Địa chỉ giao hàng</div>
+              <div style={{ fontSize: '13px', color: '#6b7280' }}><FileTextOutlined style={{ marginRight: 6 }} />Địa chỉ giao hàng</div>
               <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '4px' }}>{selectedOrder.address}</div>
-              <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>📞 {selectedOrder.phone}</div>
+              <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}><PhoneOutlined style={{ marginRight: 6 }} />{selectedOrder.phone}</div>
               {selectedOrder.note && (
-                <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>📝 {selectedOrder.note}</div>
+                <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}><FileTextOutlined style={{ marginRight: 6 }} />{selectedOrder.note}</div>
               )}
             </div>
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
 import { categories } from '../../data/mockData';
 import { formatCurrency } from '../../utils/helpers';
@@ -6,6 +7,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { Product } from '../../types';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const emptyProduct: Omit<Product, 'id'> = {
   name: '', slug: '', categoryId: 1, price: 0, description: '',
@@ -67,14 +69,14 @@ const AdminProductsPage: React.FC = () => {
             {products.length} sản phẩm trong hệ thống
           </p>
         </div>
-        <Button onClick={openAdd}>+ Thêm sản phẩm</Button>
+        <Button onClick={openAdd}><PlusOutlined /> Thêm sản phẩm</Button>
       </div>
 
       {/* Search */}
       <div style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
         <input
           type="text"
-          placeholder="🔍 Tìm kiếm theo tên hoặc thương hiệu..."
+          placeholder="Tìm kiếm theo tên hoặc thương hiệu..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -117,7 +119,7 @@ const AdminProductsPage: React.FC = () => {
                     </div>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>
-                    {cat?.icon} {cat?.name}
+                    {cat && getCategoryIcon(cat, { marginRight: 6 })} {cat?.name}
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>
@@ -156,10 +158,10 @@ const AdminProductsPage: React.FC = () => {
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <Button size="sm" variant="outline" onClick={() => openEdit(product)}>
-                        ✏️ Sửa
+                        <EditOutlined /> Sửa
                       </Button>
                       <Button size="sm" variant="danger" onClick={() => setDeleteConfirm(product.id)}>
-                        🗑️
+                        <DeleteOutlined />
                       </Button>
                     </div>
                   </td>

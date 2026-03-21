@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
+import {
+  PhoneOutlined,
+  SearchOutlined,
+  ShoppingCartOutlined,
+  SettingOutlined,
+  UserOutlined,
+  LogoutOutlined,
+  ThunderboltOutlined,
+  CarOutlined,
+  InboxOutlined,
+} from '@ant-design/icons';
 import { cartCountSelector } from '../../recoil/selectors/cartSelectors';
 import { useAuth } from '../../hooks/useAuth';
 import { useProducts } from '../../hooks/useProducts';
+import { categories } from '../../data/mockData';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const Header: React.FC = () => {
   const { currentUser, logout, isLoggedIn } = useAuth();
@@ -31,7 +44,8 @@ const Header: React.FC = () => {
         color: '#93c5fd',
         textAlign: 'center',
       }}>
-        🚚 Miễn phí vận chuyển cho đơn hàng trên 2.000.000đ | ☎ Hotline: 1800 9999
+        <CarOutlined style={{ marginRight: 6 }} />
+        Miễn phí vận chuyển cho đơn hàng trên 2.000.000đ | <PhoneOutlined style={{ margin: '0 6px 0 10px' }} />Hotline: 1800 9999
       </div>
 
       {/* Main Header */}
@@ -45,7 +59,7 @@ const Header: React.FC = () => {
           textDecoration: 'none',
           display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,
         }}>
-          <span style={{ fontSize: '28px' }}>⚡</span>
+          <ThunderboltOutlined style={{ fontSize: '28px', color: '#f59e0b' }} />
           <div>
             <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
               Electric
@@ -74,7 +88,7 @@ const Header: React.FC = () => {
                 color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: '16px',
               }}
             >
-              🔍
+              <SearchOutlined />
             </button>
           </div>
         </form>
@@ -87,7 +101,7 @@ const Header: React.FC = () => {
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             color: '#fff', padding: '4px 12px',
           }}>
-            <span style={{ fontSize: '22px' }}>🛒</span>
+            <ShoppingCartOutlined style={{ fontSize: '22px' }} />
             <span style={{ fontSize: '11px' }}>Giỏ hàng</span>
             {cartCount > 0 && (
               <span style={{
@@ -136,20 +150,20 @@ const Header: React.FC = () => {
                       onClick={() => setMenuOpen(false)}
                       style={dropItemStyle}
                     >
-                      ⚙️ Quản trị
+                      <SettingOutlined style={{ marginRight: 6 }} />Quản trị
                     </Link>
                   )}
                   <Link to="/profile" onClick={() => setMenuOpen(false)} style={dropItemStyle}>
-                    👤 Tài khoản
+                    <UserOutlined style={{ marginRight: 6 }} />Tài khoản
                   </Link>
                   <Link to="/orders" onClick={() => setMenuOpen(false)} style={dropItemStyle}>
-                    📦 Đơn hàng
+                    <InboxOutlined style={{ marginRight: 6 }} />Đơn hàng
                   </Link>
                   <button
                     onClick={() => { setMenuOpen(false); logout(); }}
                     style={{ ...dropItemStyle, background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#ef4444' }}
                   >
-                    🚪 Đăng xuất
+                    <LogoutOutlined style={{ marginRight: 6 }} />Đăng xuất
                   </button>
                 </div>
               )}
@@ -191,16 +205,7 @@ const Header: React.FC = () => {
           padding: '0 16px',
           display: 'flex', gap: '0',
         }}>
-          {[
-            { label: 'Tủ lạnh', icon: '🧊', id: 1 },
-            { label: 'Máy giặt', icon: '🫧', id: 2 },
-            { label: 'Điều hòa', icon: '❄️', id: 3 },
-            { label: 'TV', icon: '📺', id: 7 },
-            { label: 'Bếp từ', icon: '🔥', id: 5 },
-            { label: 'Máy lọc nước', icon: '💧', id: 4 },
-            { label: 'Máy hút bụi', icon: '🌀', id: 6 },
-            { label: 'Quạt', icon: '💨', id: 8 },
-          ].map((cat) => (
+          {categories.map((cat) => (
             <Link
               key={cat.id}
               to={`/products?category=${cat.id}`}
@@ -218,7 +223,7 @@ const Header: React.FC = () => {
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {cat.icon} {cat.label}
+              {getCategoryIcon(cat, { fontSize: '14px' })} {cat.name}
             </Link>
           ))}
         </div>

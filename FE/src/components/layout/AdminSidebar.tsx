@@ -1,13 +1,23 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import {
+  AppstoreOutlined,
+  BarChartOutlined,
+  FolderOutlined,
+  LogoutOutlined,
+  ShopOutlined,
+  ShoppingCartOutlined,
+  TeamOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
-  { to: '/admin', icon: '📊', label: 'Dashboard', exact: true },
-  { to: '/admin/products', icon: '📦', label: 'Sản phẩm' },
-  { to: '/admin/orders', icon: '🛒', label: 'Đơn hàng' },
-  { to: '/admin/users', icon: '👥', label: 'Người dùng' },
-  { to: '/admin/categories', icon: '📁', label: 'Danh mục' },
+  { to: '/admin', icon: <BarChartOutlined />, label: 'Dashboard', exact: true },
+  { to: '/admin/products', icon: <AppstoreOutlined />, label: 'Sản phẩm' },
+  { to: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Đơn hàng' },
+  { to: '/admin/users', icon: <TeamOutlined />, label: 'Người dùng' },
+  { to: '/admin/categories', icon: <FolderOutlined />, label: 'Danh mục' },
 ];
 
 const AdminSidebar: React.FC = () => {
@@ -37,7 +47,7 @@ const AdminSidebar: React.FC = () => {
         onClick={() => navigate('/')}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '24px' }}>⚡</span>
+          <ThunderboltOutlined style={{ fontSize: '24px', color: '#f59e0b' }} />
           <div>
             <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>ElectricShop</div>
             <div style={{ fontSize: '11px', color: '#93c5fd' }}>Quản trị hệ thống</div>
@@ -104,7 +114,7 @@ const AdminSidebar: React.FC = () => {
             marginBottom: '6px',
           }}
         >
-          🏪 Xem cửa hàng
+          <ShopOutlined /> Xem cửa hàng
         </button>
         <button
           onClick={logout}
@@ -115,7 +125,7 @@ const AdminSidebar: React.FC = () => {
             borderRadius: '8px', cursor: 'pointer', color: '#fca5a5', fontSize: '13px',
           }}
         >
-          🚪 Đăng xuất
+          <LogoutOutlined /> Đăng xuất
         </button>
       </div>
     </aside>

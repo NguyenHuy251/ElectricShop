@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CheckCircleOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -25,7 +26,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '700px', margin: '0 auto', padding: '24px 16px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>👤 Thông tin tài khoản</h1>
+      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}><UserOutlined style={{ marginRight: 8 }} />Thông tin tài khoản</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '24px', alignItems: 'start' }}>
         {/* Avatar Side */}
@@ -48,7 +49,7 @@ const ProfilePage: React.FC = () => {
               color: currentUser?.role === 'admin' ? '#92400e' : '#1d4ed8',
             }}
           >
-            {currentUser?.role === 'admin' ? '⚙️ Admin' : '👤 Khách hàng'}
+            {currentUser?.role === 'admin' ? <><SettingOutlined /> Admin</> : <><UserOutlined /> Khách hàng</>}
           </span>
         </div>
 
@@ -96,7 +97,7 @@ const ProfilePage: React.FC = () => {
                   color: '#166534', fontSize: '13px',
                 }}
               >
-                ✅ Thông tin đã được cập nhật thành công!
+                <CheckCircleOutlined style={{ marginRight: 6 }} />Thông tin đã được cập nhật thành công!
               </div>
             )}
 

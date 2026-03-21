@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
+import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { cartTotalSelector } from '../../recoil/selectors/cartSelectors';
 import { useCart } from '../../hooks/useCart';
 import { formatCurrency } from '../../utils/helpers';
@@ -14,7 +15,7 @@ const CartPage: React.FC = () => {
   if (cart.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 16px' }}>
-        <div style={{ fontSize: '80px', marginBottom: '16px' }}>🛒</div>
+        <div style={{ fontSize: '80px', marginBottom: '16px' }}><ShoppingCartOutlined /></div>
         <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Giỏ hàng trống</h2>
         <p style={{ color: '#6b7280', marginBottom: '24px' }}>
           Bạn chưa thêm sản phẩm nào vào giỏ hàng
@@ -29,7 +30,7 @@ const CartPage: React.FC = () => {
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 16px' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>
-        🛒 Giỏ hàng ({cart.length} sản phẩm)
+        <ShoppingCartOutlined style={{ marginRight: 8 }} />Giỏ hàng ({cart.length} sản phẩm)
       </h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
@@ -99,7 +100,7 @@ const CartPage: React.FC = () => {
                       color: '#ef4444', fontSize: '12px', marginTop: '4px',
                     }}
                   >
-                    🗑️ Xóa
+                    <DeleteOutlined /> Xóa
                   </button>
                 </div>
               </div>
@@ -114,7 +115,7 @@ const CartPage: React.FC = () => {
               color: '#6b7280', fontSize: '13px',
             }}
           >
-            🗑️ Xóa toàn bộ giỏ hàng
+            <DeleteOutlined /> Xóa toàn bộ giỏ hàng
           </button>
         </div>
 

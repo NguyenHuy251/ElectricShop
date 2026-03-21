@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { SearchOutlined } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
 import ProductCard from '../../components/ui/ProductCard';
 import Pagination from '../../components/ui/Pagination';
 import { categories } from '../../data/mockData';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const PAGE_SIZE = 8;
 
@@ -52,7 +54,7 @@ const ProductsPage: React.FC = () => {
                   onClick={() => setSelectedCategory(cat.id)}
                   style={catBtnStyle(selectedCategory === cat.id)}
                 >
-                  {cat.icon} {cat.name}
+                  {getCategoryIcon(cat, { marginRight: 6 })} {cat.name}
                 </button>
               ))}
             </div>
@@ -72,7 +74,7 @@ const ProductsPage: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
               <input
                 type="text"
-                placeholder="🔍 Tìm kiếm sản phẩm..."
+                placeholder="Tìm kiếm sản phẩm..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -103,7 +105,7 @@ const ProductsPage: React.FC = () => {
           {/* Grid */}
           {paginated.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', borderRadius: '12px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
+              <div style={{ fontSize: '48px', marginBottom: '12px', color: '#9ca3af' }}><SearchOutlined /></div>
               <h3>Không tìm thấy sản phẩm</h3>
               <p style={{ color: '#6b7280' }}>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
             </div>

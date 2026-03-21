@@ -1,14 +1,14 @@
 import { Category, Product, User, Order } from '../types';
 
 export const categories: Category[] = [
-  { id: 1, name: 'Tủ lạnh', slug: 'tu-lanh', icon: '🧊' },
-  { id: 2, name: 'Máy giặt', slug: 'may-giat', icon: '🫧' },
-  { id: 3, name: 'Điều hòa', slug: 'dieu-hoa', icon: '❄️' },
-  { id: 4, name: 'Máy lọc nước', slug: 'may-loc-nuoc', icon: '💧' },
-  { id: 5, name: 'Lò vi sóng', slug: 'lo-vi-song', icon: '📡' },
-  { id: 6, name: 'Máy hút bụi', slug: 'may-hut-bui', icon: '🌀' },
-  { id: 7, name: 'TV', slug: 'ti-vi', icon: '📺' },
-  { id: 8, name: 'Quạt điện', slug: 'quat-dien', icon: '💨' },
+  { id: 1, name: 'Tủ lạnh', slug: 'tu-lanh', icon: 'inbox' },
+  { id: 2, name: 'Máy giặt', slug: 'may-giat', icon: 'sync' },
+  { id: 3, name: 'Điều hòa', slug: 'dieu-hoa', icon: 'cloud' },
+  { id: 4, name: 'Máy lọc nước', slug: 'may-loc-nuoc', icon: 'experiment' },
+  { id: 5, name: 'Lò vi sóng', slug: 'lo-vi-song', icon: 'thunderbolt' },
+  { id: 6, name: 'Máy hút bụi', slug: 'may-hut-bui', icon: 'tool' },
+  { id: 7, name: 'TV', slug: 'ti-vi', icon: 'desktop' },
+  { id: 8, name: 'Quạt điện', slug: 'quat-dien', icon: 'dashboard' },
 ];
 
 export const products: Product[] = [

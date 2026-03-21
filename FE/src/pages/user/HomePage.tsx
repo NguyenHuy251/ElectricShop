@@ -4,6 +4,16 @@ import { useRecoilValue } from 'recoil';
 import { featuredProductsSelector, newProductsSelector } from '../../recoil/selectors/productSelectors';
 import ProductCard from '../../components/ui/ProductCard';
 import { categories } from '../../data/mockData';
+import {
+  FireFilled,
+  GiftOutlined,
+  InboxOutlined,
+  StarFilled,
+  TeamOutlined,
+  TrophyOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const HomePage: React.FC = () => {
   const featured = useRecoilValue(featuredProductsSelector);
@@ -23,7 +33,7 @@ const HomePage: React.FC = () => {
       >
         <div style={{ maxWidth: '700px', margin: '0 auto' }}>
           <h1 style={{ fontSize: '42px', fontWeight: 800, margin: '0 0 16px', lineHeight: 1.2 }}>
-            ⚡ Điện gia dụng <span style={{ color: '#fbbf24' }}>chính hãng</span>
+            <ThunderboltOutlined style={{ marginRight: 8 }} />Điện gia dụng <span style={{ color: '#fbbf24' }}>chính hãng</span>
             <br />
             Giá tốt nhất thị trường
           </h1>
@@ -73,10 +83,10 @@ const HomePage: React.FC = () => {
           }}
         >
           {[
-            { icon: '📦', value: '10,000+', label: 'Sản phẩm' },
-            { icon: '🏆', value: '50+', label: 'Thương hiệu' },
-            { icon: '👥', value: '100,000+', label: 'Khách hàng' },
-            { icon: '⭐', value: '4.8/5', label: 'Đánh giá' },
+            { icon: <InboxOutlined />, value: '10,000+', label: 'Sản phẩm' },
+            { icon: <TrophyOutlined />, value: '50+', label: 'Thương hiệu' },
+            { icon: <TeamOutlined />, value: '100,000+', label: 'Khách hàng' },
+            { icon: <StarFilled />, value: '4.8/5', label: 'Đánh giá' },
           ].map((stat, i) => (
             <div
               key={i}
@@ -135,7 +145,7 @@ const HomePage: React.FC = () => {
                   el.style.transform = 'none';
                 }}
               >
-                <span style={{ fontSize: '32px' }}>{cat.icon}</span>
+                <span style={{ fontSize: '32px', color: '#2563eb' }}>{getCategoryIcon(cat, { fontSize: '32px' })}</span>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{cat.name}</span>
               </Link>
             ))}
@@ -151,7 +161,8 @@ const HomePage: React.FC = () => {
             }}
           >
             <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: 0 }}>
-              🔥 Sản phẩm nổi bật
+              <FireFilled style={{ marginRight: 8, color: '#f59e0b' }} />
+                Sản phẩm nổi bật
             </h2>
             <Link to="/products" style={{ color: '#2563eb', fontSize: '14px', fontWeight: 600 }}>
               Xem tất cả →
@@ -180,7 +191,7 @@ const HomePage: React.FC = () => {
               }}
             >
               <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: 0 }}>
-                ✨ Hàng mới về
+                <GiftOutlined style={{ marginRight: 8, color: '#f59e0b' }} />Hàng mới về
               </h2>
               <Link to="/products" style={{ color: '#2563eb', fontSize: '14px', fontWeight: 600 }}>
                 Xem tất cả →
@@ -212,7 +223,7 @@ const HomePage: React.FC = () => {
             }}
           >
             <h2 style={{ fontSize: '28px', margin: '0 0 8px', fontWeight: 800 }}>
-              🎉 Flash Sale - Giảm đến 30%
+              <GiftOutlined style={{ marginRight: 8 }} />Flash Sale - Giảm đến 30%
             </h2>
             <p style={{ margin: '0 0 20px', fontSize: '16px', opacity: 0.9 }}>
               Ưu đãi có giới hạn! Nhanh tay sở hữu ngay hôm nay

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { EnvironmentOutlined, FileTextOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
 import Badge from '../../components/ui/Badge';
@@ -155,9 +156,9 @@ const AdminOrdersPage: React.FC = () => {
             {/* Address */}
             <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '14px', marginBottom: '14px' }}>
               <div style={{ fontSize: '13px', color: '#6b7280' }}>Thông tin giao hàng</div>
-              <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '4px' }}>📍 {selectedOrder.address}</div>
-              <div style={{ fontSize: '13px', marginTop: '4px' }}>📞 {selectedOrder.phone}</div>
-              {selectedOrder.note && <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>📝 {selectedOrder.note}</div>}
+              <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '4px' }}><EnvironmentOutlined style={{ marginRight: 6 }} />{selectedOrder.address}</div>
+              <div style={{ fontSize: '13px', marginTop: '4px' }}><PhoneOutlined style={{ marginRight: 6 }} />{selectedOrder.phone}</div>
+              {selectedOrder.note && <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}><FileTextOutlined style={{ marginRight: 6 }} />{selectedOrder.note}</div>}
             </div>
 
             {/* Total */}

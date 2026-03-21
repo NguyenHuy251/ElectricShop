@@ -1,11 +1,12 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
+import { AppstoreOutlined, DollarOutlined, ShoppingCartOutlined, TeamOutlined } from '@ant-design/icons';
 import { productsAtom } from '../../recoil/atoms/productAtom';
 import { useOrders } from '../../hooks/useOrders';
 import { users } from '../../data/mockData';
 import { formatCurrency, getOrderStatusLabel, getOrderStatusColor, formatDate } from '../../utils/helpers';
 
-const StatCard: React.FC<{ icon: string; label: string; value: string; color: string }> = ({ icon, label, value, color }) => (
+const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; color: string }> = ({ icon, label, value, color }) => (
   <div
     style={{
       background: '#fff', borderRadius: '12px', padding: '20px',
@@ -53,10 +54,10 @@ const DashboardPage: React.FC = () => {
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
-        <StatCard icon="💰" label="Doanh thu" value={formatCurrency(totalRevenue)} color="#10b981" />
-        <StatCard icon="📦" label="Sản phẩm" value={String(products.length)} color="#2563eb" />
-        <StatCard icon="🛒" label="Đơn hàng" value={String(orders.length)} color="#8b5cf6" />
-        <StatCard icon="👥" label="Khách hàng" value={String(users.filter((u) => u.role === 'user').length)} color="#f59e0b" />
+        <StatCard icon={<DollarOutlined />} label="Doanh thu" value={formatCurrency(totalRevenue)} color="#10b981" />
+        <StatCard icon={<AppstoreOutlined />} label="Sản phẩm" value={String(products.length)} color="#2563eb" />
+        <StatCard icon={<ShoppingCartOutlined />} label="Đơn hàng" value={String(orders.length)} color="#8b5cf6" />
+        <StatCard icon={<TeamOutlined />} label="Khách hàng" value={String(users.filter((u) => u.role === 'user').length)} color="#f59e0b" />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>

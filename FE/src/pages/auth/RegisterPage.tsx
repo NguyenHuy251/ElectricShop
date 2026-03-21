@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AlertOutlined, LockOutlined, MailOutlined, PhoneOutlined, ThunderboltOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -60,7 +61,7 @@ const RegisterPage: React.FC = () => {
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}>⚡</div>
+          <div style={{ fontSize: '40px', marginBottom: '8px' }}><ThunderboltOutlined style={{ color: '#f59e0b' }} /></div>
           <h1 style={{ margin: 0, fontSize: '24px', color: '#1e3a5f' }}>Tạo tài khoản mới</h1>
           <p style={{ margin: '6px 0 0', color: '#6b7280', fontSize: '14px' }}>
             Đăng ký để bắt đầu mua sắm
@@ -74,7 +75,7 @@ const RegisterPage: React.FC = () => {
             value={form.name}
             onChange={handleChange('name')}
             required
-            leftIcon="👤"
+            leftIcon={<UserOutlined />}
           />
           <Input
             label="Email"
@@ -83,7 +84,7 @@ const RegisterPage: React.FC = () => {
             value={form.email}
             onChange={handleChange('email')}
             required
-            leftIcon="✉"
+            leftIcon={<MailOutlined />}
           />
           <Input
             label="Số điện thoại"
@@ -92,7 +93,7 @@ const RegisterPage: React.FC = () => {
             value={form.phone}
             onChange={handleChange('phone')}
             required
-            leftIcon="📞"
+            leftIcon={<PhoneOutlined />}
           />
           <Input
             label="Mật khẩu"
@@ -101,7 +102,7 @@ const RegisterPage: React.FC = () => {
             value={form.password}
             onChange={handleChange('password')}
             required
-            leftIcon="🔒"
+            leftIcon={<LockOutlined />}
           />
           <Input
             label="Xác nhận mật khẩu"
@@ -110,7 +111,7 @@ const RegisterPage: React.FC = () => {
             value={form.confirm}
             onChange={handleChange('confirm')}
             required
-            leftIcon="🔒"
+            leftIcon={<LockOutlined />}
           />
 
           {error && (
@@ -124,7 +125,7 @@ const RegisterPage: React.FC = () => {
                 fontSize: '13px',
               }}
             >
-              ⚠️ {error}
+              <AlertOutlined style={{ marginRight: 6 }} />{error}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CheckOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Product } from '../../types';
 import { formatCurrency, calcDiscountPercent } from '../../utils/helpers';
 import { useCart } from '../../hooks/useCart';
@@ -133,8 +134,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.stock === 0
             ? 'Hết hàng'
             : isInCart(product.id)
-            ? '✓ Đã thêm'
-            : '🛒 Thêm vào giỏ'}
+            ? <><CheckOutlined /> Đã thêm</>
+            : <><ShoppingCartOutlined /> Thêm vào giỏ</>}
         </Button>
       </div>
     </div>
