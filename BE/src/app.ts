@@ -1,0 +1,58 @@
+import express from 'express';
+import type { Express } from 'express';
+import { connectToDatabase } from './config/database.js';
+import authRouter from './routes/authRoutes.js';
+
+const app: Express = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to ElectricShop API' });
+});
+
+app.use('/api/auth', authRouter);
+
+// Test database connection
+app.get('/test-db', async (req, res) => {
+  try {
+    const pool = await connectToDatabase();
+    if (pool) {
+      res.json({ 
+        status: 'success', 
+        message: 'Database connected successfully',
+        database: 'ElectricShop'
+      });
+    } else {
+      res.status(500).json({ status: 'error', message: 'No pool connection' });
+    }
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: String(error)
+    });
+  }
+});
+
+// Connect to database and start server
+const startServer = async () => {
+  try {
+    // Connect to database
+    await connectToDatabase();
+
+    // Start listening
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+startServer();
+
+export default app;

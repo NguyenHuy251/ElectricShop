@@ -1,0 +1,49 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# coverage
+/coverage
+
+# build (nếu dùng TypeScript)
+/dist
+/build
+
+# environment variables
+.env
+.env.*
+!.env.example
+
+# cache
+.cache
+.nyc_output
+
+# IDE / editor
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# temp
+tmp/
+temp/
+
+# uploads (nếu có upload file)
+uploads/

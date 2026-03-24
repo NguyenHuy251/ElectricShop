@@ -356,3 +356,171 @@ SELECT * FROM ChiTietPhieuNhap;
 SELECT * FROM Voucher;
 SELECT * FROM TinTuc;
 
+
+IF OBJECT_ID('dbo.sp_DangNhap', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DangNhap;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DangNhap
+    @tenDangNhap NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        id,
+        tenDangNhap,
+        matKhau,
+        tenHienThi,
+        email,
+        vaiTro,
+        trangThai
+    FROM dbo.TaiKhoan
+    WHERE tenDangNhap = @tenDangNhap;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_TaiKhoan_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TaiKhoan_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TaiKhoan_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        id,
+        tenDangNhap,
+        matKhau,
+        tenHienThi,
+        email,
+        sdt,
+        diaChi,
+        vaiTro,
+        trangThai
+    FROM dbo.TaiKhoan
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_TaiKhoan_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TaiKhoan_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TaiKhoan_Them
+    @tenDangNhap NVARCHAR(50),
+    @matKhau NVARCHAR(255),
+    @tenHienThi NVARCHAR(100) = NULL,
+    @email NVARCHAR(100) = NULL,
+    @sdt NVARCHAR(15) = NULL,
+    @diaChi NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.TaiKhoan
+    (
+        tenDangNhap,
+        matKhau,
+        tenHienThi,
+        email,
+        sdt,
+        diaChi,
+        vaiTro,
+        trangThai,
+        ngayTao
+    )
+    OUTPUT
+        INSERTED.id,
+        INSERTED.tenDangNhap,
+        INSERTED.tenHienThi,
+        INSERTED.email,
+        INSERTED.sdt,
+        INSERTED.diaChi,
+        INSERTED.vaiTro,
+        INSERTED.trangThai
+    VALUES
+    (
+        @tenDangNhap,
+        @matKhau,
+        @tenHienThi,
+        @email,
+        @sdt,
+        @diaChi,
+        N'Customer',
+        1,
+        GETDATE()
+    );
+END
+GO
+
+IF OBJECT_ID('dbo.sp_TaiKhoan_DoiMatKhau', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TaiKhoan_DoiMatKhau;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TaiKhoan_DoiMatKhau
+    @id INT,
+    @matKhauMoi NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.TaiKhoan
+    SET matKhau = @matKhauMoi
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_TaiKhoan_XoaMem', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TaiKhoan_XoaMem;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TaiKhoan_XoaMem
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.TaiKhoan
+    SET trangThai = 0
+    WHERE id = @id
+      AND trangThai = 1;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_TaiKhoan_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TaiKhoan_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TaiKhoan_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        id,
+        tenDangNhap,
+        tenHienThi,
+        email,
+        sdt,
+        diaChi,
+        vaiTro,
+        trangThai
+    FROM dbo.TaiKhoan
+    ORDER BY id DESC;
+END
+GO
