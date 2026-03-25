@@ -524,3 +524,43 @@ BEGIN
     ORDER BY id DESC;
 END
 GO
+
+IF OBJECT_ID('dbo.sp_TaiKhoan_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TaiKhoan_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TaiKhoan_Sua
+    @id INT,
+    @tenHienThi NVARCHAR(100) = NULL,
+    @email NVARCHAR(100) = NULL,
+    @sdt NVARCHAR(15) = NULL,
+    @diaChi NVARCHAR(255) = NULL,
+    @vaiTro NVARCHAR(20) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.TaiKhoan
+    SET
+        tenHienThi = ISNULL(@tenHienThi, tenHienThi),
+        email = ISNULL(@email, email),
+        sdt = ISNULL(@sdt, sdt),
+        diaChi = ISNULL(@diaChi, diaChi),
+        vaiTro = ISNULL(@vaiTro, vaiTro)
+    WHERE id = @id AND trangThai = 1;
+
+    SELECT
+        id,
+        tenDangNhap,
+        tenHienThi,
+        email,
+        sdt,
+        diaChi,
+        vaiTro,
+        trangThai
+    FROM dbo.TaiKhoan
+    WHERE id = @id;
+END
+GO

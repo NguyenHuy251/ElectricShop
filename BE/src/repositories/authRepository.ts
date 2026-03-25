@@ -79,6 +79,29 @@ export const softDeleteAccountById = async (id: number): Promise<number> => {
   return result.rowsAffected[0] ?? 0;
 };
 
+export const updateAccount = async (params: {
+  id: number;
+  tenHienThi?: string;
+  email?: string;
+  sdt?: string;
+  diaChi?: string;
+  vaiTro?: string;
+}): Promise<TaiKhoanRow | null> => {
+  const pool = await connectToDatabase();
+
+  const result = await pool
+    .request()
+    .input('id', sql.Int, params.id)
+    .input('tenHienThi', sql.NVarChar(100), params.tenHienThi ?? null)
+    .input('email', sql.NVarChar(100), params.email ?? null)
+    .input('sdt', sql.NVarChar(15), params.sdt ?? null)
+    .input('diaChi', sql.NVarChar(255), params.diaChi ?? null)
+    .input('vaiTro', sql.NVarChar(20), params.vaiTro ?? null)
+    .execute('sp_TaiKhoan_Sua');
+
+  return (result.recordset[0] as TaiKhoanRow | undefined) ?? null;
+};
+
 export const getAllAccounts = async (): Promise<TaiKhoanRow[]> => {
   const pool = await connectToDatabase();
 

@@ -45,7 +45,7 @@ const Header: React.FC = () => {
         textAlign: 'center',
       }}>
         <CarOutlined style={{ marginRight: 6 }} />
-        Miễn phí vận chuyển cho đơn hàng trên 2.000.000đ | <PhoneOutlined style={{ margin: '0 6px 0 10px' }} />Hotline: 1800 9999
+        Miễn phí vận chuyển cho đơn hàng trên 2.000.000đ | <PhoneOutlined style={{ margin: '0 6px 0 10px' }} />Hotline: 0336113905
       </div>
 
       {/* Main Header */}

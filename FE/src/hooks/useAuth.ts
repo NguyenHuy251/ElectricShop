@@ -1,53 +1,165 @@
 import { useRecoilState } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import { authAtom } from '../recoil/atoms/authAtom';
-import { users } from '../data/mockData';
 import { AuthUser } from '../types';
+import {
+  changePasswordApi,
+  deleteAccountApi,
+  getAccountsApi,
+  loginApi,
+  registerApi,
+  updateAccountApi,
+} from '../services/authApi';
+
+const mapRole = (vaiTro: string | null): 'user' | 'admin' => {
+  return vaiTro?.toLowerCase() === 'admin' ? 'admin' : 'user';
+};
+
+const mapBackendUser = (user: {
+  id: number;
+  tenDangNhap: string;
+  tenHienThi: string | null;
+  email: string | null;
+  sdt: string | null;
+  diaChi: string | null;
+  vaiTro: string | null;
+  trangThai?: boolean;
+}): AuthUser => {
+  const displayName = user.tenHienThi || user.tenDangNhap;
+
+  return {
+    id: user.id,
+    name: displayName,
+    email: user.email || user.tenDangNhap,
+    role: mapRole(user.vaiTro),
+    avatar: buildAvatar(displayName),
+    phone: user.sdt || '',
+    address: user.diaChi || '',
+    username: user.tenDangNhap,
+    isActive: user.trangThai,
+  };
+};
+
+const getErrorMessage = (error: unknown): string => {
+  if (typeof error === 'object' && error && 'response' in error) {
+    const response = (error as { response?: { data?: { message?: string } } }).response;
+    if (response?.data?.message) {
+      return response.data.message;
+    }
+  }
+
+  return 'Không thể kết nối máy chủ';
+};
+
+const buildAvatar = (name: string): string => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`;
+};
 
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useRecoilState(authAtom);
   const navigate = useNavigate();
 
-  const login = (email: string, password: string): { success: boolean; message: string } => {
-    const user = users.find((u) => u.email === email && u.password === password);
-    if (!user) return { success: false, message: 'Email hoặc mật khẩu không đúng' };
-
-    const authUser: AuthUser = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      phone: user.phone,
-      address: user.address,
-    };
-    setCurrentUser(authUser);
-    return { success: true, message: 'Đăng nhập thành công' };
+  const login = async (
+    tenDangNhap: string,
+    matKhau: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await loginApi(tenDangNhap, matKhau);
+      localStorage.setItem('auth_token', result.token);
+      setCurrentUser(mapBackendUser(result.data));
+      return { success: true, message: result.message };
+    } catch (error: unknown) {
+      return { success: false, message: getErrorMessage(error) };
+    }
   };
 
-  const register = (
+  const register = async (
+    tenDangNhap: string,
     name: string,
     email: string,
     password: string,
     phone: string
-  ): { success: boolean; message: string } => {
-    const exists = users.find((u) => u.email === email);
-    if (exists) return { success: false, message: 'Email đã được sử dụng' };
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await registerApi({
+        tenDangNhap,
+        matKhau: password,
+        tenHienThi: name,
+        email,
+        sdt: phone,
+      });
+      return { success: true, message: result.message };
+    } catch (error: unknown) {
+      return { success: false, message: getErrorMessage(error) };
+    }
+  };
 
-    const newUser: AuthUser = {
-      id: Date.now(),
-      name,
-      email,
-      role: 'user',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`,
-      phone,
-      address: '',
-    };
-    setCurrentUser(newUser);
-    return { success: true, message: 'Đăng ký thành công' };
+  const changePassword = async (
+    matKhauCu: string,
+    matKhauMoi: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    if (!currentUser) {
+      return { success: false, message: 'Bạn chưa đăng nhập' };
+    }
+
+    try {
+      const result = await changePasswordApi({
+        id: currentUser.id,
+        matKhauCu,
+        matKhauMoi,
+      });
+      return { success: true, message: result.message };
+    } catch (error: unknown) {
+      return { success: false, message: getErrorMessage(error) };
+    }
+  };
+
+  const getAccounts = async (): Promise<{ success: boolean; message: string; data: AuthUser[] }> => {
+    try {
+      const result = await getAccountsApi();
+      return {
+        success: true,
+        message: result.message,
+        data: result.data.map(mapBackendUser),
+      };
+    } catch (error: unknown) {
+      return { success: false, message: getErrorMessage(error), data: [] };
+    }
+  };
+
+  const deleteAccount = async (id: number): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await deleteAccountApi(id);
+      return { success: true, message: result.message };
+    } catch (error: unknown) {
+      return { success: false, message: getErrorMessage(error) };
+    }
+  };
+
+  const updateAccount = async (payload: {
+    id: number;
+    tenHienThi?: string;
+    email?: string;
+    sdt?: string;
+    diaChi?: string;
+    vaiTro?: string;
+  }): Promise<{ success: boolean; message: string; data?: AuthUser }> => {
+    try {
+      const result = await updateAccountApi(payload);
+      const updatedUser = mapBackendUser(result.data);
+
+      if (currentUser && updatedUser.id === currentUser.id) {
+        setCurrentUser(updatedUser);
+      }
+
+      return { success: true, message: result.message, data: updatedUser };
+    } catch (error: unknown) {
+      return { success: false, message: getErrorMessage(error) };
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem('auth_token');
     setCurrentUser(null);
     navigate('/login');
   };
@@ -55,5 +167,16 @@ export const useAuth = () => {
   const isAdmin = currentUser?.role === 'admin';
   const isLoggedIn = !!currentUser;
 
-  return { currentUser, login, register, logout, isAdmin, isLoggedIn };
+  return {
+    currentUser,
+    login,
+    register,
+    changePassword,
+    getAccounts,
+    deleteAccount,
+    updateAccount,
+    logout,
+    isAdmin,
+    isLoggedIn,
+  };
 };

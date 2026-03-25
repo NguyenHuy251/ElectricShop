@@ -16,7 +16,7 @@ const navItems = [
   { to: '/admin', icon: <BarChartOutlined />, label: 'Dashboard', exact: true },
   { to: '/admin/products', icon: <AppstoreOutlined />, label: 'Sản phẩm' },
   { to: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Đơn hàng' },
-  { to: '/admin/users', icon: <TeamOutlined />, label: 'Người dùng' },
+  { to: '/admin/accounts', icon: <TeamOutlined />, label: 'Quản lý tài khoản' },
   { to: '/admin/categories', icon: <FolderOutlined />, label: 'Danh mục' },
 ];
 

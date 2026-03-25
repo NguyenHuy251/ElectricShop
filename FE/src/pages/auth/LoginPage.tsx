@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AlertOutlined, LockOutlined, MailOutlined, SettingOutlined, ThunderboltOutlined, UserOutlined } from '@ant-design/icons';
+import { AlertOutlined, LockOutlined, SettingOutlined, ThunderboltOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -9,7 +9,7 @@ const LoginPage: React.FC = () => {
   const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState('');
+  const [tenDangNhap, setTenDangNhap] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,15 +25,13 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      const result = login(email, password);
-      if (result.success) {
-        navigate(from, { replace: true });
-      } else {
-        setError(result.message);
-      }
-      setLoading(false);
-    }, 600);
+    const result = await login(tenDangNhap, password);
+    if (result.success) {
+      navigate(from, { replace: true });
+    } else {
+      setError(result.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -79,20 +77,20 @@ const LoginPage: React.FC = () => {
         >
           <strong>Tài khoản demo:</strong>
           <br />
-          <UserOutlined style={{ marginRight: 6 }} />User: user@example.com / user123
+          <UserOutlined style={{ marginRight: 6 }} />User: user1 / 123456
           <br />
-          <SettingOutlined style={{ marginRight: 6 }} />Admin: admin@electricshop.vn / admin123
+          <SettingOutlined style={{ marginRight: 6 }} />Admin: admin / 654321
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Input
-            label="Email"
-            type="email"
-            placeholder="example@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            label="Tên đăng nhập"
+            type="text"
+            placeholder="Nhập tên đăng nhập"
+            value={tenDangNhap}
+            onChange={(e) => setTenDangNhap(e.target.value)}
             required
-            leftIcon={<MailOutlined />}
+            leftIcon={<UserOutlined />}
           />
           <Input
             label="Mật khẩu"

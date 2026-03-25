@@ -5,6 +5,7 @@ import {
   getAccountsController,
   loginController,
   registerController,
+  updateAccountController,
 } from '../controllers/authController.js';
 import { authenticateToken, requireRoles } from '../middlewares/authMiddleware.js';
 
@@ -14,6 +15,7 @@ authRouter.get('/accounts', authenticateToken, requireRoles('Admin'), getAccount
 authRouter.post('/login', loginController);
 authRouter.post('/register', registerController);
 authRouter.put('/change-password', authenticateToken, changePasswordController);
+authRouter.patch('/:id', authenticateToken, updateAccountController);
 authRouter.delete('/:id', authenticateToken, requireRoles('Admin'), deleteAccountController);
 
 export default authRouter;

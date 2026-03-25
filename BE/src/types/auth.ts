@@ -18,6 +18,15 @@ export interface ChangePasswordRequestBody {
   matKhauMoi: string;
 }
 
+export interface UpdateAccountRequestBody {
+  id: number;
+  tenHienThi?: string;
+  email?: string;
+  sdt?: string;
+  diaChi?: string;
+  vaiTro?: string;
+}
+
 export interface TaiKhoanPublic {
   id: number;
   tenDangNhap: string;

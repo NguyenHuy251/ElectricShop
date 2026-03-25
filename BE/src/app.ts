@@ -1,12 +1,19 @@
 import express from 'express';
 import type { Express } from 'express';
+import cors from 'cors';
 import { connectToDatabase } from './config/database.js';
 import authRouter from './routes/authRoutes.js';
 
 const app: Express = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

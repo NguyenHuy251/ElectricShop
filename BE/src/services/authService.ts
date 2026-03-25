@@ -5,12 +5,14 @@ import {
   getLoginByUsername,
   softDeleteAccountById,
   updatePasswordById,
+  updateAccount,
 } from '../repositories/authRepository.js';
 import type { TaiKhoanRow } from '../repositories/authRepository.js';
 import type {
   ChangePasswordRequestBody,
   LoginRequestBody,
   RegisterRequestBody,
+  UpdateAccountRequestBody,
   TaiKhoanPublic,
 } from '../types/auth.js';
 
@@ -111,4 +113,49 @@ export const deleteAccount = async (id: number): Promise<void> => {
 export const getAccounts = async (): Promise<TaiKhoanPublic[]> => {
   const accounts = await getAllAccounts();
   return accounts.map(mapTaiKhoan);
+};
+
+export const updateAccountInfo = async (payload: UpdateAccountRequestBody): Promise<TaiKhoanPublic> => {
+  const user = await getAccountById(payload.id);
+
+  if (!user) {
+    throw new AuthError('Không tìm thấy tài khoản', 404);
+  }
+
+  if (!user.trangThai) {
+    throw new AuthError('Tài khoản đã bị khóa hoặc xóa', 403);
+  }
+
+  const updates: {
+    id: number;
+    tenHienThi?: string;
+    email?: string;
+    sdt?: string;
+    diaChi?: string;
+    vaiTro?: string;
+  } = { id: payload.id };
+
+  if (payload.tenHienThi !== undefined) {
+    updates.tenHienThi = payload.tenHienThi;
+  }
+  if (payload.email !== undefined) {
+    updates.email = payload.email;
+  }
+  if (payload.sdt !== undefined) {
+    updates.sdt = payload.sdt;
+  }
+  if (payload.diaChi !== undefined) {
+    updates.diaChi = payload.diaChi;
+  }
+  if (payload.vaiTro !== undefined) {
+    updates.vaiTro = payload.vaiTro;
+  }
+
+  const updated = await updateAccount(updates);
+
+  if (!updated) {
+    throw new AuthError('Không thể cập nhật tài khoản', 500);
+  }
+
+  return mapTaiKhoan(updated);
 };

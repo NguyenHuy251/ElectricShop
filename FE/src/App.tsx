@@ -129,7 +129,7 @@ function App() {
         }
       />
       <Route
-        path="/admin/users"
+        path="/admin/accounts"
         element={
           <ProtectedRoute requireAdmin>
             <AdminLayout>
@@ -138,6 +138,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/admin/users" element={<Navigate to="/admin/accounts" replace />} />
       <Route
         path="/admin/categories"
         element={

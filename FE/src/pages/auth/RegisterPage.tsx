@@ -8,7 +8,14 @@ import Button from '../../components/ui/Button';
 const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
+  const [form, setForm] = useState({
+    tenDangNhap: '',
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirm: '',
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +23,7 @@ const RegisterPage: React.FC = () => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (form.password !== form.confirm) {
@@ -28,15 +35,22 @@ const RegisterPage: React.FC = () => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const result = register(form.name, form.email, form.password, form.phone);
-      if (result.success) {
-        navigate('/');
-      } else {
-        setError(result.message);
-      }
-      setLoading(false);
-    }, 600);
+
+    const result = await register(
+      form.tenDangNhap,
+      form.name,
+      form.email,
+      form.password,
+      form.phone,
+    );
+
+    if (result.success) {
+      navigate('/login');
+    } else {
+      setError(result.message);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -69,6 +83,14 @@ const RegisterPage: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <Input
+            label="Tên đăng nhập"
+            placeholder="user1"
+            value={form.tenDangNhap}
+            onChange={handleChange('tenDangNhap')}
+            required
+            leftIcon={<UserOutlined />}
+          />
           <Input
             label="Họ và tên"
             placeholder="Nguyễn Văn A"

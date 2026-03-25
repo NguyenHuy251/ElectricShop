@@ -73,6 +73,8 @@ export interface AuthUser {
   avatar: string;
   phone: string;
   address: string;
+  username?: string;
+  isActive?: boolean;
 }
 
 export interface PaginationInfo {

@@ -22,9 +22,9 @@ const Footer: React.FC = () => (
           Cửa hàng điện gia dụng uy tín hàng đầu Việt Nam. Sản phẩm chính hãng, bảo hành tận nơi.
         </p>
         <div style={{ marginTop: '16px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span><EnvironmentOutlined style={{ marginRight: 6 }} />123 Nguyễn Huệ, Quận 1, TP.HCM</span>
-          <span><PhoneOutlined style={{ marginRight: 6 }} />Hotline: 1800 9999</span>
-          <span><MailOutlined style={{ marginRight: 6 }} />info@electricshop.vn</span>
+          <span><EnvironmentOutlined style={{ marginRight: 6 }} />Hưng Yên</span>
+          <span><PhoneOutlined style={{ marginRight: 6 }} />Hotline: 0336113905</span>
+          <span><MailOutlined style={{ marginRight: 6 }} />nguyenhuy05kc@gmail.com</span>
         </div>
       </div>
 
