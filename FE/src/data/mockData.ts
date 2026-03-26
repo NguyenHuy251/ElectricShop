@@ -1,4 +1,4 @@
-import { Category, Product, User, Order } from '../types';
+import { Category, Product, User, Order, Voucher, NewsArticle } from '../types';
 
 export const categories: Category[] = [
   { id: 1, name: 'Tủ lạnh', slug: 'tu-lanh', icon: 'inbox' },
@@ -333,5 +333,109 @@ export const orders: Order[] = [
     note: '',
     createdAt: '2025-01-08',
     updatedAt: '2025-01-08',
+  },
+];
+
+export const vouchers: Voucher[] = [
+  {
+    id: 1,
+    code: 'ELECTRIC10',
+    title: 'Giảm 10% toàn sàn',
+    description: 'Áp dụng cho tất cả sản phẩm gia dụng chính hãng.',
+    discountType: 'percent',
+    discountValue: 10,
+    minOrderValue: 2000000,
+    maxDiscountValue: 1000000,
+    expiredAt: '2026-12-31',
+    isActive: true,
+  },
+  {
+    id: 2,
+    code: 'FREESHIP500',
+    title: 'Ưu đãi 500.000đ',
+    description: 'Giảm trực tiếp cho đơn từ 8.000.000đ.',
+    discountType: 'amount',
+    discountValue: 500000,
+    minOrderValue: 8000000,
+    expiredAt: '2026-08-31',
+    isActive: true,
+  },
+  {
+    id: 3,
+    code: 'TVMEGA15',
+    title: 'Giảm 15% cho TV',
+    description: 'Ưu đãi đặc biệt cho ngành hàng TV và màn hình.',
+    discountType: 'percent',
+    discountValue: 15,
+    minOrderValue: 12000000,
+    maxDiscountValue: 2500000,
+    expiredAt: '2026-07-15',
+    isActive: true,
+  },
+  {
+    id: 4,
+    code: 'NEWBIE300',
+    title: 'Khách mới giảm 300.000đ',
+    description: 'Dành cho tài khoản mới tạo trong 30 ngày.',
+    discountType: 'amount',
+    discountValue: 300000,
+    minOrderValue: 3000000,
+    expiredAt: '2026-06-30',
+    isActive: true,
+  },
+  {
+    id: 5,
+    code: 'OLD2025',
+    title: 'Voucher đã hết hạn',
+    description: 'Ví dụ voucher không còn hiệu lực để hiển thị trạng thái.',
+    discountType: 'percent',
+    discountValue: 8,
+    minOrderValue: 1500000,
+    maxDiscountValue: 400000,
+    expiredAt: '2025-12-31',
+    isActive: false,
+  },
+];
+
+export const newsArticles: NewsArticle[] = [
+  {
+    id: 1,
+    title: 'Mẹo dùng quạt điện tiết kiệm và bền hơn',
+    slug: 'meo-quat',
+    content: 'Vệ sinh cánh quạt định kỳ, không bật tốc độ cao liên tục và đặt quạt ở nơi thông thoáng giúp tăng tuổi thọ thiết bị.',
+    image: 'news1.jpg',
+    publishedAt: '2026-03-01',
+  },
+  {
+    id: 2,
+    title: 'Cách chọn nồi cơm điện phù hợp gia đình',
+    slug: 'chon-noi',
+    content: 'Nên chọn dung tích theo số thành viên và ưu tiên lòng nồi chống dính chất lượng cao để cơm ngon hơn, dễ vệ sinh hơn.',
+    image: 'news2.jpg',
+    publishedAt: '2026-03-03',
+  },
+  {
+    id: 3,
+    title: 'So sánh quạt đứng và quạt treo tường',
+    slug: 'so-sanh',
+    content: 'Quạt đứng linh hoạt vị trí, quạt treo tường tiết kiệm diện tích. Hãy cân nhắc không gian sử dụng trước khi mua.',
+    image: 'news3.jpg',
+    publishedAt: '2026-03-08',
+  },
+  {
+    id: 4,
+    title: 'Vệ sinh máy xay sinh tố đúng cách',
+    slug: 've-sinh',
+    content: 'Tháo rời các bộ phận, ngâm nước ấm và làm sạch vòng gioăng để tránh mùi và đảm bảo an toàn khi sử dụng lâu dài.',
+    image: 'news4.jpg',
+    publishedAt: '2026-03-12',
+  },
+  {
+    id: 5,
+    title: 'Kinh nghiệm mua máy hút bụi cho căn hộ',
+    slug: 'may-hut',
+    content: 'Ưu tiên công suất hút phù hợp, bộ lọc HEPA và độ ồn thấp để sử dụng hiệu quả cho căn hộ diện tích vừa và nhỏ.',
+    image: 'news5.jpg',
+    publishedAt: '2026-03-15',
   },
 ];

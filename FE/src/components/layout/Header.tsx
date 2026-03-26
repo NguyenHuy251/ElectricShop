@@ -11,6 +11,9 @@ import {
   ThunderboltOutlined,
   CarOutlined,
   InboxOutlined,
+  HomeOutlined,
+  GiftOutlined,
+  ReadOutlined,
 } from '@ant-design/icons';
 import { cartCountSelector } from '../../recoil/selectors/cartSelectors';
 import { useAuth } from '../../hooks/useAuth';
@@ -95,6 +98,16 @@ const Header: React.FC = () => {
 
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <Link to="/vouchers" style={{
+            textDecoration: 'none',
+            position: 'relative',
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            color: '#fff', padding: '4px 10px',
+          }}>
+            <GiftOutlined style={{ fontSize: '20px' }} />
+            <span style={{ fontSize: '11px' }}>Voucher</span>
+          </Link>
+
           {/* Cart */}
           <Link to="/cart" style={{
             textDecoration: 'none', position: 'relative',
@@ -205,6 +218,44 @@ const Header: React.FC = () => {
           padding: '0 16px',
           display: 'flex', gap: '0',
         }}>
+          <Link
+            to="/"
+            style={{
+              textDecoration: 'none',
+              color: '#fff',
+              padding: '10px 14px',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'background 0.15s',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <HomeOutlined style={{ fontSize: '14px' }} /> Trang chủ
+          </Link>
+
+          <Link
+            to="/news"
+            style={{
+              textDecoration: 'none',
+              color: '#fff',
+              padding: '10px 14px',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'background 0.15s',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <ReadOutlined style={{ fontSize: '14px' }} /> Tin tức
+          </Link>
+
           {categories.map((cat) => (
             <Link
               key={cat.id}

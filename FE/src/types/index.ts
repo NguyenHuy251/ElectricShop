@@ -82,3 +82,25 @@ export interface PaginationInfo {
   pageSize: number;
   total: number;
 }
+
+export interface Voucher {
+  id: number;
+  code: string;
+  title: string;
+  description: string;
+  discountType: 'percent' | 'amount';
+  discountValue: number;
+  minOrderValue: number;
+  maxDiscountValue?: number;
+  expiredAt: string;
+  isActive: boolean;
+}
+
+export interface NewsArticle {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  image: string;
+  publishedAt: string;
+}

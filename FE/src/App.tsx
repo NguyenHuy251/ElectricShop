@@ -14,6 +14,9 @@ import CartPage from './pages/user/CartPage';
 import CheckoutPage from './pages/user/CheckoutPage';
 import OrdersPage from './pages/user/OrdersPage';
 import ProfilePage from './pages/user/ProfilePage';
+import VouchersPage from './pages/user/VouchersPage';
+import NewsPage from './pages/user/NewsPage';
+import NewsDetailPage from './pages/user/NewsDetailPage';
 
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -25,6 +28,12 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
+import AdminVouchersPage from './pages/admin/AdminVouchersPage';
+import AdminNewsPage from './pages/admin/AdminNewsPage';
+import AdminBrandsPage from './pages/admin/AdminBrandsPage';
+import AdminSuppliersPage from './pages/admin/AdminSuppliersPage';
+import AdminImportReceiptsPage from './pages/admin/AdminImportReceiptsPage';
+import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 
 function App() {
   return (
@@ -96,6 +105,30 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/vouchers"
+        element={
+          <UserLayout>
+            <VouchersPage />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/news"
+        element={
+          <UserLayout>
+            <NewsPage />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/news/:slug"
+        element={
+          <UserLayout>
+            <NewsDetailPage />
+          </UserLayout>
+        }
+      />
 
       {/* Admin Routes - AdminLayout */}
       <Route
@@ -145,6 +178,66 @@ function App() {
           <ProtectedRoute requireAdmin>
             <AdminLayout>
               <AdminCategoriesPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/vouchers"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminVouchersPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/news"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminNewsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/brands"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminBrandsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/suppliers"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminSuppliersPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/import-receipts"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminImportReceiptsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reviews"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminReviewsPage />
             </AdminLayout>
           </ProtectedRoute>
         }

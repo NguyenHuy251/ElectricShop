@@ -3,17 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { featuredProductsSelector, newProductsSelector } from '../../recoil/selectors/productSelectors';
 import ProductCard from '../../components/ui/ProductCard';
-import { categories } from '../../data/mockData';
+import { categories, newsArticles } from '../../data/mockData';
 import {
+  CalendarOutlined,
   FireFilled,
   GiftOutlined,
   InboxOutlined,
+  ReadOutlined,
   StarFilled,
   TeamOutlined,
   TrophyOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+import { formatDate, truncate } from '../../utils/helpers';
 
 const HomePage: React.FC = () => {
   const featured = useRecoilValue(featuredProductsSelector);
@@ -210,6 +213,74 @@ const HomePage: React.FC = () => {
             </div>
           </section>
         )}
+
+        {/* News */}
+        <section style={{ marginBottom: '48px' }}>
+          <div
+            style={{
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', marginBottom: '20px',
+            }}
+          >
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: 0 }}>
+              <ReadOutlined style={{ marginRight: 8, color: '#2563eb' }} />Tin tức mới
+            </h2>
+            <Link to="/news" style={{ color: '#2563eb', fontSize: '14px', fontWeight: 600 }}>
+              Xem tất cả →
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '16px',
+            }}
+          >
+            {newsArticles.slice(0, 3).map((article) => (
+              <article
+                key={article.id}
+                style={{
+                  background: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 14px rgba(15, 23, 42, 0.06)',
+                }}
+              >
+                <div style={{ height: '165px', background: '#dbeafe' }}>
+                  <img
+                    src={`https://picsum.photos/seed/${article.slug}-home/800/500`}
+                    alt={article.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                <div style={{ padding: '14px' }}>
+                  <h3 style={{ margin: '0 0 8px', fontSize: '18px', color: '#111827' }}>{article.title}</h3>
+                  <p style={{ margin: '0 0 10px', color: '#4b5563', fontSize: '14px', lineHeight: 1.5 }}>
+                    {truncate(article.content, 110)}
+                  </p>
+                  <div style={{ color: '#64748b', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <CalendarOutlined /> {formatDate(article.publishedAt)}
+                  </div>
+                  <Link
+                    to={`/news/${article.slug}`}
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '10px',
+                      color: '#2563eb',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      fontSize: '14px',
+                    }}
+                  >
+                    Đọc chi tiết →
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
         {/* Promotions Banner */}
         <section>

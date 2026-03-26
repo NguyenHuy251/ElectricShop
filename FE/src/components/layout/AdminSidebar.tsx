@@ -4,11 +4,16 @@ import {
   AppstoreOutlined,
   BarChartOutlined,
   FolderOutlined,
+  GiftOutlined,
+  FileTextOutlined,
   LogoutOutlined,
   ShopOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
   ThunderboltOutlined,
+  CreditCardOutlined,
+  HomeOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -18,6 +23,12 @@ const navItems = [
   { to: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Đơn hàng' },
   { to: '/admin/accounts', icon: <TeamOutlined />, label: 'Quản lý tài khoản' },
   { to: '/admin/categories', icon: <FolderOutlined />, label: 'Danh mục' },
+  { to: '/admin/brands', icon: <HomeOutlined />, label: 'Thương hiệu' },
+  { to: '/admin/vouchers', icon: <GiftOutlined />, label: 'Voucher' },
+  { to: '/admin/news', icon: <FileTextOutlined />, label: 'Tin tức' },
+  { to: '/admin/suppliers', icon: <CreditCardOutlined />, label: 'Nhà cung cấp' },
+  { to: '/admin/import-receipts', icon: <ShoppingCartOutlined />, label: 'Phiếu nhập' },
+  { to: '/admin/reviews', icon: <StarOutlined />, label: 'Đánh giá' },
 ];
 
 const AdminSidebar: React.FC = () => {

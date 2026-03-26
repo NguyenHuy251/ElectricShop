@@ -9,14 +9,44 @@ import {
   SafetyCertificateOutlined,
   ShoppingCartOutlined,
   TruckOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
 import { useCart } from '../../hooks/useCart';
 import { categories } from '../../data/mockData';
-import { formatCurrency, calcDiscountPercent } from '../../utils/helpers';
+import { formatDate, formatCurrency, calcDiscountPercent } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ui/ProductCard';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+
+// Mock data for reviews
+interface Review {
+  id: number;
+  tenKhachHang: string;
+  soSao: number;
+  noiDung: string;
+  ngayDanhGia: string;
+}
+
+const mockReviewsByProduct: Record<number, Review[]> = {
+  1: [
+    { id: 1, tenKhachHang: 'Nguyễn Văn A', soSao: 5, noiDung: 'Quạt tốt, gió mạnh, chạy êm', ngayDanhGia: '2026-03-20' },
+    { id: 2, tenKhachHang: 'Trần Thị B', soSao: 4, noiDung: 'Ổn, hơi ồn một chút', ngayDanhGia: '2026-03-15' },
+  ],
+  2: [
+    { id: 3, tenKhachHang: 'Trần Thị B', soSao: 4, noiDung: 'Nồi cơm ok, nấu cơm nhanh', ngayDanhGia: '2026-03-19' },
+  ],
+  3: [
+    { id: 4, tenKhachHang: 'Lê Văn C', soSao: 5, noiDung: 'Máy xay rất mạnh, xay đều', ngayDanhGia: '2026-03-18' },
+    { id: 5, tenKhachHang: 'Phạm Thị D', soSao: 5, noiDung: 'Rất tốt, giao nhanh', ngayDanhGia: '2026-03-14' },
+  ],
+  4: [
+    { id: 6, tenKhachHang: 'Phạm Thị D', soSao: 4, noiDung: 'Ấm bình thường, giá hơi đắt', ngayDanhGia: '2026-03-17' },
+  ],
+  5: [
+    { id: 7, tenKhachHang: 'Nguyễn Văn A', soSao: 5, noiDung: 'Máy hút bụi rất tốt, hút sạch', ngayDanhGia: '2026-03-16' },
+  ],
+};
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,9 +54,10 @@ const ProductDetailPage: React.FC = () => {
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'desc' | 'specs'>('desc');
+  const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'reviews'>('desc');
 
   const product = getProductById(Number(id));
+  const reviews = product ? (mockReviewsByProduct[product.id] || []) : [];
   if (!product) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 16px' }}>
@@ -217,7 +248,7 @@ const ProductDetailPage: React.FC = () => {
       {/* Tabs */}
       <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '20px' }}>
-          {(['desc', 'specs'] as const).map((tab) => (
+          {(['desc', 'specs', 'reviews'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -230,7 +261,7 @@ const ProductDetailPage: React.FC = () => {
                 marginBottom: '-2px',
               }}
             >
-              {tab === 'desc' ? 'Mô tả sản phẩm' : 'Thông số kỹ thuật'}
+              {tab === 'desc' ? 'Mô tả sản phẩm' : tab === 'specs' ? 'Thông số kỹ thuật' : `Đánh giá (${reviews.length})`}
             </button>
           ))}
         </div>
@@ -239,7 +270,7 @@ const ProductDetailPage: React.FC = () => {
           <p style={{ fontSize: '15px', lineHeight: 1.7, color: '#374151', margin: 0 }}>
             {product.description}
           </p>
-        ) : (
+        ) : activeTab === 'specs' ? (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               {Object.entries(product.specs).map(([key, value]) => (
@@ -250,6 +281,49 @@ const ProductDetailPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+        ) : (
+          <div>
+            {reviews.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    style={{
+                      padding: '16px',
+                      background: '#f9fafb',
+                      borderRadius: '8px',
+                      borderLeft: '4px solid #2563eb',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+                      <span style={{ fontWeight: 600, color: '#111827' }}>{review.tenKhachHang}</span>
+                      <span style={{ fontSize: '13px', color: '#94a3b8' }}>
+                        {formatDate(review.ngayDanhGia)}
+                      </span>
+                    </div>
+                    <div style={{ marginBottom: '8px', display: 'flex', gap: '2px' }}>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <StarOutlined
+                          key={i}
+                          style={{
+                            color: i < review.soSao ? '#f59e0b' : '#d1d5db',
+                            fontSize: '14px',
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <p style={{ margin: 0, color: '#374151', fontSize: '14px', lineHeight: 1.5 }}>
+                      {review.noiDung}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px' }}>
+                Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!
+              </p>
+            )}
+          </div>
         )}
       </div>
 
