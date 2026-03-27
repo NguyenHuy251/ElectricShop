@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
+import { useAuth } from '../../hooks/useAuth';
 
 export interface Supplier {
   id: number;
@@ -50,6 +51,9 @@ const initialSuppliers: Supplier[] = [
 ];
 
 const AdminSuppliersPage: React.FC = () => {
+  const { currentUser } = useAuth();
+  const isReadOnly = currentUser?.isEmployee ?? false;
+
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -146,23 +150,25 @@ const AdminSuppliersPage: React.FC = () => {
         <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#111827' }}>
           Quản lý Nhà cung cấp
         </h1>
-        <button
-          onClick={() => handleOpenModal()}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            background: '#2563eb',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
-        >
-          <PlusOutlined /> Thêm nhà cung cấp
-        </button>
+        {!isReadOnly && (
+          <button
+            onClick={() => handleOpenModal()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: '#2563eb',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            <PlusOutlined /> Thêm nhà cung cấp
+          </button>
+        )}
       </div>
 
       <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
@@ -223,40 +229,45 @@ const AdminSuppliersPage: React.FC = () => {
                     justifyContent: 'center',
                   }}
                 >
-                  <button
-                    onClick={() => handleOpenModal(supplier)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#dbeafe',
-                      color: '#0369a1',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <EditOutlined /> Sửa
-                  </button>
-                  <button
-                    onClick={() => handleDelete(supplier.id)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#fee2e2',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <DeleteOutlined /> Xóa
-                  </button>
+                  {!isReadOnly && (
+                    <>
+                      <button
+                        onClick={() => handleOpenModal(supplier)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#dbeafe',
+                          color: '#0369a1',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <EditOutlined /> Sửa
+                      </button>
+                      <button
+                        onClick={() => handleDelete(supplier.id)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#fee2e2',
+                          color: '#dc2626',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <DeleteOutlined /> Xóa
+                      </button>
+                    </>
+                  )}
+                  {isReadOnly && <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>}
                 </td>
               </tr>
             ))}

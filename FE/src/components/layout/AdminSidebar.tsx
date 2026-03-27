@@ -13,7 +13,9 @@ import {
   ThunderboltOutlined,
   CreditCardOutlined,
   HomeOutlined,
+  MessageOutlined,
   StarOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,6 +24,7 @@ const navItems = [
   { to: '/admin/products', icon: <AppstoreOutlined />, label: 'Sản phẩm' },
   { to: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Đơn hàng' },
   { to: '/admin/accounts', icon: <TeamOutlined />, label: 'Quản lý tài khoản' },
+  { to: '/admin/employees', icon: <UserOutlined />, label: 'Quản lý nhân viên' },
   { to: '/admin/categories', icon: <FolderOutlined />, label: 'Danh mục' },
   { to: '/admin/brands', icon: <HomeOutlined />, label: 'Thương hiệu' },
   { to: '/admin/vouchers', icon: <GiftOutlined />, label: 'Voucher' },
@@ -29,23 +32,39 @@ const navItems = [
   { to: '/admin/suppliers', icon: <CreditCardOutlined />, label: 'Nhà cung cấp' },
   { to: '/admin/import-receipts', icon: <ShoppingCartOutlined />, label: 'Phiếu nhập' },
   { to: '/admin/reviews', icon: <StarOutlined />, label: 'Đánh giá' },
+  { to: '/admin/contacts', icon: <MessageOutlined />, label: 'Liên hệ' },
+];
+
+const employeeNavItems = [
+  { to: '/admin', icon: <BarChartOutlined />, label: 'Dashboard', exact: true },
+  { to: '/admin/products', icon: <AppstoreOutlined />, label: 'Sản phẩm' },
+  { to: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Đơn hàng' },
+  { to: '/admin/categories', icon: <FolderOutlined />, label: 'Danh mục' },
+  { to: '/admin/brands', icon: <HomeOutlined />, label: 'Thương hiệu' },
+  { to: '/admin/vouchers', icon: <GiftOutlined />, label: 'Voucher' },
+  { to: '/admin/news', icon: <FileTextOutlined />, label: 'Tin tức' },
+  { to: '/admin/suppliers', icon: <CreditCardOutlined />, label: 'Nhà cung cấp' },
+  { to: '/admin/import-receipts', icon: <ShoppingCartOutlined />, label: 'Phiếu nhập' },
 ];
 
 const AdminSidebar: React.FC = () => {
   const { logout, currentUser } = useAuth();
   const navigate = useNavigate();
+  const isEmployee = currentUser?.isEmployee ?? false;
+  const visibleNavItems = isEmployee ? employeeNavItems : navItems;
 
   return (
     <aside
       style={{
         width: '240px',
-        minHeight: '100vh',
+        height: '100vh',
         background: '#1e3a5f',
         display: 'flex',
         flexDirection: 'column',
         position: 'sticky',
         top: 0,
         flexShrink: 0,
+        overflow: 'hidden',
       }}
     >
       {/* Logo */}
@@ -88,8 +107,15 @@ const AdminSidebar: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, padding: '8px 0' }}>
-        {navItems.map((item) => (
+      <nav
+        style={{
+          flex: 1,
+          padding: '8px 0',
+          overflowY: 'auto',
+          scrollbarWidth: 'thin',
+        }}
+      >
+        {visibleNavItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

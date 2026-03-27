@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
+import { useAuth } from '../../hooks/useAuth';
 import { formatDate } from '../../utils/helpers';
 
 export interface Brand {
@@ -57,6 +58,9 @@ const initialBrands: Brand[] = [
 ];
 
 const AdminBrandsPage: React.FC = () => {
+  const { currentUser } = useAuth();
+  const isReadOnly = currentUser?.isEmployee ?? false;
+
   const [brands, setBrands] = useState<Brand[]>(initialBrands);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
@@ -156,23 +160,25 @@ const AdminBrandsPage: React.FC = () => {
         <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#111827' }}>
           Quản lý Thương hiệu
         </h1>
-        <button
-          onClick={() => handleOpenModal()}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            background: '#2563eb',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
-        >
-          <PlusOutlined /> Thêm thương hiệu
-        </button>
+        {!isReadOnly && (
+          <button
+            onClick={() => handleOpenModal()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: '#2563eb',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            <PlusOutlined /> Thêm thương hiệu
+          </button>
+        )}
       </div>
 
       <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
@@ -220,20 +226,27 @@ const AdminBrandsPage: React.FC = () => {
                 </td>
                 <td style={{ padding: '16px', color: '#475569' }}>{brand.quocGia}</td>
                 <td style={{ padding: '16px' }}>
-                  <select
-                    value={brand.trangThai ? '1' : '0'}
-                    onChange={(e) => handleStatusChange(brand.id, e.target.value === '1')}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '4px',
-                      border: '1px solid #d1d5db',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <option value="1">Hoạt động</option>
-                    <option value="0">Tạm dừng</option>
-                  </select>
+                  {!isReadOnly && (
+                    <select
+                      value={brand.trangThai ? '1' : '0'}
+                      onChange={(e) => handleStatusChange(brand.id, e.target.value === '1')}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #d1d5db',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="1">Hoạt động</option>
+                      <option value="0">Tạm dừng</option>
+                    </select>
+                  )}
+                  {isReadOnly && (
+                    <span style={{ padding: '6px 10px', fontSize: '14px' }}>
+                      {brand.trangThai ? 'Hoạt động' : 'Tạm dừng'}
+                    </span>
+                  )}
                 </td>
                 <td
                   style={{
@@ -244,40 +257,45 @@ const AdminBrandsPage: React.FC = () => {
                     justifyContent: 'center',
                   }}
                 >
-                  <button
-                    onClick={() => handleOpenModal(brand)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#dbeafe',
-                      color: '#0369a1',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <EditOutlined /> Sửa
-                  </button>
-                  <button
-                    onClick={() => handleDelete(brand.id)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#fee2e2',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <DeleteOutlined /> Xóa
-                  </button>
+                  {!isReadOnly && (
+                    <>
+                      <button
+                        onClick={() => handleOpenModal(brand)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#dbeafe',
+                          color: '#0369a1',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <EditOutlined /> Sửa
+                      </button>
+                      <button
+                        onClick={() => handleDelete(brand.id)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#fee2e2',
+                          color: '#dc2626',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <DeleteOutlined /> Xóa
+                      </button>
+                    </>
+                  )}
+                  {isReadOnly && <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>}
                 </td>
               </tr>
             ))}

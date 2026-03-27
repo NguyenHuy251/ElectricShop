@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { categories } from '../../data/mockData';
 import { useProducts } from '../../hooks/useProducts';
+import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const AdminCategoriesPage: React.FC = () => {
+  const { currentUser } = useAuth();
+  const isReadOnly = currentUser?.isEmployee ?? false;
+
   const { products } = useProducts();
   const [addModal, setAddModal] = useState(false);
   const [form, setForm] = useState({ name: '', icon: 'inbox', slug: '' });
@@ -21,7 +25,7 @@ const AdminCategoriesPage: React.FC = () => {
             {categories.length} danh mục sản phẩm
           </p>
         </div>
-        <Button onClick={() => setAddModal(true)}><PlusOutlined /> Thêm danh mục</Button>
+        {!isReadOnly && <Button onClick={() => setAddModal(true)}><PlusOutlined /> Thêm danh mục</Button>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
@@ -51,13 +55,17 @@ const AdminCategoriesPage: React.FC = () => {
                   <div style={{ fontSize: '12px', color: '#6b7280' }}>{count} sản phẩm</div>
                 </div>
               </div>
-              <Button size="sm" variant="ghost"><EditOutlined /></Button>
+              {!isReadOnly ? (
+                <Button size="sm" variant="ghost"><EditOutlined /></Button>
+              ) : (
+                <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>
+              )}
             </div>
           );
         })}
       </div>
 
-      <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Thêm danh mục mới" size="sm">
+      {!isReadOnly && <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Thêm danh mục mới" size="sm">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <Input label="Tên danh mục" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required />
           <Input label="Icon key (AntD)" value={form.icon} onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))} placeholder="inbox, cloud, desktop..." />
@@ -67,7 +75,7 @@ const AdminCategoriesPage: React.FC = () => {
             <Button onClick={() => setAddModal(false)}>Thêm danh mục</Button>
           </div>
         </div>
-      </Modal>
+      </Modal>}
     </div>
   );
 };

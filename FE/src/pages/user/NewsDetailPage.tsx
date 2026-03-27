@@ -42,9 +42,15 @@ const NewsDetailPage: React.FC = () => {
             {article.title}
           </h1>
 
-          <div style={{ color: '#64748b', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+          <div style={{ color: '#64748b', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
             <CalendarOutlined /> {formatDate(article.publishedAt)}
           </div>
+
+          {article.tenNhanVienDang && (
+            <div style={{ color: '#64748b', fontSize: '14px', marginBottom: '16px' }}>
+              Tác giả: <span style={{ fontWeight: 600 }}>{article.tenNhanVienDang}</span>
+            </div>
+          )}
 
           <div style={{ fontSize: '16px', lineHeight: 1.8, color: '#334155' }}>
             <p style={{ marginTop: 0 }}>{article.content}</p>

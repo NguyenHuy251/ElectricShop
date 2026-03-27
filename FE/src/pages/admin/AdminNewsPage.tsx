@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
-import { newsArticles as initialNewsArticles } from '../../data/mockData';
+import { newsArticles as initialNewsArticles, employees as initialEmployees } from '../../data/mockData';
 import { NewsArticle } from '../../types';
 import { formatDate, truncate } from '../../utils/helpers';
 
@@ -11,6 +11,8 @@ type NewsFormState = {
   content: string;
   image: string;
   publishedAt: string;
+  idNhanVienDang?: number;
+  tenNhanVienDang?: string;
 };
 
 const emptyForm: NewsFormState = {
@@ -19,6 +21,8 @@ const emptyForm: NewsFormState = {
   content: '',
   image: '',
   publishedAt: '',
+  idNhanVienDang: undefined,
+  tenNhanVienDang: '',
 };
 
 const AdminNewsPage: React.FC = () => {
@@ -41,6 +45,8 @@ const AdminNewsPage: React.FC = () => {
       content: news.content,
       image: news.image,
       publishedAt: news.publishedAt,
+      idNhanVienDang: news.idNhanVienDang,
+      tenNhanVienDang: news.tenNhanVienDang,
     });
     setIsModalOpen(true);
   };
@@ -64,12 +70,22 @@ const AdminNewsPage: React.FC = () => {
       return;
     }
 
+    let tenNhanVienDang = form.tenNhanVienDang;
+    if (form.idNhanVienDang) {
+      const employee = initialEmployees.find((e) => e.id === form.idNhanVienDang);
+      if (employee) {
+        tenNhanVienDang = employee.hoTen;
+      }
+    }
+
     const payload: Omit<NewsArticle, 'id'> = {
       title: form.title.trim(),
       slug: form.slug.trim(),
       content: form.content.trim(),
       image: form.image.trim() || 'news-default.jpg',
       publishedAt: form.publishedAt,
+      idNhanVienDang: form.idNhanVienDang,
+      tenNhanVienDang,
     };
 
     if (editingNews) {
@@ -107,7 +123,7 @@ const AdminNewsPage: React.FC = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
-              {['Tiêu đề', 'Slug', 'Nội dung', 'Ngày đăng', 'Thao tác'].map((h) => (
+              {['Tiêu đề', 'Slug', 'Nội dung', 'Tác giả', 'Ngày đăng', 'Thao tác'].map((h) => (
                 <th
                   key={h}
                   style={{
@@ -130,6 +146,7 @@ const AdminNewsPage: React.FC = () => {
                 <td style={{ padding: '12px 10px', fontSize: '14px', fontWeight: 600 }}>{news.title}</td>
                 <td style={{ padding: '12px 10px', fontSize: '14px', color: '#475569' }}>{news.slug}</td>
                 <td style={{ padding: '12px 10px', fontSize: '14px', color: '#334155' }}>{truncate(news.content, 70)}</td>
+                <td style={{ padding: '12px 10px', fontSize: '14px', color: '#475569' }}>{news.tenNhanVienDang || 'N/A'}</td>
                 <td style={{ padding: '12px 10px', fontSize: '14px' }}>{formatDate(news.publishedAt)}</td>
                 <td style={{ padding: '12px 10px' }}>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -167,6 +184,29 @@ const AdminNewsPage: React.FC = () => {
             <div>
               <label style={labelStyle}>Ngày đăng *</label>
               <input type="date" value={form.publishedAt} onChange={(e) => setForm((prev) => ({ ...prev, publishedAt: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Tác giả</label>
+              <select
+                value={form.idNhanVienDang || ''}
+                onChange={(e) => {
+                  const id = e.target.value ? parseInt(e.target.value) : undefined;
+                  const selected = initialEmployees.find((emp) => emp.id === id);
+                  setForm((prev) => ({
+                    ...prev,
+                    idNhanVienDang: id,
+                    tenNhanVienDang: selected?.hoTen || '',
+                  }));
+                }}
+                style={inputStyle}
+              >
+                <option value="">Chọn tác giả</option>
+                {initialEmployees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.hoTen}
+                  </option>
+                ))}
+              </select>
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={labelStyle}>Hình ảnh</label>

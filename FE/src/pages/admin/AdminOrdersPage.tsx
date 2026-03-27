@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { EnvironmentOutlined, FileTextOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useOrders } from '../../hooks/useOrders';
+import { useAuth } from '../../hooks/useAuth';
 import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
@@ -10,6 +11,8 @@ import { Order, OrderStatus } from '../../types';
 const ALL_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'];
 
 const AdminOrdersPage: React.FC = () => {
+  const { currentUser } = useAuth();
+
   const { orders, updateOrderStatus } = useOrders();
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -49,7 +52,7 @@ const AdminOrdersPage: React.FC = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-              {['Mã đơn', 'Ngày đặt', 'Khách hàng', 'Sản phẩm', 'Tổng tiền', 'Trạng thái', 'Thao tác'].map((h) => (
+              {['Mã đơn', 'Ngày đặt', 'Khách hàng', 'Sản phẩm', 'Tổng tiền', 'Người xác nhận', 'Trạng thái', 'Thao tác'].map((h) => (
                 <th key={h} style={{ padding: '12px 14px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>
                   {h}
                 </th>
@@ -57,39 +60,48 @@ const AdminOrdersPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((order) => (
-              <tr key={order.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                <td style={{ padding: '12px 14px', fontSize: '14px', fontWeight: 700 }}>#{order.id}</td>
-                <td style={{ padding: '12px 14px', fontSize: '13px', color: '#6b7280' }}>
-                  {formatDate(order.createdAt)}
-                </td>
-                <td style={{ padding: '12px 14px', fontSize: '13px' }}>
-                  <div>{order.phone}</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {order.address}
-                  </div>
-                </td>
-                <td style={{ padding: '12px 14px', fontSize: '13px', color: '#374151' }}>
-                  {order.items.length} sản phẩm
-                </td>
-                <td style={{ padding: '12px 14px', fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>
-                  {formatCurrency(order.total)}
-                </td>
-                <td style={{ padding: '12px 14px' }}>
-                  <Badge
-                    bg={`${getOrderStatusColor(order.status)}22`}
-                    color={getOrderStatusColor(order.status)}
-                  >
-                    {getOrderStatusLabel(order.status)}
-                  </Badge>
-                </td>
-                <td style={{ padding: '12px 14px' }}>
-                  <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
-                    Chi tiết
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {filtered.map((order) => {
+              // Mock data for confirmed by employee
+              const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
+              const confirmedBy = employees[order.id % employees.length];
+
+              return (
+                <tr key={order.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '12px 14px', fontSize: '14px', fontWeight: 700 }}>#{order.id}</td>
+                  <td style={{ padding: '12px 14px', fontSize: '13px', color: '#6b7280' }}>
+                    {formatDate(order.createdAt)}
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: '13px' }}>
+                    <div>{order.phone}</div>
+                    <div style={{ color: '#6b7280', fontSize: '12px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {order.address}
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: '13px', color: '#374151' }}>
+                    {order.items.length} sản phẩm
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>
+                    {formatCurrency(order.total)}
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: '13px', color: '#6b7280' }}>
+                    {order.status !== 'pending' ? confirmedBy : '-'}
+                  </td>
+                  <td style={{ padding: '12px 14px' }}>
+                    <Badge
+                      bg={`${getOrderStatusColor(order.status)}22`}
+                      color={getOrderStatusColor(order.status)}
+                    >
+                      {getOrderStatusLabel(order.status)}
+                    </Badge>
+                  </td>
+                  <td style={{ padding: '12px 14px' }}>
+                    <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
+                      Chi tiết
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>

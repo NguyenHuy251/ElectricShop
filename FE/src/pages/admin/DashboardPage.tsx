@@ -34,6 +34,7 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; 
 const DashboardPage: React.FC = () => {
   const products = useRecoilValue(productsAtom);
   const { orders } = useOrders();
+  const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
 
   const totalRevenue = orders
     .filter((o) => o.status === 'delivered')
@@ -67,7 +68,7 @@ const DashboardPage: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
-                {['Mã đơn', 'Ngày đặt', 'Tổng tiền', 'Trạng thái'].map((h) => (
+                {['Mã đơn', 'Ngày đặt', 'Tổng tiền', 'Người xác nhận', 'Trạng thái'].map((h) => (
                   <th
                     key={h}
                     style={{
@@ -82,25 +83,31 @@ const DashboardPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {recentOrders.map((order) => (
-                <tr key={order.id} style={{ borderBottom: '1px solid #f9fafb' }}>
-                  <td style={{ padding: '10px', fontSize: '14px', fontWeight: 600 }}>#{order.id}</td>
-                  <td style={{ padding: '10px', fontSize: '13px', color: '#6b7280' }}>{formatDate(order.createdAt)}</td>
-                  <td style={{ padding: '10px', fontSize: '14px', fontWeight: 600 }}>{formatCurrency(order.total)}</td>
-                  <td style={{ padding: '10px' }}>
-                    <span
-                      style={{
-                        padding: '3px 10px', borderRadius: '999px',
-                        fontSize: '12px', fontWeight: 600,
-                        background: `${getOrderStatusColor(order.status)}22`,
-                        color: getOrderStatusColor(order.status),
-                      }}
-                    >
-                      {getOrderStatusLabel(order.status)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {recentOrders.map((order) => {
+                const confirmedBy = employees[order.id % employees.length];
+                return (
+                  <tr key={order.id} style={{ borderBottom: '1px solid #f9fafb' }}>
+                    <td style={{ padding: '10px', fontSize: '14px', fontWeight: 600 }}>#{order.id}</td>
+                    <td style={{ padding: '10px', fontSize: '13px', color: '#6b7280' }}>{formatDate(order.createdAt)}</td>
+                    <td style={{ padding: '10px', fontSize: '14px', fontWeight: 600 }}>{formatCurrency(order.total)}</td>
+                    <td style={{ padding: '10px', fontSize: '13px', color: '#6b7280' }}>
+                      {order.status !== 'pending' ? confirmedBy : '-'}
+                    </td>
+                    <td style={{ padding: '10px' }}>
+                      <span
+                        style={{
+                          padding: '3px 10px', borderRadius: '999px',
+                          fontSize: '12px', fontWeight: 600,
+                          background: `${getOrderStatusColor(order.status)}22`,
+                          color: getOrderStatusColor(order.status),
+                        }}
+                      >
+                        {getOrderStatusLabel(order.status)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

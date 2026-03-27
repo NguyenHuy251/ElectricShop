@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, GiftOutlined, PlusOutlined, TagOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { vouchers as initialVouchers } from '../../data/mockData';
+import { useAuth } from '../../hooks/useAuth';
 import { Voucher } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
@@ -30,6 +31,9 @@ const emptyForm: VoucherFormState = {
 };
 
 const AdminVouchersPage: React.FC = () => {
+  const { currentUser } = useAuth();
+  const isReadOnly = currentUser?.isEmployee ?? false;
+
   const [voucherList, setVoucherList] = useState<Voucher[]>(initialVouchers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
@@ -127,7 +131,7 @@ const AdminVouchersPage: React.FC = () => {
             {`Tổng ${voucherList.length} voucher, ${totalActive} voucher đang hoạt động.`}
           </p>
         </div>
-        <button
+        {!isReadOnly && <button
           onClick={openCreateModal}
           style={{
             border: 'none',
@@ -140,7 +144,7 @@ const AdminVouchersPage: React.FC = () => {
           }}
         >
           <PlusOutlined style={{ marginRight: 6 }} />Thêm voucher
-        </button>
+        </button>}
       </div>
 
       <div style={{ background: '#fff', borderRadius: '12px', padding: '18px' }}>
@@ -212,32 +216,38 @@ const AdminVouchersPage: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 10px' }}>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => openEditModal(voucher)}
-                        style={{
-                          border: 'none',
-                          borderRadius: '7px',
-                          background: '#0ea5e9',
-                          color: '#fff',
-                          padding: '8px 10px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <EditOutlined /> Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteVoucher(voucher.id)}
-                        style={{
-                          border: 'none',
-                          borderRadius: '7px',
-                          background: '#ef4444',
-                          color: '#fff',
-                          padding: '8px 10px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <DeleteOutlined /> Xóa
-                      </button>
+                      {isReadOnly ? (
+                        <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => openEditModal(voucher)}
+                            style={{
+                              border: 'none',
+                              borderRadius: '7px',
+                              background: '#0ea5e9',
+                              color: '#fff',
+                              padding: '8px 10px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <EditOutlined /> Sửa
+                          </button>
+                          <button
+                            onClick={() => handleDeleteVoucher(voucher.id)}
+                            style={{
+                              border: 'none',
+                              borderRadius: '7px',
+                              background: '#ef4444',
+                              color: '#fff',
+                              padding: '8px 10px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <DeleteOutlined /> Xóa
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -247,7 +257,7 @@ const AdminVouchersPage: React.FC = () => {
         </table>
       </div>
 
-      <Modal
+      {!isReadOnly && <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
         title={editingVoucher ? 'Sửa voucher' : 'Thêm voucher mới'}
@@ -352,7 +362,7 @@ const AdminVouchersPage: React.FC = () => {
             </button>
           </div>
         </form>
-      </Modal>
+      </Modal>}
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { DeleteOutlined, CheckOutlined } from '@ant-design/icons';
+import { MessageOutlined } from '@ant-design/icons';
 import { formatDate } from '../../utils/helpers';
 import { StarOutlined } from '@ant-design/icons';
+import { getReplyByReviewId, upsertReply } from '../../services/reviewReplyService';
 
 export interface Review {
   id: number;
@@ -88,33 +89,13 @@ const initialReviews: Review[] = [
 const AdminReviewsPage: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
 
   const filteredReviews =
     filterStatus === 'all'
       ? reviews
       : reviews.filter((review) => review.trangThai === filterStatus);
-
-  const handleApprove = (id: number) => {
-    setReviews((prev) =>
-      prev.map((review) =>
-        review.id === id ? { ...review, trangThai: 'approved' } : review
-      )
-    );
-  };
-
-  const handleReject = (id: number) => {
-    setReviews((prev) =>
-      prev.map((review) =>
-        review.id === id ? { ...review, trangThai: 'rejected' } : review
-      )
-    );
-  };
-
-  const handleDelete = (id: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
-      setReviews((prev) => prev.filter((review) => review.id !== id));
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -273,50 +254,16 @@ const AdminReviewsPage: React.FC = () => {
               Ngày: {formatDate(review.ngayDanhGia)}
             </p>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {review.trangThai === 'pending' && (
-                <>
-                  <button
-                    onClick={() => handleApprove(review.id)}
-                    style={{
-                      padding: '8px 14px',
-                      background: '#d1fae5',
-                      color: '#065f46',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
-                  >
-                    <CheckOutlined /> Duyệt
-                  </button>
-                  <button
-                    onClick={() => handleReject(review.id)}
-                    style={{
-                      padding: '8px 14px',
-                      background: '#fee2e2',
-                      color: '#991b1b',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                    }}
-                  >
-                    Từ chối
-                  </button>
-                </>
-              )}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
               <button
-                onClick={() => handleDelete(review.id)}
+                onClick={() => {
+                  setReplyTargetId(review.id);
+                  setReplyText(getReplyByReviewId(review.id)?.content || '');
+                }}
                 style={{
                   padding: '8px 14px',
-                  background: '#fee2e2',
-                  color: '#dc2626',
+                  background: '#dbeafe',
+                  color: '#1d4ed8',
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
@@ -325,12 +272,99 @@ const AdminReviewsPage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  marginLeft: 'auto',
                 }}
               >
-                <DeleteOutlined /> Xóa
+                <MessageOutlined /> Phản hồi
               </button>
             </div>
+
+            {getReplyByReviewId(review.id) && (
+              <div
+                style={{
+                  marginBottom: '10px',
+                  padding: '10px 12px',
+                  background: '#ecfeff',
+                  border: '1px solid #a5f3fc',
+                  borderRadius: '6px',
+                }}
+              >
+                <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#0e7490', fontWeight: 700 }}>
+                  Phản hồi người bán
+                </p>
+                <p style={{ margin: 0, color: '#164e63', fontSize: '14px', lineHeight: 1.5 }}>
+                  {getReplyByReviewId(review.id)?.content}
+                </p>
+                <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#0e7490' }}>
+                  {getReplyByReviewId(review.id)?.repliedBy} • {formatDate(getReplyByReviewId(review.id)?.repliedAt || '')}
+                </p>
+              </div>
+            )}
+
+            {replyTargetId === review.id && (
+              <div style={{ marginTop: '8px' }}>
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  rows={3}
+                  placeholder="Nhập phản hồi cho đánh giá này"
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '8px 10px',
+                    fontSize: '14px',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => {
+                      if (!replyText.trim()) return;
+                      upsertReply({
+                        reviewId: review.id,
+                        content: replyText.trim(),
+                        repliedBy: 'Admin',
+                        repliedAt: new Date().toISOString(),
+                      });
+                      setReplyTargetId(null);
+                      setReplyText('');
+                      setReviews((prev) => [...prev]);
+                    }}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#2563eb',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                    }}
+                  >
+                    Gửi phản hồi
+                  </button>
+                  <button
+                    onClick={() => {
+                      setReplyTargetId(null);
+                      setReplyText('');
+                    }}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#e2e8f0',
+                      color: '#334155',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                    }}
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

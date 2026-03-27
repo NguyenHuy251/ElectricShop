@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { CloseOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
+import { useAuth } from '../../hooks/useAuth';
 import { formatDate, formatCurrency } from '../../utils/helpers';
 
 export interface ImportReceiptItem {
@@ -71,6 +72,8 @@ const initialReceipts: ImportReceipt[] = [
 ];
 
 const AdminImportReceiptsPage: React.FC = () => {
+  const { currentUser } = useAuth();
+
   const [receipts, setReceipts] = useState<ImportReceipt[]>(initialReceipts);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -243,77 +246,89 @@ const AdminImportReceiptsPage: React.FC = () => {
               <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
                 Ngày nhập
               </th>
+              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+                Người thực hiện
+              </th>
               <th style={{ padding: '16px', textAlign: 'center', fontWeight: 600, color: '#475569' }}>
                 Hành động
               </th>
             </tr>
           </thead>
           <tbody>
-            {receipts.map((receipt) => (
-              <tr key={receipt.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', color: '#111827', fontWeight: 600 }}>#{receipt.id}</td>
-                <td style={{ padding: '16px', color: '#111827' }}>
-                  {receipt.tenNhaCungCap}
-                </td>
-                <td style={{ padding: '16px', color: '#111827', fontWeight: 600, textAlign: 'right' }}>
-                  {formatCurrency(receipt.tongTien)}
-                </td>
-                <td style={{ padding: '16px', color: '#475569' }}>
-                  {formatDate(receipt.ngayNhap)}
-                </td>
-                <td
-                  style={{
-                    padding: '16px',
-                    textAlign: 'center',
-                    display: 'flex',
-                    gap: '8px',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <button
-                    onClick={() => handleViewDetail(receipt)}
+            {receipts.map((receipt) => {
+              // Mock data for person who performed the import
+              const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
+              const performedBy = employees[receipt.id % employees.length];
+
+              return (
+                <tr key={receipt.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                  <td style={{ padding: '16px', color: '#111827', fontWeight: 600 }}>#{receipt.id}</td>
+                  <td style={{ padding: '16px', color: '#111827' }}>
+                    {receipt.tenNhaCungCap}
+                  </td>
+                  <td style={{ padding: '16px', color: '#111827', fontWeight: 600, textAlign: 'right' }}>
+                    {formatCurrency(receipt.tongTien)}
+                  </td>
+                  <td style={{ padding: '16px', color: '#475569' }}>
+                    {formatDate(receipt.ngayNhap)}
+                  </td>
+                  <td style={{ padding: '16px', color: '#475569' }}>
+                    {performedBy}
+                  </td>
+                  <td
                     style={{
-                      padding: '6px 12px',
-                      background: '#dbeafe',
-                      color: '#0369a1',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
+                      padding: '16px',
+                      textAlign: 'center',
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
+                      gap: '8px',
+                      justifyContent: 'center',
                     }}
                   >
-                    <EyeOutlined /> Xem chi tiết
-                  </button>
-                  <button
-                    onClick={() => handleDelete(receipt.id)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#fee2e2',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <DeleteOutlined /> Xóa
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <button
+                      onClick={() => handleViewDetail(receipt)}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#dbeafe',
+                        color: '#0369a1',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <EyeOutlined /> Xem chi tiết
+                    </button>
+                    <button
+                      onClick={() => handleDelete(receipt.id)}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#fee2e2',
+                        color: '#dc2626',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <DeleteOutlined /> Xóa
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       {/* Create Modal */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div style={{ padding: '24px' }}>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} size="lg">
+        <div style={{ padding: '20px', maxHeight: '80vh', overflowY: 'auto' }}>
           <h2 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: 700, color: '#111827' }}>
             Tạo phiếu nhập hàng mới
           </h2>
@@ -346,11 +361,40 @@ const AdminImportReceiptsPage: React.FC = () => {
               </select>
             </div>
 
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+                Người thực hiện
+              </label>
+              <input
+                value={currentUser?.name || currentUser?.username || 'Nhân viên phụ trách'}
+                readOnly
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  background: '#f8fafc',
+                  color: '#334155',
+                }}
+              />
+            </div>
+
             <div style={{ marginBottom: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px' }}>
               <p style={{ margin: '0 0 16px', fontWeight: 600, color: '#111827' }}>Sản phẩm nhập</p>
 
               {formData.items.map((item, index) => (
-                <div key={index} style={{ marginBottom: '16px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+                <div
+                  key={index}
+                  style={{
+                    marginBottom: '16px',
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(260px, 2fr) minmax(120px, 1fr) minmax(140px, 1fr) 44px',
+                    gap: '12px',
+                    alignItems: 'end',
+                  }}
+                >
                   <select
                     name="idSanPham"
                     value={item.idSanPham}
@@ -406,17 +450,22 @@ const AdminImportReceiptsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(index)}
+                    aria-label="Xóa sản phẩm"
+                    title="Xóa sản phẩm"
                     style={{
-                      padding: '10px 16px',
+                      width: '40px',
+                      height: '40px',
                       background: '#fee2e2',
                       color: '#dc2626',
                       border: 'none',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    Xóa
+                    <CloseOutlined />
                   </button>
                 </div>
               ))}

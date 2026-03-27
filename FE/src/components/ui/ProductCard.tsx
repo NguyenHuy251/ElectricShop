@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { CheckOutlined, EyeOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Product } from '../../types';
 import { formatCurrency, calcDiscountPercent } from '../../utils/helpers';
 import { useCart } from '../../hooks/useCart';
@@ -124,19 +124,40 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        <Button
-          variant={isInCart(product.id) ? 'secondary' : 'primary'}
-          size="sm"
-          fullWidth
-          onClick={() => addToCart(product)}
-          disabled={product.stock === 0}
-        >
-          {product.stock === 0
-            ? 'Hết hàng'
-            : isInCart(product.id)
-            ? <><CheckOutlined /> Đã thêm</>
-            : <><ShoppingCartOutlined /> Thêm vào giỏ</>}
-        </Button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 36px', gap: '8px', alignItems: 'center' }}>
+          <Button
+            variant={isInCart(product.id) ? 'secondary' : 'primary'}
+            size="sm"
+            fullWidth
+            onClick={() => addToCart(product)}
+            disabled={product.stock === 0}
+            style={{ height: '36px', borderRadius: '10px' }}
+          >
+            {product.stock === 0
+              ? 'Hết hàng'
+              : isInCart(product.id)
+              ? <><CheckOutlined /> Đã thêm</>
+              : <><ShoppingCartOutlined /> Thêm vào giỏ</>}
+          </Button>
+          <Link
+            to={`/products/${product.id}`}
+            title="Xem chi tiết sản phẩm"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: '#e0f2fe',
+              color: '#0369a1',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none',
+              border: '1px solid #bae6fd',
+            }}
+          >
+            <EyeOutlined />
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
+import { useAuth } from '../../hooks/useAuth';
 import { categories } from '../../data/mockData';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
@@ -16,6 +17,9 @@ const emptyProduct: Omit<Product, 'id'> = {
 };
 
 const AdminProductsPage: React.FC = () => {
+  const { currentUser } = useAuth();
+  const isReadOnly = currentUser?.isEmployee ?? false;
+
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -69,7 +73,7 @@ const AdminProductsPage: React.FC = () => {
             {products.length} sản phẩm trong hệ thống
           </p>
         </div>
-        <Button onClick={openAdd}><PlusOutlined /> Thêm sản phẩm</Button>
+        {!isReadOnly && <Button onClick={openAdd}><PlusOutlined /> Thêm sản phẩm</Button>}
       </div>
 
       {/* Search */}
@@ -157,12 +161,18 @@ const AdminProductsPage: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <Button size="sm" variant="outline" onClick={() => openEdit(product)}>
-                        <EditOutlined /> Sửa
-                      </Button>
-                      <Button size="sm" variant="danger" onClick={() => setDeleteConfirm(product.id)}>
-                        <DeleteOutlined />
-                      </Button>
+                      {isReadOnly ? (
+                        <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => openEdit(product)}>
+                            <EditOutlined /> Sửa
+                          </Button>
+                          <Button size="sm" variant="danger" onClick={() => setDeleteConfirm(product.id)}>
+                            <DeleteOutlined />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -173,6 +183,7 @@ const AdminProductsPage: React.FC = () => {
       </div>
 
       {/* Add/Edit Modal */}
+      {!isReadOnly && (
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -228,9 +239,10 @@ const AdminProductsPage: React.FC = () => {
           </div>
         </div>
       </Modal>
+      )}
 
       {/* Delete Confirm Modal */}
-      <Modal isOpen={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} title="Xác nhận xóa" size="sm">
+      {!isReadOnly && <Modal isOpen={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} title="Xác nhận xóa" size="sm">
         <p style={{ margin: '0 0 20px', color: '#374151' }}>
           Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.
         </p>
@@ -238,7 +250,7 @@ const AdminProductsPage: React.FC = () => {
           <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Hủy</Button>
           <Button variant="danger" onClick={() => handleDelete(deleteConfirm!)}>Xác nhận xóa</Button>
         </div>
-      </Modal>
+      </Modal>}
     </div>
   );
 };

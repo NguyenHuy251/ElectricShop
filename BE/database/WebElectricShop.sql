@@ -13,6 +13,24 @@
     ngayTao DATETIME DEFAULT GETDATE()
 );
 
+CREATE TABLE NhanVien(
+    id INT IDENTITY PRIMARY KEY,
+    idTaiKhoan INT NOT NULL,
+    maNhanVien NVARCHAR(50) NOT NULL,
+    hoTen NVARCHAR(100) NOT NULL,
+    sdt NVARCHAR(20) NULL,
+    email NVARCHAR(100) NULL,
+    diaChi NVARCHAR(255) NULL,
+    chucVu NVARCHAR(100) NULL,
+    boPhan NVARCHAR(100) NULL,
+    ngayVaoLam DATE NULL,
+    luongCoBan FLOAT NULL,
+    trangThai BIT DEFAULT 1,
+    ngayTao DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT FK_NhanVien_TaiKhoan FOREIGN KEY (idTaiKhoan) REFERENCES dbo.TaiKhoan(id)
+);
+
 CREATE TABLE ThuongHieu(
     id INT IDENTITY PRIMARY KEY,
     tenThuongHieu NVARCHAR(150),
@@ -100,13 +118,15 @@ CREATE TABLE DonHang(
     id INT IDENTITY PRIMARY KEY,
     maDonHang NVARCHAR(50),
     idTaiKhoan INT,
+    idNhanVienXuly INT,
     tongTien FLOAT,
     trangThai NVARCHAR(50),
     diaChi NVARCHAR(MAX),
     phuongThucThanhToan NVARCHAR(50),
     ngayDatHang DATETIME DEFAULT GETDATE(),
 
-    FOREIGN KEY (idTaiKhoan) REFERENCES TaiKhoan(id)
+    FOREIGN KEY (idTaiKhoan) REFERENCES TaiKhoan(id),
+    FOREIGN KEY (idNhanVienXuLy) REFERENCES dbo.NhanVien(id);
 );
 
 CREATE TABLE ChiTietDonHang(
@@ -143,10 +163,12 @@ CREATE TABLE NhaCungCap(
 CREATE TABLE PhieuNhap(
     id INT IDENTITY PRIMARY KEY,
     idNhaCungCap INT,
+    idNhanVienLap INT,
     tongTien FLOAT,
     ngayNhap DATETIME DEFAULT GETDATE(),
 
-    FOREIGN KEY (idNhaCungCap) REFERENCES NhaCungCap(id)
+    FOREIGN KEY (idNhaCungCap) REFERENCES NhaCungCap(id),
+    FOREIGN KEY (idNhanVienLap) REFERENCES dbo.NhanVien(id)
 );
 
 CREATE TABLE ChiTietPhieuNhap(
@@ -172,11 +194,28 @@ CREATE TABLE Voucher(
 
 CREATE TABLE TinTuc(
     id INT IDENTITY PRIMARY KEY,
+    idNhanVienDang INT,
     tieuDe NVARCHAR(300),
     slug NVARCHAR(300),
     noiDung NVARCHAR(MAX),
     hinhAnh NVARCHAR(255),
     ngayDang DATETIME DEFAULT GETDATE()
+
+    FOREIGN KEY (idNhanVienDang) REFERENCES dbo.NhanVien(id)
+);
+
+CREATE TABLE LienHe(
+    id INT IDENTITY PRIMARY KEY,
+    idTaiKhoan INT NULL,
+    hoTen NVARCHAR(120) NOT NULL,
+    email NVARCHAR(120) NOT NULL,
+    sdt NVARCHAR(20) NULL,
+    tieuDe NVARCHAR(255) NOT NULL,
+    noiDung NVARCHAR(MAX) NOT NULL,
+    trangThai NVARCHAR(30) DEFAULT N'Moi',
+    ngayTao DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (idTaiKhoan) REFERENCES dbo.TaiKhoan(id)
 );
 
 -- =====================================
@@ -208,6 +247,16 @@ INSERT INTO TaiKhoan (tenDangNhap, matKhau, tenHienThi, email, sdt, diaChi, vaiT
 ('user2','123456',N'Trần Thị B','b@gmail.com','0902222222',N'Đà Nẵng','Customer',1,GETDATE()),
 ('user3','123456',N'Lê Văn C','c@gmail.com','0903333333',N'Hải Phòng','Customer',1,GETDATE()),
 ('user4','123456',N'Phạm Thị D','d@gmail.com','0904444444',N'Cần Thơ','Customer',1,GETDATE());
+
+-- =====================================
+-- NHAN VIEN
+-- =====================================
+INSERT INTO NhanVien (idTaiKhoan, maNhanVien, hoTen, sdt, email, diaChi, chucVu, boPhan, ngayVaoLam, luongCoBan, trangThai) VALUES
+(1, 'NV001', N'Admin Hệ Thống', '0900000000', 'admin@gmail.com', N'Hà Nội', N'Quản trị viên', N'Vận hành', CAST(GETDATE() AS DATE), 15000000, 1),
+(2, 'NV002', N'Nguyễn Văn Hùng', '0901234567', 'hung@gmail.com', N'HCM', N'Nhân viên bán hàng', N'Tổng hợp', CAST(GETDATE() AS DATE), 8000000, 1),
+(3, 'NV003', N'Trần Thị Linh', '0902345678', 'linh@gmail.com', N'Đà Nẵng', N'Nhân viên kho', N'Kho hàng', CAST(GETDATE() AS DATE), 6500000, 1),
+(4, 'NV004', N'Lê Văn Tuấn', '0903456789', 'tuan@gmail.com', N'Hải Phòng', N'Nhân viên giao hàng', N'Logistics', CAST(GETDATE() AS DATE), 7000000, 1),
+(5, 'NV005', N'Phạm Thị Hoa', '0904567890', 'hoa@gmail.com', N'Cần Thơ', N'Nhân viên mua hàng', N'Mua hàng', CAST(GETDATE() AS DATE), 7500000, 1);
 
 -- =====================================
 -- SAN PHAM
@@ -338,6 +387,13 @@ INSERT INTO TinTuc (tieuDe, slug, noiDung, hinhAnh, ngayDang) VALUES
 (N'Ve sinh máy xay','ve-sinh',N'Chi tiết','news4.jpg',GETDATE()),
 (N'Mua máy hút bụi','may-hut',N'Chi tiết','news5.jpg',GETDATE());
 
+-- =====================================
+-- LIEN HE
+-- =====================================
+INSERT INTO LienHe (idTaiKhoan, hoTen, email, sdt, tieuDe, noiDung, trangThai, ngayTao) VALUES
+(2, N'Nguyễn Văn A', 'a@gmail.com', '0901111111', N'Hỏi về bảo hành quạt', N'Tôi cần tư vấn chính sách bảo hành cho quạt Panasonic.', N'Moi', GETDATE()),
+(NULL, N'Khách vãng lai', 'guest@gmail.com', '0908888888', N'Tư vấn sản phẩm', N'Nhờ shop gợi ý máy hút bụi cho căn hộ 70m2.', N'DaLienHe', GETDATE());
+
 SELECT * FROM ThuongHieu;
 SELECT * FROM DanhMuc;
 SELECT * FROM TaiKhoan;
@@ -355,6 +411,7 @@ SELECT * FROM PhieuNhap;
 SELECT * FROM ChiTietPhieuNhap;
 SELECT * FROM Voucher;
 SELECT * FROM TinTuc;
+SELECT * FROM LienHe;
 
 
 IF OBJECT_ID('dbo.sp_DangNhap', 'P') IS NOT NULL
@@ -551,6 +608,12 @@ BEGIN
         vaiTro = ISNULL(@vaiTro, vaiTro)
     WHERE id = @id AND trangThai = 1;
 
+    IF @@ROWCOUNT = 0
+    BEGIN
+        SELECT NULL as id;
+        RETURN;
+    END
+
     SELECT
         id,
         tenDangNhap,
@@ -564,3 +627,102 @@ BEGIN
     WHERE id = @id;
 END
 GO
+
+IF OBJECT_ID('dbo.sp_LienHe_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_LienHe_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_LienHe_Them
+    @idTaiKhoan INT = NULL,
+    @hoTen NVARCHAR(120),
+    @email NVARCHAR(120),
+    @sdt NVARCHAR(20) = NULL,
+    @tieuDe NVARCHAR(255),
+    @noiDung NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.LienHe(idTaiKhoan, hoTen, email, sdt, tieuDe, noiDung, trangThai, ngayTao)
+    OUTPUT
+        INSERTED.id,
+        INSERTED.idTaiKhoan,
+        INSERTED.hoTen,
+        INSERTED.email,
+        INSERTED.sdt,
+        INSERTED.tieuDe,
+        INSERTED.noiDung,
+        INSERTED.trangThai,
+        INSERTED.ngayTao
+    VALUES
+    (
+        @idTaiKhoan,
+        @hoTen,
+        @email,
+        @sdt,
+        @tieuDe,
+        @noiDung,
+        N'Moi',
+        GETDATE()
+    );
+END
+GO
+
+IF OBJECT_ID('dbo.sp_LienHe_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_LienHe_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_LienHe_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        id,
+        idTaiKhoan,
+        hoTen,
+        email,
+        sdt,
+        tieuDe,
+        noiDung,
+        trangThai,
+        ngayTao
+    FROM dbo.LienHe
+    ORDER BY ngayTao DESC, id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_LienHe_CapNhatTrangThai', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_LienHe_CapNhatTrangThai;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_LienHe_CapNhatTrangThai
+    @id INT,
+    @trangThai NVARCHAR(30)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.LienHe
+    SET trangThai = @trangThai
+    WHERE id = @id;
+
+    SELECT
+        id,
+        idTaiKhoan,
+        hoTen,
+        email,
+        sdt,
+        tieuDe,
+        noiDung,
+        trangThai,
+        ngayTao
+    FROM dbo.LienHe
+    WHERE id = @id;
+END

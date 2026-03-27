@@ -27,6 +27,9 @@ export class AuthError extends Error {
 }
 
 const mapTaiKhoan = (row: TaiKhoanRow): TaiKhoanPublic => {
+  const isEmployee = row.vaiTro === 'Employee';
+  const employeeRole = isEmployee ? 'staff' : undefined;
+
   return {
     id: row.id,
     tenDangNhap: row.tenDangNhap,
@@ -36,6 +39,8 @@ const mapTaiKhoan = (row: TaiKhoanRow): TaiKhoanPublic => {
     diaChi: row.diaChi,
     vaiTro: row.vaiTro,
     trangThai: row.trangThai,
+    isEmployee,
+    employeeRole: employeeRole as 'staff' | 'supervisor' | 'manager' | undefined,
   };
 };
 

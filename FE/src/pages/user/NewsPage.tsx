@@ -54,9 +54,14 @@ const NewsPage: React.FC = () => {
               <p style={{ margin: '0 0 10px', color: '#4b5563', fontSize: '14px', lineHeight: 1.5 }}>
                 {truncate(article.content, 120)}
               </p>
-              <div style={{ color: '#64748b', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ color: '#64748b', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                 <CalendarOutlined /> {formatDate(article.publishedAt)}
               </div>
+              {article.tenNhanVienDang && (
+                <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '10px' }}>
+                  Tác giả: <span style={{ fontWeight: 600 }}>{article.tenNhanVienDang}</span>
+                </div>
+              )}
               <Link
                 to={`/news/${article.slug}`}
                 style={{

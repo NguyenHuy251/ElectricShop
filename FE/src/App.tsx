@@ -17,6 +17,8 @@ import ProfilePage from './pages/user/ProfilePage';
 import VouchersPage from './pages/user/VouchersPage';
 import NewsPage from './pages/user/NewsPage';
 import NewsDetailPage from './pages/user/NewsDetailPage';
+import ContactPage from './pages/user/ContactPage';
+import MyContactsPage from './pages/user/MyContacts';
 
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -27,6 +29,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminEmployeesPage from './pages/admin/AdminEmployeesPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminVouchersPage from './pages/admin/AdminVouchersPage';
 import AdminNewsPage from './pages/admin/AdminNewsPage';
@@ -34,6 +37,7 @@ import AdminBrandsPage from './pages/admin/AdminBrandsPage';
 import AdminSuppliersPage from './pages/admin/AdminSuppliersPage';
 import AdminImportReceiptsPage from './pages/admin/AdminImportReceiptsPage';
 import AdminReviewsPage from './pages/admin/AdminReviewsPage';
+import AdminContactsPage from './pages/admin/AdminContactsPage';
 
 function App() {
   return (
@@ -129,12 +133,30 @@ function App() {
           </UserLayout>
         }
       />
+      <Route
+        path="/contact"
+        element={
+          <UserLayout>
+            <ContactPage />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/my-contacts"
+        element={
+          <ProtectedRoute>
+            <UserLayout>
+              <MyContactsPage />
+            </UserLayout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Admin Routes - AdminLayout */}
       <Route
         path="/admin"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <DashboardPage />
             </AdminLayout>
@@ -144,7 +166,7 @@ function App() {
       <Route
         path="/admin/products"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminProductsPage />
             </AdminLayout>
@@ -154,7 +176,7 @@ function App() {
       <Route
         path="/admin/orders"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminOrdersPage />
             </AdminLayout>
@@ -173,9 +195,19 @@ function App() {
       />
       <Route path="/admin/users" element={<Navigate to="/admin/accounts" replace />} />
       <Route
-        path="/admin/categories"
+        path="/admin/employees"
         element={
           <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminEmployeesPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/categories"
+        element={
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminCategoriesPage />
             </AdminLayout>
@@ -185,7 +217,7 @@ function App() {
       <Route
         path="/admin/vouchers"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminVouchersPage />
             </AdminLayout>
@@ -195,7 +227,7 @@ function App() {
       <Route
         path="/admin/news"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminNewsPage />
             </AdminLayout>
@@ -205,7 +237,7 @@ function App() {
       <Route
         path="/admin/brands"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminBrandsPage />
             </AdminLayout>
@@ -215,7 +247,7 @@ function App() {
       <Route
         path="/admin/suppliers"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminSuppliersPage />
             </AdminLayout>
@@ -225,7 +257,7 @@ function App() {
       <Route
         path="/admin/import-receipts"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminImportReceiptsPage />
             </AdminLayout>
@@ -238,6 +270,16 @@ function App() {
           <ProtectedRoute requireAdmin>
             <AdminLayout>
               <AdminReviewsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/contacts"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminContactsPage />
             </AdminLayout>
           </ProtectedRoute>
         }

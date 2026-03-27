@@ -36,4 +36,6 @@ export interface TaiKhoanPublic {
   diaChi: string | null;
   vaiTro: string | null;
   trangThai: boolean;
+  isEmployee?: boolean;
+  employeeRole?: 'staff' | 'supervisor' | 'manager';
 }

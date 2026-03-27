@@ -75,6 +75,8 @@ export interface AuthUser {
   address: string;
   username?: string;
   isActive?: boolean;
+  isEmployee?: boolean;
+  employeeRole?: 'staff' | 'supervisor' | 'manager';
 }
 
 export interface PaginationInfo {
@@ -96,6 +98,23 @@ export interface Voucher {
   isActive: boolean;
 }
 
+export interface Employee {
+  id: number;
+  idTaiKhoan: number;
+  maNhanVien: string;
+  hoTen: string;
+  sdt: string;
+  email: string;
+  diaChi: string;
+  chucVu: string;
+  boPhan: string;
+  ngayVaoLam: string;
+  luongCoBan: number;
+  trangThai: boolean;
+  ngayTao: string;
+  role?: 'staff' | 'supervisor' | 'manager';
+}
+
 export interface NewsArticle {
   id: number;
   title: string;
@@ -103,4 +122,21 @@ export interface NewsArticle {
   content: string;
   image: string;
   publishedAt: string;
+  idNhanVienDang?: number;
+  tenNhanVienDang?: string;
+}
+
+export interface ContactMessage {
+  id: number;
+  idTaiKhoan?: number;
+  hoTen: string;
+  email: string;
+  sdt?: string;
+  tieuDe: string;
+  noiDung: string;
+  trangThai: 'new' | 'contacted' | 'closed';
+  ngayTao: string;
+  phanHoi?: string;
+  nguoiPhanHoi?: string;
+  ngayPhanHoi?: string;
 }

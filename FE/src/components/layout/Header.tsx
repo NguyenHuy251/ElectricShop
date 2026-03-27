@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import {
+  AppstoreOutlined,
+  DownOutlined,
   PhoneOutlined,
   SearchOutlined,
   ShoppingCartOutlined,
@@ -13,6 +15,7 @@ import {
   InboxOutlined,
   HomeOutlined,
   GiftOutlined,
+  MessageOutlined,
   ReadOutlined,
 } from '@ant-design/icons';
 import { cartCountSelector } from '../../recoil/selectors/cartSelectors';
@@ -27,6 +30,7 @@ const Header: React.FC = () => {
   const cartCount = useRecoilValue(cartCountSelector);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [productsMenuOpen, setProductsMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,13 +161,29 @@ const Header: React.FC = () => {
                   }}
                   onMouseLeave={() => setMenuOpen(false)}
                 >
-                  {currentUser?.role === 'admin' && (
+                  {(currentUser?.role === 'admin' || currentUser?.isEmployee) && (
                     <Link
                       to="/admin"
                       onClick={() => setMenuOpen(false)}
                       style={dropItemStyle}
                     >
                       <SettingOutlined style={{ marginRight: 6 }} />Quản trị
+                    </Link>
+                  )}
+                  <Link
+                    to="/my-contacts"
+                    onClick={() => setMenuOpen(false)}
+                    style={dropItemStyle}
+                  >
+                    <MessageOutlined style={{ marginRight: 6 }} />Check liên hệ
+                  </Link>
+                  {currentUser?.role === 'admin' && (
+                    <Link
+                      to="/admin/contacts"
+                      onClick={() => setMenuOpen(false)}
+                      style={dropItemStyle}
+                    >
+                      <MessageOutlined style={{ marginRight: 6 }} />Quản lý liên hệ
                     </Link>
                   )}
                   <Link to="/profile" onClick={() => setMenuOpen(false)} style={dropItemStyle}>
@@ -256,27 +276,83 @@ const Header: React.FC = () => {
             <ReadOutlined style={{ fontSize: '14px' }} /> Tin tức
           </Link>
 
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              to={`/products?category=${cat.id}`}
+          <Link
+            to="/contact"
+            style={{
+              textDecoration: 'none',
+              color: '#fff',
+              padding: '10px 14px',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'background 0.15s',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <PhoneOutlined style={{ fontSize: '14px' }} /> Liên hệ
+          </Link>
+
+          <div
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setProductsMenuOpen(true)}
+            onMouseLeave={() => setProductsMenuOpen(false)}
+          >
+            <button
+              type="button"
               style={{
-                textDecoration: 'none',
+                border: 'none',
+                background: productsMenuOpen ? 'rgba(255,255,255,0.15)' : 'transparent',
                 color: '#fff',
                 padding: '10px 14px',
                 fontSize: '13px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
-                transition: 'background 0.15s',
+                gap: '6px',
+                cursor: 'pointer',
                 whiteSpace: 'nowrap',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {getCategoryIcon(cat, { fontSize: '14px' })} {cat.name}
-            </Link>
-          ))}
+              <AppstoreOutlined style={{ fontSize: '14px' }} /> Sản phẩm <DownOutlined style={{ fontSize: '10px' }} />
+            </button>
+
+            {productsMenuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  minWidth: '210px',
+                  background: '#fff',
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                  zIndex: 300,
+                  overflow: 'hidden',
+                }}
+              >
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/products?category=${cat.id}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: '#1f2937',
+                      padding: '10px 12px',
+                      fontSize: '13px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                    onClick={() => setProductsMenuOpen(false)}
+                  >
+                    {getCategoryIcon(cat, { fontSize: '14px' })} {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </nav>
     </header>

@@ -61,12 +61,18 @@ const AdminUsersPage: React.FC = () => {
 
   const handleEdit = (account: AuthUser) => {
     setEditingAccount(account);
+    let vaiTro = 'User';
+    if (account.role === 'admin') {
+      vaiTro = 'Admin';
+    } else if (account.isEmployee) {
+      vaiTro = 'Employee';
+    }
     setEditForm({
       tenHienThi: account.name || '',
       email: account.email || '',
       sdt: account.phone || '',
       diaChi: account.address || '',
-      vaiTro: account.role === 'admin' ? 'Admin' : 'User',
+      vaiTro,
     });
     setEditError('');
     setEditSuccess('');
@@ -80,13 +86,20 @@ const AdminUsersPage: React.FC = () => {
     setEditSuccess('');
     setEditLoading(true);
 
+    let vaiTro = 'User';
+    if (editForm.vaiTro === 'Admin') {
+      vaiTro = 'Admin';
+    } else if (editForm.vaiTro === 'Employee') {
+      vaiTro = 'Employee';
+    }
+
     const result = await updateAccount({
       id: editingAccount.id,
       tenHienThi: editForm.tenHienThi.trim(),
       email: editForm.email.trim(),
       sdt: editForm.sdt.trim(),
       diaChi: editForm.diaChi.trim(),
-      vaiTro: editForm.vaiTro === 'Admin' ? 'Admin' : 'User',
+      vaiTro,
     });
     setEditLoading(false);
 
@@ -234,12 +247,28 @@ const AdminUsersPage: React.FC = () => {
                 <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>{account.phone || '—'}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <Badge
-                    bg={account.role === 'admin' ? '#fef3c7' : '#eff6ff'}
-                    color={account.role === 'admin' ? '#92400e' : '#1d4ed8'}
+                    bg={
+                      account.role === 'admin'
+                        ? '#fef3c7'
+                        : account.isEmployee
+                          ? '#fce7f3'
+                          : '#eff6ff'
+                    }
+                    color={
+                      account.role === 'admin'
+                        ? '#92400e'
+                        : account.isEmployee
+                          ? '#be185d'
+                          : '#1d4ed8'
+                    }
                   >
                     {account.role === 'admin' ? (
                       <>
                         <SettingOutlined /> Admin
+                      </>
+                    ) : account.isEmployee ? (
+                      <>
+                        <UserOutlined /> Nhân viên
                       </>
                     ) : (
                       <>
@@ -326,6 +355,7 @@ const AdminUsersPage: React.FC = () => {
               }}
             >
               <option value="User">Khách hàng</option>
+              <option value="Employee">Nhân viên</option>
               <option value="Admin">Quản trị viên</option>
             </select>
           </div>

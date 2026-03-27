@@ -13,11 +13,13 @@ import {
 } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
 import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks/useAuth';
 import { categories } from '../../data/mockData';
 import { formatDate, formatCurrency, calcDiscountPercent } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ui/ProductCard';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+import { getReplyByReviewId, upsertReply } from '../../services/reviewReplyService';
 
 // Mock data for reviews
 interface Review {
@@ -52,12 +54,17 @@ const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getProductById, products } = useProducts();
   const { addToCart, isInCart } = useCart();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'reviews'>('desc');
+  const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const product = getProductById(Number(id));
   const reviews = product ? (mockReviewsByProduct[product.id] || []) : [];
+  const isAdmin = currentUser?.role === 'admin';
   if (!product) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 16px' }}>
@@ -315,6 +322,119 @@ const ProductDetailPage: React.FC = () => {
                     <p style={{ margin: 0, color: '#374151', fontSize: '14px', lineHeight: 1.5 }}>
                       {review.noiDung}
                     </p>
+
+                    {getReplyByReviewId(review.id) && (
+                      <div
+                        style={{
+                          marginTop: '12px',
+                          padding: '10px 12px',
+                          background: '#ecfeff',
+                          borderRadius: '6px',
+                          border: '1px solid #a5f3fc',
+                        }}
+                      >
+                        <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#0e7490', fontWeight: 700 }}>
+                          Phản hồi của người bán
+                        </p>
+                        <p style={{ margin: 0, color: '#164e63', fontSize: '14px', lineHeight: 1.5 }}>
+                          {getReplyByReviewId(review.id)?.content}
+                        </p>
+                        <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#0e7490' }}>
+                          {getReplyByReviewId(review.id)?.repliedBy} • {formatDate(getReplyByReviewId(review.id)?.repliedAt || '')}
+                        </p>
+                      </div>
+                    )}
+
+                    {isAdmin && (
+                      <div style={{ marginTop: '10px' }}>
+                        <button
+                          onClick={() => {
+                            setReplyTargetId(review.id);
+                            setReplyText(getReplyByReviewId(review.id)?.content || '');
+                          }}
+                          style={{
+                            padding: '6px 10px',
+                            background: '#e0f2fe',
+                            color: '#075985',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '13px',
+                          }}
+                        >
+                          Phản hồi
+                        </button>
+
+                        {replyTargetId === review.id && (
+                          <div style={{ marginTop: '10px' }}>
+                            <textarea
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              rows={3}
+                              placeholder="Nhập phản hồi của người bán"
+                              style={{
+                                width: '100%',
+                                boxSizing: 'border-box',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '6px',
+                                padding: '8px 10px',
+                                fontSize: '14px',
+                                fontFamily: 'inherit',
+                              }}
+                            />
+                            <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => {
+                                  if (!replyText.trim()) {
+                                    return;
+                                  }
+                                  upsertReply({
+                                    reviewId: review.id,
+                                    content: replyText.trim(),
+                                    repliedBy: currentUser?.name || 'Admin',
+                                    repliedAt: new Date().toISOString(),
+                                  });
+                                  setReplyTargetId(null);
+                                  setReplyText('');
+                                  setRefreshToken((prev) => prev + 1);
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: '#2563eb',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontWeight: 600,
+                                  fontSize: '13px',
+                                }}
+                              >
+                                Gửi phản hồi
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setReplyTargetId(null);
+                                  setReplyText('');
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: '#e2e8f0',
+                                  color: '#334155',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontWeight: 600,
+                                  fontSize: '13px',
+                                }}
+                              >
+                                Hủy
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -37,6 +37,8 @@ const mapBackendUser = (user: {
     address: user.diaChi || '',
     username: user.tenDangNhap,
     isActive: user.trangThai,
+    isEmployee: (user as any).isEmployee,
+    employeeRole: (user as any).employeeRole,
   };
 };
 

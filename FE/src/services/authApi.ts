@@ -9,6 +9,8 @@ export interface BackendAuthUser {
   diaChi: string | null;
   vaiTro: string | null;
   trangThai: boolean;
+  isEmployee?: boolean;
+  employeeRole?: 'staff' | 'supervisor' | 'manager';
 }
 
 interface ApiResponse<T> {
