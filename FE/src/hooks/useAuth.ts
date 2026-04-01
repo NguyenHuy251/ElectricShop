@@ -9,10 +9,16 @@ import {
   loginApi,
   registerApi,
   updateAccountApi,
+  getCurrentUserApi,
 } from '../services/authApi';
 
 const mapRole = (vaiTro: string | null): 'user' | 'admin' => {
-  return vaiTro?.toLowerCase() === 'admin' ? 'admin' : 'user';
+  const normalized = vaiTro?.toLowerCase() ?? '';
+  return normalized === 'admin' ? 'admin' : 'user';
+};
+
+const isAdminRole = (vaiTro: string | null): boolean => {
+  return vaiTro?.toLowerCase() === 'admin';
 };
 
 const mapBackendUser = (user: {
@@ -26,19 +32,22 @@ const mapBackendUser = (user: {
   trangThai?: boolean;
 }): AuthUser => {
   const displayName = user.tenHienThi || user.tenDangNhap;
+  const isEmployee = user.vaiTro === 'Employee';
+  const isAdmin = isAdminRole(user.vaiTro);
 
   return {
     id: user.id,
     name: displayName,
     email: user.email || user.tenDangNhap,
-    role: mapRole(user.vaiTro),
+    role: isAdmin ? 'admin' : 'user',
     avatar: buildAvatar(displayName),
     phone: user.sdt || '',
     address: user.diaChi || '',
     username: user.tenDangNhap,
     isActive: user.trangThai,
-    isEmployee: (user as any).isEmployee,
-    employeeRole: (user as any).employeeRole,
+    isEmployee,
+    employeeRole: isEmployee ? 'staff' : undefined,
+    vaiTro: user.vaiTro || undefined,
   };
 };
 
@@ -162,8 +171,23 @@ export const useAuth = () => {
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
     setCurrentUser(null);
     navigate('/login');
+  };
+
+  const getCurrentUser = async (): Promise<{ success: boolean; data?: AuthUser }> => {
+    try {
+      const result = await getCurrentUserApi();
+      const user = mapBackendUser(result.data);
+      setCurrentUser(user);
+      return { success: true, data: user };
+    } catch (error: unknown) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      setCurrentUser(null);
+      return { success: false };
+    }
   };
 
   const isAdmin = currentUser?.role === 'admin';
@@ -178,6 +202,7 @@ export const useAuth = () => {
     deleteAccount,
     updateAccount,
     logout,
+    getCurrentUser,
     isAdmin,
     isLoggedIn,
   };

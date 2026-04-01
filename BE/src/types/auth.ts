@@ -37,5 +37,5 @@ export interface TaiKhoanPublic {
   vaiTro: string | null;
   trangThai: boolean;
   isEmployee?: boolean;
-  employeeRole?: 'staff' | 'supervisor' | 'manager';
+  employeeRole?: 'staff' | 'supervisor' | 'manager' | undefined;
 }

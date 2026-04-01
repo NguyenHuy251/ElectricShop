@@ -175,7 +175,7 @@ const Header: React.FC = () => {
                     onClick={() => setMenuOpen(false)}
                     style={dropItemStyle}
                   >
-                    <MessageOutlined style={{ marginRight: 6 }} />Check liên hệ
+                    <MessageOutlined style={{ marginRight: 6 }} />Liên hệ
                   </Link>
                   {currentUser?.role === 'admin' && (
                     <Link

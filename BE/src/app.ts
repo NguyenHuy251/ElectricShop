@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import type { Express } from 'express';
 import cors from 'cors';
@@ -6,11 +7,16 @@ import authRouter from './routes/authRoutes.js';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
+const DB_NAME = process.env.DB_NAME || 'ElectricShop';
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // Middleware
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: corsOrigins,
     credentials: true,
   }),
 );
@@ -32,7 +38,7 @@ app.get('/test-db', async (req, res) => {
       res.json({ 
         status: 'success', 
         message: 'Database connected successfully',
-        database: 'ElectricShop'
+        database: DB_NAME
       });
     } else {
       res.status(500).json({ status: 'error', message: 'No pool connection' });

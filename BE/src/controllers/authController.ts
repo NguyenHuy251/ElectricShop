@@ -7,6 +7,7 @@ import {
   login,
   register,
   updateAccountInfo,
+  getAccountByIdService,
 } from '../services/authService.js';
 import type {
   ChangePasswordRequestBody,
@@ -190,6 +191,25 @@ export const updateAccountController = async (
     const updated = await updateAccountInfo(updates);
 
     res.status(200).json({ message: 'Cập nhật tài khoản thành công', data: updated });
+  } catch (error: unknown) {
+    handleError(error, res);
+  }
+};
+
+export const getCurrentUserController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const authReq = req as AuthenticatedRequest;
+
+  if (!authReq.user) {
+    res.status(401).json({ message: 'Chưa xác thực người dùng' });
+    return;
+  }
+
+  try {
+    const user = await getAccountByIdService(authReq.user.userId);
+    res.status(200).json({ message: 'Lấy thông tin tài khoản thành công', data: user });
   } catch (error: unknown) {
     handleError(error, res);
   }

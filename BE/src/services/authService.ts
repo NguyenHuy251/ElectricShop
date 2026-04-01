@@ -164,3 +164,17 @@ export const updateAccountInfo = async (payload: UpdateAccountRequestBody): Prom
 
   return mapTaiKhoan(updated);
 };
+
+export const getAccountByIdService = async (id: number): Promise<TaiKhoanPublic> => {
+  const user = await getAccountById(id);
+
+  if (!user) {
+    throw new AuthError('Không tìm thấy tài khoản', 404);
+  }
+
+  if (!user.trangThai) {
+    throw new AuthError('Tài khoản đã bị khóa hoặc xóa', 403);
+  }
+
+  return mapTaiKhoan(user);
+};

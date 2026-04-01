@@ -1,14 +1,16 @@
 import sql from 'mssql';
 
+const DB_PORT = Number(process.env.DB_PORT ?? 1433);
+
 const config: sql.config = {
-  server: 'DESKTOP-2DPRNES\\SQLEXPRESS01',
-  database: 'ElectricShop',
-  user: 'sa',
-  password: '1',
+  server: process.env.DB_SERVER ?? 'DESKTOP-2DPRNES\\SQLEXPRESS01',
+  database: process.env.DB_NAME ?? 'ElectricShop',
+  user: process.env.DB_USER ?? 'sa',
+  password: process.env.DB_PASSWORD ?? '1',
+  port: Number.isNaN(DB_PORT) ? 1433 : DB_PORT,
   options: {
-    encrypt: true,
-    trustServerCertificate: true,
-    connectTimeout: 15000,
+    encrypt: process.env.DB_ENCRYPT === 'true',
+    trustServerCertificate: process.env.DB_TRUST_SERVER_CERT !== 'false',
   },
 };
 

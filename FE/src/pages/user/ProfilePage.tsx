@@ -132,13 +132,17 @@ const ProfilePage: React.FC = () => {
               borderRadius: '999px',
               fontSize: '12px',
               fontWeight: 600,
-              background: currentUser.role === 'admin' ? '#fef3c7' : '#eff6ff',
-              color: currentUser.role === 'admin' ? '#92400e' : '#1d4ed8',
+              background: currentUser.role === 'admin' ? '#fef3c7' : currentUser.isEmployee ? '#dbeafe' : '#eff6ff',
+              color: currentUser.role === 'admin' ? '#92400e' : currentUser.isEmployee ? '#1e40af' : '#1d4ed8',
             }}
           >
             {currentUser.role === 'admin' ? (
               <>
                 <SettingOutlined /> Admin
+              </>
+            ) : currentUser.isEmployee ? (
+              <>
+                <SettingOutlined /> Nhân viên
               </>
             ) : (
               <>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthInitialize } from './hooks/useAuthInitialize';
 
 // Layouts
 import UserLayout from './components/layout/UserLayout';
@@ -40,6 +41,8 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminContactsPage from './pages/admin/AdminContactsPage';
 
 function App() {
+  useAuthInitialize();
+
   return (
     <Routes>
       {/* Auth Routes - No Layout */}

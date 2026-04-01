@@ -6,14 +6,16 @@ import {
   loginController,
   registerController,
   updateAccountController,
+  getCurrentUserController,
 } from '../controllers/authController.js';
 import { authenticateToken, requireRoles } from '../middlewares/authMiddleware.js';
 
 const authRouter = Router();
 
-authRouter.get('/accounts', authenticateToken, requireRoles('Admin'), getAccountsController);
 authRouter.post('/login', loginController);
 authRouter.post('/register', registerController);
+authRouter.get('/me', authenticateToken, getCurrentUserController);
+authRouter.get('/accounts', authenticateToken, requireRoles('Admin'), getAccountsController);
 authRouter.put('/change-password', authenticateToken, changePasswordController);
 authRouter.patch('/:id', authenticateToken, updateAccountController);
 authRouter.delete('/:id', authenticateToken, requireRoles('Admin'), deleteAccountController);

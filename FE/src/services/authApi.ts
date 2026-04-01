@@ -85,3 +85,8 @@ export const updateAccountApi = async (
   });
   return response.data;
 };
+
+export const getCurrentUserApi = async (): Promise<ApiResponse<BackendAuthUser>> => {
+  const response = await httpClient.get<ApiResponse<BackendAuthUser>>('/api/auth/me');
+  return response.data;
+};

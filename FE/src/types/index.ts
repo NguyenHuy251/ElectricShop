@@ -77,6 +77,7 @@ export interface AuthUser {
   isActive?: boolean;
   isEmployee?: boolean;
   employeeRole?: 'staff' | 'supervisor' | 'manager';
+  vaiTro?: string;
 }
 
 export interface PaginationInfo {
