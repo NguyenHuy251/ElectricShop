@@ -31,6 +31,7 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminEmployeesPage from './pages/admin/AdminEmployeesPage';
+import AdminCustomersPage from './pages/admin/AdminCustomersPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminVouchersPage from './pages/admin/AdminVouchersPage';
 import AdminNewsPage from './pages/admin/AdminNewsPage';
@@ -203,6 +204,16 @@ function App() {
           <ProtectedRoute requireAdmin>
             <AdminLayout>
               <AdminEmployeesPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/customers"
+        element={
+          <ProtectedRoute requireAdmin allowEmployee>
+            <AdminLayout>
+              <AdminCustomersPage />
             </AdminLayout>
           </ProtectedRoute>
         }

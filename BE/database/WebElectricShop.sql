@@ -13,6 +13,20 @@
     ngayTao DATETIME DEFAULT GETDATE()
 );
 
+CREATE TABLE KhachHang(
+    id INT IDENTITY PRIMARY KEY,
+    idTaiKhoan INT NOT NULL UNIQUE,
+    maKhachHang NVARCHAR(50) NOT NULL UNIQUE,
+    hoTen NVARCHAR(100) NOT NULL,
+    ngaySinh DATE NULL,
+    gioiTinh NVARCHAR(10) NULL,
+    ghiChu NVARCHAR(255) NULL,
+    trangThai BIT DEFAULT 1,
+    ngayTao DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT FK_KhachHang_TaiKhoan FOREIGN KEY (idTaiKhoan) REFERENCES dbo.TaiKhoan(id)
+);
+
 CREATE TABLE NhanVien(
     id INT IDENTITY PRIMARY KEY,
     idTaiKhoan INT NOT NULL,
@@ -249,6 +263,15 @@ INSERT INTO TaiKhoan (tenDangNhap, matKhau, tenHienThi, email, sdt, diaChi, vaiT
 ('user4','123456',N'Phạm Thị D','d@gmail.com','0904444444',N'Cần Thơ','Customer',1,GETDATE());
 
 -- =====================================
+-- KHACH HANG
+-- =====================================
+INSERT INTO KhachHang (idTaiKhoan, maKhachHang, hoTen, ngaySinh, gioiTinh, diemTichLuy, hangThanhVien, ghiChu, trangThai) VALUES
+(2, 'KH001', N'Nguyễn Văn A', '1998-05-12', N'Nam', N'Khách mua thường xuyên', 1),
+(3, 'KH002', N'Trần Thị B', '1999-08-20', N'Nữ', NULL, 1),
+(4, 'KH003', N'Lê Văn C', '1995-03-01', N'Nam', N'Ưu tiên tư vấn sản phẩm mới', 1),
+(5, 'KH004', N'Phạm Thị D', '2000-11-30', N'Nữ', NULL, 1);
+
+-- =====================================
 -- NHAN VIEN
 -- =====================================
 INSERT INTO NhanVien (idTaiKhoan, maNhanVien, hoTen, sdt, email, diaChi, chucVu, boPhan, ngayVaoLam, luongCoBan, trangThai) VALUES
@@ -397,6 +420,7 @@ INSERT INTO LienHe (idTaiKhoan, hoTen, email, sdt, tieuDe, noiDung, trangThai, n
 SELECT * FROM ThuongHieu;
 SELECT * FROM DanhMuc;
 SELECT * FROM TaiKhoan;
+SELECT * FROM KhachHang;
 SELECT * FROM SanPham;
 SELECT * FROM AnhSanPham;
 SELECT * FROM ThuocTinh;

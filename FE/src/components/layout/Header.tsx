@@ -177,15 +177,7 @@ const Header: React.FC = () => {
                   >
                     <MessageOutlined style={{ marginRight: 6 }} />Liên hệ
                   </Link>
-                  {currentUser?.role === 'admin' && (
-                    <Link
-                      to="/admin/contacts"
-                      onClick={() => setMenuOpen(false)}
-                      style={dropItemStyle}
-                    >
-                      <MessageOutlined style={{ marginRight: 6 }} />Quản lý liên hệ
-                    </Link>
-                  )}
+                  
                   <Link to="/profile" onClick={() => setMenuOpen(false)} style={dropItemStyle}>
                     <UserOutlined style={{ marginRight: 6 }} />Tài khoản
                   </Link>

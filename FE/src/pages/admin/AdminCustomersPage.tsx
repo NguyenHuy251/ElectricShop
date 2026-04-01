@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ReloadOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { ReloadOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
@@ -7,14 +7,14 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { AuthUser } from '../../types';
 
-const AdminUsersPage: React.FC = () => {
+const AdminCustomersPage: React.FC = () => {
   const { currentUser, getAccounts, deleteAccount, updateAccount } = useAuth();
-  const [accounts, setAccounts] = useState<AuthUser[]>([]);
+  const [customers, setCustomers] = useState<AuthUser[]>([]);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [editingAccount, setEditingAccount] = useState<AuthUser | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<AuthUser | null>(null);
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
   const [editLoading, setEditLoading] = useState(false);
@@ -23,10 +23,11 @@ const AdminUsersPage: React.FC = () => {
     email: '',
     sdt: '',
     diaChi: '',
-    vaiTro: 'User',
   });
 
-  const loadAccounts = async () => {
+  const isAdmin = currentUser?.role === 'admin';
+
+  const loadCustomers = async () => {
     setLoading(true);
     setError('');
     const result = await getAccounts();
@@ -37,42 +38,40 @@ const AdminUsersPage: React.FC = () => {
       return;
     }
 
-    setAccounts(result.data);
+    const customerAccounts = result.data.filter((account) => account.role !== 'admin' && !account.isEmployee);
+    setCustomers(customerAccounts);
   };
 
   useEffect(() => {
-    void loadAccounts();
+    void loadCustomers();
   }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) {
-      return accounts;
+      return customers;
     }
 
-    return accounts.filter((u) => {
+    return customers.filter((u) => {
       return (
         u.name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
         (u.username || '').toLowerCase().includes(q)
       );
     });
-  }, [accounts, search]);
+  }, [customers, search]);
 
   const handleEdit = (account: AuthUser) => {
-    setEditingAccount(account);
-    let vaiTro = 'User';
-    if (account.role === 'admin') {
-      vaiTro = 'Admin';
-    } else if (account.isEmployee) {
-      vaiTro = 'Employee';
+    if (!isAdmin) {
+      return;
     }
+
+    setEditingCustomer(account);
     setEditForm({
       tenHienThi: account.name || '',
       email: account.email || '',
       sdt: account.phone || '',
       diaChi: account.address || '',
-      vaiTro,
     });
     setEditError('');
     setEditSuccess('');
@@ -80,26 +79,19 @@ const AdminUsersPage: React.FC = () => {
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingAccount) return;
+    if (!editingCustomer || !isAdmin) return;
 
     setEditError('');
     setEditSuccess('');
     setEditLoading(true);
 
-    let vaiTro = 'User';
-    if (editForm.vaiTro === 'Admin') {
-      vaiTro = 'Admin';
-    } else if (editForm.vaiTro === 'Employee') {
-      vaiTro = 'Employee';
-    }
-
     const result = await updateAccount({
-      id: editingAccount.id,
+      id: editingCustomer.id,
       tenHienThi: editForm.tenHienThi.trim(),
       email: editForm.email.trim(),
       sdt: editForm.sdt.trim(),
       diaChi: editForm.diaChi.trim(),
-      vaiTro,
+      vaiTro: 'User',
     });
     setEditLoading(false);
 
@@ -109,22 +101,16 @@ const AdminUsersPage: React.FC = () => {
     }
 
     setEditSuccess(result.message);
-    await loadAccounts();
-    setTimeout(() => setEditingAccount(null), 1500);
+    await loadCustomers();
+    setTimeout(() => setEditingCustomer(null), 1000);
   };
 
   const handleDelete = async (account: AuthUser) => {
-    if (account.role === 'admin') {
-      setError('Không thể xóa tài khoản quản trị');
+    if (!isAdmin) {
       return;
     }
 
-    if (account.id === currentUser?.id) {
-      setError('Không thể tự xóa tài khoản đang đăng nhập');
-      return;
-    }
-
-    const ok = window.confirm(`Xóa tài khoản ${account.name} (ID: ${account.id})?`);
+    const ok = window.confirm(`Xóa khách hàng ${account.name} (ID: ${account.id})?`);
     if (!ok) {
       return;
     }
@@ -138,30 +124,28 @@ const AdminUsersPage: React.FC = () => {
       return;
     }
 
-    await loadAccounts();
+    await loadCustomers();
   };
 
-  const totalAdmins = accounts.filter((u) => u.role === 'admin').length;
-  const totalUsers = accounts.filter((u) => u.role === 'user').length;
-  const totalInactive = accounts.filter((u) => u.isActive === false).length;
+  const totalActive = customers.filter((u) => u.isActive !== false).length;
+  const totalInactive = customers.filter((u) => u.isActive === false).length;
 
   return (
     <div>
       <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, margin: 0 }}>Quản lý tài khoản</h1>
-          <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '13px' }}>{accounts.length} tài khoản</p>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, margin: 0 }}>Quản lý khách hàng</h1>
+          <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '13px' }}>{customers.length} khách hàng</p>
         </div>
-        <Button variant="outline" onClick={() => void loadAccounts()} loading={loading}>
+        <Button variant="outline" onClick={() => void loadCustomers()} loading={loading}>
           <ReloadOutlined /> Làm mới
         </Button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
         {[
-          { label: 'Tổng tài khoản', value: accounts.length, color: '#2563eb' },
-          { label: 'Khách hàng', value: totalUsers, color: '#10b981' },
-          { label: 'Quản trị viên', value: totalAdmins, color: '#f59e0b' },
+          { label: 'Tổng khách hàng', value: customers.length, color: '#2563eb' },
+          { label: 'Đang hoạt động', value: totalActive, color: '#10b981' },
           { label: 'Đã vô hiệu hóa', value: totalInactive, color: '#ef4444' },
         ].map((stat) => (
           <div key={stat.label} style={{ background: '#fff', borderRadius: '10px', padding: '16px', borderLeft: `4px solid ${stat.color}` }}>
@@ -170,6 +154,22 @@ const AdminUsersPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {!isAdmin && (
+        <div
+          style={{
+            marginBottom: '12px',
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '8px',
+            padding: '10px 12px',
+            color: '#1d4ed8',
+            fontSize: '13px',
+          }}
+        >
+          Bạn đang ở chế độ chỉ xem. Chỉ quản trị viên mới có quyền chỉnh sửa/xóa khách hàng.
+        </div>
+      )}
 
       <div style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
         <input
@@ -209,7 +209,7 @@ const AdminUsersPage: React.FC = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-              {['Tài khoản', 'Username', 'Email', 'SĐT', 'Vai trò', 'Trạng thái', 'Thao tác'].map((h) => (
+              {['Khách hàng', 'Username', 'Email', 'SĐT', 'Trạng thái', 'Thao tác'].map((h) => (
                 <th
                   key={h}
                   style={{
@@ -240,38 +240,6 @@ const AdminUsersPage: React.FC = () => {
                 <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>{account.phone || '—'}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <Badge
-                    bg={
-                      account.role === 'admin'
-                        ? '#fef3c7'
-                        : account.isEmployee
-                          ? '#fce7f3'
-                          : '#eff6ff'
-                    }
-                    color={
-                      account.role === 'admin'
-                        ? '#92400e'
-                        : account.isEmployee
-                          ? '#be185d'
-                          : '#1d4ed8'
-                    }
-                  >
-                    {account.role === 'admin' ? (
-                      <>
-                        <SettingOutlined /> Admin
-                      </>
-                    ) : account.isEmployee ? (
-                      <>
-                        <UserOutlined /> Nhân viên
-                      </>
-                    ) : (
-                      <>
-                        <UserOutlined /> Khách hàng
-                      </>
-                    )}
-                  </Badge>
-                </td>
-                <td style={{ padding: '12px 16px' }}>
-                  <Badge
                     bg={account.isActive === false ? '#fef2f2' : '#ecfdf5'}
                     color={account.isActive === false ? '#dc2626' : '#059669'}
                   >
@@ -282,7 +250,7 @@ const AdminUsersPage: React.FC = () => {
                   <Button
                     size="sm"
                     onClick={() => handleEdit(account)}
-                    disabled={account.isActive === false}
+                    disabled={!isAdmin || account.isActive === false}
                   >
                     Sửa
                   </Button>
@@ -290,7 +258,7 @@ const AdminUsersPage: React.FC = () => {
                     size="sm"
                     variant="danger"
                     onClick={() => void handleDelete(account)}
-                    disabled={account.role === 'admin' || account.id === currentUser?.id || account.isActive === false}
+                    disabled={!isAdmin || account.isActive === false}
                     loading={deletingId === account.id}
                   >
                     Xóa
@@ -300,8 +268,8 @@ const AdminUsersPage: React.FC = () => {
             ))}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
-                  Không tìm thấy tài khoản
+                <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+                  Không tìm thấy khách hàng
                 </td>
               </tr>
             )}
@@ -309,7 +277,7 @@ const AdminUsersPage: React.FC = () => {
         </table>
       </div>
 
-      <Modal isOpen={!!editingAccount} onClose={() => setEditingAccount(null)} title={`Chỉnh sửa: ${editingAccount?.name}`} size="md">
+      <Modal isOpen={!!editingCustomer} onClose={() => setEditingCustomer(null)} title={`Chỉnh sửa: ${editingCustomer?.name}`} size="md">
         <form onSubmit={handleSubmitEdit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <Input
             label="Họ và tên"
@@ -334,24 +302,6 @@ const AdminUsersPage: React.FC = () => {
             value={editForm.diaChi}
             onChange={(e) => setEditForm((prev) => ({ ...prev, diaChi: e.target.value }))}
           />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>Vai trò</label>
-            <select
-              value={editForm.vaiTro}
-              onChange={(e) => setEditForm((prev) => ({ ...prev, vaiTro: e.target.value }))}
-              style={{
-                padding: '10px 12px',
-                border: '1.5px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none',
-              }}
-            >
-              <option value="User">Khách hàng</option>
-              <option value="Employee">Nhân viên</option>
-              <option value="Admin">Quản trị viên</option>
-            </select>
-          </div>
 
           {editError && (
             <div
@@ -387,7 +337,7 @@ const AdminUsersPage: React.FC = () => {
             <Button type="submit" size="lg" loading={editLoading}>
               Lưu thay đổi
             </Button>
-            <Button type="button" size="lg" variant="secondary" onClick={() => setEditingAccount(null)}>
+            <Button type="button" size="lg" variant="secondary" onClick={() => setEditingCustomer(null)}>
               Hủy
             </Button>
           </div>
@@ -397,4 +347,4 @@ const AdminUsersPage: React.FC = () => {
   );
 };
 
-export default AdminUsersPage;
+export default AdminCustomersPage;
