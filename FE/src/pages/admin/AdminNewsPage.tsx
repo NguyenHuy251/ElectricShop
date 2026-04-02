@@ -4,6 +4,7 @@ import Modal from '../../components/ui/Modal';
 import { newsArticles as initialNewsArticles, employees as initialEmployees } from '../../data/mockData';
 import { NewsArticle } from '../../types';
 import { formatDate, truncate } from '../../utils/helpers';
+import '../../assets/styles/pages/admin-pages.css';
 
 type NewsFormState = {
   title: string;
@@ -102,39 +103,26 @@ const AdminNewsPage: React.FC = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+      <div className="admin-page-header">
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: 0 }}>
-            <FileTextOutlined style={{ marginRight: 8, color: '#2563eb' }} />Quản lý tin tức
+          <h1 className="dashboard-title">
+            <FileTextOutlined className="admin-icon-inline" />Quản lý tin tức
           </h1>
-          <p style={{ color: '#6b7280', margin: '6px 0 0', fontSize: '14px' }}>
+          <p className="dashboard-subtitle">
             {`Tổng ${newsList.length} bài viết.`}
           </p>
         </div>
-        <button
-          onClick={openCreateModal}
-          style={{ border: 'none', borderRadius: '8px', background: '#2563eb', color: '#fff', fontWeight: 700, padding: '10px 14px', cursor: 'pointer' }}
-        >
-          <PlusOutlined style={{ marginRight: 6 }} />Thêm tin tức
+        <button onClick={openCreateModal} className="admin-news-add-btn">
+          <PlusOutlined />Thêm tin tức
         </button>
       </div>
 
-      <div style={{ background: '#fff', borderRadius: '12px', padding: '18px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-news-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+            <tr className="dashboard-table-head-row">
               {['Tiêu đề', 'Slug', 'Nội dung', 'Tác giả', 'Ngày đăng', 'Thao tác'].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: '10px',
-                    textAlign: 'left',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#6b7280',
-                    textTransform: 'uppercase',
-                  }}
-                >
+                <th key={h} className="dashboard-table-th">
                   {h}
                 </th>
               ))}
@@ -142,24 +130,18 @@ const AdminNewsPage: React.FC = () => {
           </thead>
           <tbody>
             {newsList.map((news) => (
-              <tr key={news.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                <td style={{ padding: '12px 10px', fontSize: '14px', fontWeight: 600 }}>{news.title}</td>
-                <td style={{ padding: '12px 10px', fontSize: '14px', color: '#475569' }}>{news.slug}</td>
-                <td style={{ padding: '12px 10px', fontSize: '14px', color: '#334155' }}>{truncate(news.content, 70)}</td>
-                <td style={{ padding: '12px 10px', fontSize: '14px', color: '#475569' }}>{news.tenNhanVienDang || 'N/A'}</td>
-                <td style={{ padding: '12px 10px', fontSize: '14px' }}>{formatDate(news.publishedAt)}</td>
-                <td style={{ padding: '12px 10px' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => openEditModal(news)}
-                      style={{ border: 'none', borderRadius: '7px', background: '#0ea5e9', color: '#fff', padding: '8px 10px', cursor: 'pointer' }}
-                    >
+              <tr key={news.id} className="dashboard-table-row">
+                <td className="admin-news-cell-title">{news.title}</td>
+                <td className="admin-news-cell-muted">{news.slug}</td>
+                <td className="admin-news-cell-content">{truncate(news.content, 70)}</td>
+                <td className="admin-news-cell-muted">{news.tenNhanVienDang || 'N/A'}</td>
+                <td className="admin-news-cell-date">{formatDate(news.publishedAt)}</td>
+                <td className="admin-news-cell-date">
+                  <div className="admin-news-actions">
+                    <button onClick={() => openEditModal(news)} className="admin-news-action-btn edit">
                       <EditOutlined /> Sửa
                     </button>
-                    <button
-                      onClick={() => handleDeleteNews(news.id)}
-                      style={{ border: 'none', borderRadius: '7px', background: '#ef4444', color: '#fff', padding: '8px 10px', cursor: 'pointer' }}
-                    >
+                    <button onClick={() => handleDeleteNews(news.id)} className="admin-news-action-btn delete">
                       <DeleteOutlined /> Xóa
                     </button>
                   </div>
@@ -172,21 +154,21 @@ const AdminNewsPage: React.FC = () => {
 
       <Modal isOpen={isModalOpen} onClose={closeModal} title={editingNews ? 'Sửa tin tức' : 'Thêm tin tức mới'} size="md">
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Tiêu đề *</label>
-              <input value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} style={inputStyle} />
+          <div className="admin-news-form-grid">
+            <div className="admin-form-full">
+              <label className="admin-form-label">Tiêu đề *</label>
+              <input value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} className="admin-form-input" />
             </div>
             <div>
-              <label style={labelStyle}>Slug *</label>
-              <input value={form.slug} onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))} style={inputStyle} />
+              <label className="admin-form-label">Slug *</label>
+              <input value={form.slug} onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))} className="admin-form-input" />
             </div>
             <div>
-              <label style={labelStyle}>Ngày đăng *</label>
-              <input type="date" value={form.publishedAt} onChange={(e) => setForm((prev) => ({ ...prev, publishedAt: e.target.value }))} style={inputStyle} />
+              <label className="admin-form-label">Ngày đăng *</label>
+              <input type="date" value={form.publishedAt} onChange={(e) => setForm((prev) => ({ ...prev, publishedAt: e.target.value }))} className="admin-form-input" />
             </div>
             <div>
-              <label style={labelStyle}>Tác giả</label>
+              <label className="admin-form-label">Tác giả</label>
               <select
                 value={form.idNhanVienDang || ''}
                 onChange={(e) => {
@@ -198,7 +180,7 @@ const AdminNewsPage: React.FC = () => {
                     tenNhanVienDang: selected?.hoTen || '',
                   }));
                 }}
-                style={inputStyle}
+                className="admin-form-select"
               >
                 <option value="">Chọn tác giả</option>
                 {initialEmployees.map((emp) => (
@@ -208,25 +190,25 @@ const AdminNewsPage: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Hình ảnh</label>
-              <input value={form.image} onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))} style={inputStyle} placeholder="news1.jpg" />
+            <div className="admin-form-full">
+              <label className="admin-form-label">Hình ảnh</label>
+              <input value={form.image} onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))} className="admin-form-input" placeholder="news1.jpg" />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Nội dung *</label>
+            <div className="admin-form-full">
+              <label className="admin-form-label">Nội dung *</label>
               <textarea
                 value={form.content}
                 onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-                style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }}
+                className="admin-form-textarea"
               />
             </div>
           </div>
 
-          <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <button type="button" onClick={closeModal} style={{ ...actionBtnStyle, background: '#e2e8f0', color: '#334155' }}>
+          <div className="admin-form-actions">
+            <button type="button" onClick={closeModal} className="admin-action-btn cancel">
               Hủy
             </button>
-            <button type="submit" style={{ ...actionBtnStyle, background: '#2563eb', color: '#fff' }}>
+            <button type="submit" className="admin-action-btn primary">
               {editingNews ? 'Lưu thay đổi' : 'Thêm tin tức'}
             </button>
           </div>
@@ -234,31 +216,6 @@ const AdminNewsPage: React.FC = () => {
       </Modal>
     </div>
   );
-};
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  marginBottom: '6px',
-  fontSize: '13px',
-  fontWeight: 600,
-  color: '#334155',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  border: '1px solid #cbd5e1',
-  borderRadius: '8px',
-  padding: '9px 10px',
-  fontSize: '14px',
-  outline: 'none',
-};
-
-const actionBtnStyle: React.CSSProperties = {
-  border: 'none',
-  borderRadius: '8px',
-  padding: '10px 14px',
-  fontWeight: 700,
-  cursor: 'pointer',
 };
 
 export default AdminNewsPage;

@@ -3,6 +3,7 @@ import { MessageOutlined } from '@ant-design/icons';
 import { formatDate } from '../../utils/helpers';
 import { StarOutlined } from '@ant-design/icons';
 import { getReplyByReviewId, upsertReply } from '../../services/reviewReplyService';
+import '../../assets/styles/pages/admin-pages.css';
 
 export interface Review {
   id: number;
@@ -101,46 +102,19 @@ const AdminReviewsPage: React.FC = () => {
     switch (status) {
       case 'approved':
         return (
-          <span
-            style={{
-              padding: '6px 12px',
-              background: '#d1fae5',
-              color: '#065f46',
-              borderRadius: '4px',
-              fontSize: '13px',
-              fontWeight: 600,
-            }}
-          >
+          <span className="admin-review-badge-approved">
             ✓ Đã duyệt
           </span>
         );
       case 'pending':
         return (
-          <span
-            style={{
-              padding: '6px 12px',
-              background: '#fef3c7',
-              color: '#92400e',
-              borderRadius: '4px',
-              fontSize: '13px',
-              fontWeight: 600,
-            }}
-          >
+          <span className="admin-review-badge-pending">
             ⏳ Chờ duyệt
           </span>
         );
       case 'rejected':
         return (
-          <span
-            style={{
-              padding: '6px 12px',
-              background: '#fee2e2',
-              color: '#991b1b',
-              borderRadius: '4px',
-              fontSize: '13px',
-              fontWeight: 600,
-            }}
-          >
+          <span className="admin-review-badge-rejected">
             ✕ Từ chối
           </span>
         );
@@ -151,14 +125,11 @@ const AdminReviewsPage: React.FC = () => {
 
   const getStarRating = (soSao: number) => {
     return (
-      <div style={{ display: 'flex', gap: '2px' }}>
+      <div className="admin-reviews-star-row">
         {Array.from({ length: 5 }).map((_, i) => (
           <StarOutlined
             key={i}
-            style={{
-              color: i < soSao ? '#f59e0b' : '#d1d5db',
-              fontSize: '16px',
-            }}
+            className={i < soSao ? 'admin-review-star-active' : 'admin-review-star-inactive'}
           />
         ))}
       </div>
@@ -166,13 +137,13 @@ const AdminReviewsPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ margin: '0 0 20px', fontSize: '28px', fontWeight: 700, color: '#111827' }}>
+    <div>
+      <div className="dashboard-title-wrap">
+        <h1 className="admin-page-title">
           Quản lý Đánh giá sản phẩm
         </h1>
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="admin-reviews-filter-row">
           {['all', 'pending', 'approved', 'rejected'].map((status) => {
             const statusLabels: Record<string, string> = {
               all: 'Tất cả',
@@ -186,16 +157,7 @@ const AdminReviewsPage: React.FC = () => {
               <button
                 key={status}
                 onClick={() => setFilterStatus(status as any)}
-                style={{
-                  padding: '10px 16px',
-                  background: filterStatus === status ? '#2563eb' : '#f3f4f6',
-                  color: filterStatus === status ? '#fff' : '#111827',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                }}
+                className={`admin-reviews-filter-btn${filterStatus === status ? ' active' : ''}`}
               >
                 {statusLabels[status]} ({count})
               </button>
@@ -204,120 +166,69 @@ const AdminReviewsPage: React.FC = () => {
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gap: '16px',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-        }}
-      >
+      <div className="admin-reviews-grid">
         {filteredReviews.map((review) => (
-          <div
-            key={review.id}
-            style={{
-              background: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              padding: '16px',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-            }}
-          >
-            <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+          <div key={review.id} className="admin-reviews-card">
+            <div className="admin-reviews-card-head">
               <div>
-                <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700, color: '#111827' }}>
+                <h3 className="admin-reviews-title">
                   {review.tenSanPham}
                 </h3>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                <p className="admin-reviews-author">
                   bởi <strong>{review.tenKhachHang}</strong>
                 </p>
               </div>
               {getStatusBadge(review.trangThai)}
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div className="admin-table-cell">
               {getStarRating(review.soSao)}
             </div>
 
-            <p
-              style={{
-                margin: '0 0 12px',
-                fontSize: '14px',
-                color: '#475569',
-                lineHeight: '1.5',
-                minHeight: '40px',
-              }}
-            >
+            <p className="admin-reviews-content">
               {review.noiDung}
             </p>
 
-            <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#94a3b8' }}>
+            <p className="admin-reviews-date">
               Ngày: {formatDate(review.ngayDanhGia)}
             </p>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+            <div className="admin-reviews-action-row">
               <button
                 onClick={() => {
                   setReplyTargetId(review.id);
                   setReplyText(getReplyByReviewId(review.id)?.content || '');
                 }}
-                style={{
-                  padding: '8px 14px',
-                  background: '#dbeafe',
-                  color: '#1d4ed8',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
+                className="admin-reviews-reply-btn"
               >
                 <MessageOutlined /> Phản hồi
               </button>
             </div>
 
             {getReplyByReviewId(review.id) && (
-              <div
-                style={{
-                  marginBottom: '10px',
-                  padding: '10px 12px',
-                  background: '#ecfeff',
-                  border: '1px solid #a5f3fc',
-                  borderRadius: '6px',
-                }}
-              >
-                <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#0e7490', fontWeight: 700 }}>
+              <div className="admin-reviews-reply-box">
+                <p className="admin-reviews-reply-title">
                   Phản hồi người bán
                 </p>
-                <p style={{ margin: 0, color: '#164e63', fontSize: '14px', lineHeight: 1.5 }}>
+                <p className="admin-reviews-reply-content">
                   {getReplyByReviewId(review.id)?.content}
                 </p>
-                <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#0e7490' }}>
+                <p className="admin-reviews-reply-meta">
                   {getReplyByReviewId(review.id)?.repliedBy} • {formatDate(getReplyByReviewId(review.id)?.repliedAt || '')}
                 </p>
               </div>
             )}
 
             {replyTargetId === review.id && (
-              <div style={{ marginTop: '8px' }}>
+              <div className="admin-reviews-reply-editor">
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   rows={3}
                   placeholder="Nhập phản hồi cho đánh giá này"
-                  style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    padding: '8px 10px',
-                    fontSize: '14px',
-                    fontFamily: 'inherit',
-                  }}
+                  className="admin-reviews-textarea"
                 />
-                <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                <div className="admin-reviews-reply-actions">
                   <button
                     onClick={() => {
                       if (!replyText.trim()) return;
@@ -331,16 +242,7 @@ const AdminReviewsPage: React.FC = () => {
                       setReplyText('');
                       setReviews((prev) => [...prev]);
                     }}
-                    style={{
-                      padding: '8px 14px',
-                      background: '#2563eb',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                    }}
+                    className="admin-reviews-send-btn"
                   >
                     Gửi phản hồi
                   </button>
@@ -349,16 +251,7 @@ const AdminReviewsPage: React.FC = () => {
                       setReplyTargetId(null);
                       setReplyText('');
                     }}
-                    style={{
-                      padding: '8px 14px',
-                      background: '#e2e8f0',
-                      color: '#334155',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                    }}
+                    className="admin-reviews-cancel-btn"
                   >
                     Hủy
                   </button>
@@ -370,8 +263,8 @@ const AdminReviewsPage: React.FC = () => {
       </div>
 
       {filteredReviews.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px 24px', color: '#94a3b8' }}>
-          <p style={{ fontSize: '16px' }}>Không có đánh giá nào</p>
+        <div className="admin-reviews-empty">
+          <p>Không có đánh giá nào</p>
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { Product } from '../../types';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+import '../../assets/styles/pages/admin-pages.css';
 
 const emptyProduct: Omit<Product, 'id'> = {
   name: '', slug: '', categoryId: 1, price: 0, description: '',
@@ -66,37 +67,32 @@ const AdminProductsPage: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="admin-page-header">
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, margin: 0 }}>Quản lý sản phẩm</h1>
-          <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '13px' }}>
+          <h1 className="admin-page-title">Quản lý sản phẩm</h1>
+          <p className="admin-page-subtitle">
             {products.length} sản phẩm trong hệ thống
           </p>
         </div>
         {!isReadOnly && <Button onClick={openAdd}><PlusOutlined /> Thêm sản phẩm</Button>}
       </div>
 
-      {/* Search */}
-      <div style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
+      <div className="admin-search-wrap">
         <input
           type="text"
           placeholder="Tìm kiếm theo tên hoặc thương hiệu..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: '100%', padding: '8px 12px', border: '1.5px solid #e5e7eb',
-            borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box',
-          }}
+          className="admin-search-input"
         />
       </div>
 
-      {/* Table */}
-      <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+            <tr className="admin-table-head-row">
               {['Sản phẩm', 'Danh mục', 'Giá', 'Tồn kho', 'Trạng thái', 'Thao tác'].map((h) => (
-                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>
+                <th key={h} className="admin-table-th">
                   {h}
                 </th>
               ))}
@@ -106,63 +102,62 @@ const AdminProductsPage: React.FC = () => {
             {filtered.map((product) => {
               const cat = categories.find((c) => c.id === product.categoryId);
               return (
-                <tr key={product.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <tr key={product.id} className="admin-table-row">
+                  <td className="admin-table-cell">
+                    <div className="admin-product-cell-main">
                       <img
                         src={product.images[0]}
                         alt={product.name}
-                        style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }}
+                        className="admin-product-thumb"
                       />
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 600, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div className="admin-product-name">
                           {product.name}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#6b7280' }}>{product.brand}</div>
+                        <div className="admin-product-brand">{product.brand}</div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>
+                  <td className="admin-table-cell-text">
                     {cat && getCategoryIcon(cat, { marginRight: 6 })} {cat?.name}
                   </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>
+                  <td className="admin-table-cell">
+                    <div className="admin-product-price">
                       {formatCurrency(product.price)}
                     </div>
                     {product.originalPrice && (
-                      <div style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'line-through' }}>
+                      <div className="admin-product-price-old">
                         {formatCurrency(product.originalPrice)}
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '12px 16px' }}>
+                  <td className="admin-table-cell">
                     <span
-                      style={{
-                        fontSize: '13px', fontWeight: 600,
-                        color: product.stock > 5 ? '#10b981' : product.stock > 0 ? '#f59e0b' : '#ef4444',
-                      }}
+                      className={`admin-product-stock ${
+                        product.stock > 5 ? 'high' : product.stock > 0 ? 'medium' : 'low'
+                      }`}
                     >
                       {product.stock}
                     </span>
                   </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <td className="admin-table-cell">
+                    <div className="admin-product-status-col">
                       {product.isFeatured && (
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#2563eb', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', width: 'fit-content' }}>
+                        <span className="admin-product-tag featured">
                           Nổi bật
                         </span>
                       )}
                       {product.isNew && (
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#10b981', background: '#f0fdf4', padding: '2px 6px', borderRadius: '4px', width: 'fit-content' }}>
+                        <span className="admin-product-tag new">
                           Mới
                         </span>
                       )}
                     </div>
                   </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                  <td className="admin-table-cell">
+                    <div className="admin-table-actions">
                       {isReadOnly ? (
-                        <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>
+                        <span className="admin-readonly-text">Chỉ xem</span>
                       ) : (
                         <>
                           <Button size="sm" variant="outline" onClick={() => openEdit(product)}>
@@ -190,16 +185,16 @@ const AdminProductsPage: React.FC = () => {
         title={editProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
         size="lg"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="admin-product-form">
           <Input label="Tên sản phẩm" value={form.name} onChange={f('name')} required />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="admin-product-form-grid-2">
             <Input label="Thương hiệu" value={form.brand} onChange={f('brand')} required />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>Danh mục</label>
+            <div className="admin-product-field">
+              <label className="admin-product-label">Danh mục</label>
               <select
                 value={form.categoryId}
                 onChange={f('categoryId')}
-                style={{ padding: '10px 12px', border: '1.5px solid #d1d5db', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                className="admin-product-select"
               >
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -207,31 +202,31 @@ const AdminProductsPage: React.FC = () => {
               </select>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          <div className="admin-product-form-grid-3">
             <Input label="Giá hiện tại (VND)" type="number" value={String(form.price)} onChange={f('price')} required />
             <Input label="Giá gốc (VND, tùy chọn)" type="number" value={String(form.originalPrice || '')} onChange={f('originalPrice')} />
             <Input label="Tồn kho" type="number" value={String(form.stock)} onChange={f('stock')} required />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>Mô tả ngắn</label>
+          <div className="admin-product-field">
+            <label className="admin-product-label">Mô tả ngắn</label>
             <textarea
               value={form.shortDescription}
               onChange={f('shortDescription')}
               rows={2}
-              style={{ padding: '10px 12px', border: '1.5px solid #d1d5db', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+              className="admin-product-textarea"
             />
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+          <div className="admin-product-checkbox-row">
+            <label className="admin-product-checkbox-label">
               <input type="checkbox" checked={form.isFeatured} onChange={f('isFeatured')} />
               Sản phẩm nổi bật
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+            <label className="admin-product-checkbox-label">
               <input type="checkbox" checked={form.isNew} onChange={f('isNew')} />
               Sản phẩm mới
             </label>
           </div>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px' }}>
+          <div className="admin-product-form-actions">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>Hủy</Button>
             <Button onClick={handleSave}>
               {editProduct ? 'Cập nhật' : 'Thêm mới'}
@@ -243,10 +238,10 @@ const AdminProductsPage: React.FC = () => {
 
       {/* Delete Confirm Modal */}
       {!isReadOnly && <Modal isOpen={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} title="Xác nhận xóa" size="sm">
-        <p style={{ margin: '0 0 20px', color: '#374151' }}>
+        <p className="admin-product-delete-text">
           Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.
         </p>
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+        <div className="admin-form-actions-end">
           <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Hủy</Button>
           <Button variant="danger" onClick={() => handleDelete(deleteConfirm!)}>Xác nhận xóa</Button>
         </div>

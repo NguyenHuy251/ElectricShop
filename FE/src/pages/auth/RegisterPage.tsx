@@ -4,6 +4,7 @@ import { AlertOutlined, LockOutlined, MailOutlined, PhoneOutlined, ThunderboltOu
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import '../../assets/styles/pages/auth.css';
 
 const RegisterPage: React.FC = () => {
   const { register } = useAuth();
@@ -54,35 +55,17 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
-        padding: '16px',
-      }}
-    >
-      <div
-        style={{
-          background: '#fff',
-          borderRadius: '20px',
-          padding: '40px',
-          width: '100%',
-          maxWidth: '440px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}><ThunderboltOutlined style={{ color: '#f59e0b' }} /></div>
-          <h1 style={{ margin: 0, fontSize: '24px', color: '#1e3a5f' }}>Tạo tài khoản mới</h1>
-          <p style={{ margin: '6px 0 0', color: '#6b7280', fontSize: '14px' }}>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-brand">
+          <div className="auth-brand-icon"><ThunderboltOutlined /></div>
+          <h1 className="auth-brand-title">Tạo tài khoản mới</h1>
+          <p className="auth-brand-desc">
             Đăng ký để bắt đầu mua sắm
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <Input
             label="Tên đăng nhập"
             placeholder="user1"
@@ -137,17 +120,8 @@ const RegisterPage: React.FC = () => {
           />
 
           {error && (
-            <div
-              style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                color: '#dc2626',
-                fontSize: '13px',
-              }}
-            >
-              <AlertOutlined style={{ marginRight: 6 }} />{error}
+            <div className="auth-error">
+              <AlertOutlined />{error}
             </div>
           )}
 
@@ -156,9 +130,9 @@ const RegisterPage: React.FC = () => {
           </Button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#6b7280' }}>
+        <div className="auth-footer">
           Đã có tài khoản?{' '}
-          <Link to="/login" style={{ color: '#2563eb', fontWeight: 600 }}>
+          <Link to="/login" className="auth-link-primary">
             Đăng nhập
           </Link>
         </div>

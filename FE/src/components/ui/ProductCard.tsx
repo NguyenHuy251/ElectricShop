@@ -17,121 +17,67 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : 0;
 
   return (
-    <div
-      className="product-card"
-      style={{
-        background: '#fff',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
-        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
-        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)';
-      }}
-    >
+    <div className="product-card">
       {/* Image */}
-      <Link to={`/products/${product.id}`} style={{ position: 'relative', display: 'block' }}>
+      <Link to={`/products/${product.id}`} className="product-card__image-link">
         <img
           src={product.images[0]}
           alt={product.name}
-          style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+          className="product-card__image"
         />
         {discount > 0 && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              background: '#ef4444',
-              color: '#fff',
-              fontSize: '12px',
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '4px',
-            }}
-          >
+          <span className="product-card__badge product-card__badge--sale">
             -{discount}%
           </span>
         )}
         {product.isNew && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '8px',
-              right: '8px',
-              background: '#10b981',
-              color: '#fff',
-              fontSize: '12px',
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '4px',
-            }}
-          >
+          <span className="product-card__badge product-card__badge--new">
             Mới
           </span>
         )}
       </Link>
 
       {/* Content */}
-      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <span style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>
+      <div className="product-card__content">
+        <span className="product-card__brand">
           {product.brand}
         </span>
         <Link
           to={`/products/${product.id}`}
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#111827',
-            textDecoration: 'none',
-            lineHeight: '1.4',
-            marginBottom: 'auto',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
+          className="product-card__name"
         >
           {product.name}
         </Link>
 
         {/* Rating */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '8px 0' }}>
-          <span style={{ color: '#f59e0b', fontSize: '13px' }}>
+        <div className="product-card__rating">
+          <span className="product-card__rating-stars">
             {'★'.repeat(Math.round(product.rating))}
             {'☆'.repeat(5 - Math.round(product.rating))}
           </span>
-          <span style={{ fontSize: '12px', color: '#6b7280' }}>({product.reviewCount})</span>
+          <span className="product-card__rating-count">({product.reviewCount})</span>
         </div>
 
         {/* Price */}
-        <div style={{ marginBottom: '12px' }}>
-          <div style={{ fontSize: '18px', fontWeight: 700, color: '#2563eb' }}>
+        <div className="product-card__price">
+          <div className="product-card__price-main">
             {formatCurrency(product.price)}
           </div>
           {product.originalPrice && (
-            <div style={{ fontSize: '13px', color: '#9ca3af', textDecoration: 'line-through' }}>
+            <div className="product-card__price-old">
               {formatCurrency(product.originalPrice)}
             </div>
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 36px', gap: '8px', alignItems: 'center' }}>
+        <div className="product-card__actions">
           <Button
             variant={isInCart(product.id) ? 'secondary' : 'primary'}
             size="sm"
             fullWidth
             onClick={() => addToCart(product)}
             disabled={product.stock === 0}
-            style={{ height: '36px', borderRadius: '10px' }}
+            className="product-card__action-btn"
           >
             {product.stock === 0
               ? 'Hết hàng'
@@ -142,18 +88,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <Link
             to={`/products/${product.id}`}
             title="Xem chi tiết sản phẩm"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#e0f2fe',
-              color: '#0369a1',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textDecoration: 'none',
-              border: '1px solid #bae6fd',
-            }}
+            className="product-card__quick-view"
           >
             <EyeOutlined />
           </Link>

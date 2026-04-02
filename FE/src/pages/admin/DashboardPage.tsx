@@ -5,28 +5,26 @@ import { productsAtom } from '../../recoil/atoms/productAtom';
 import { useOrders } from '../../hooks/useOrders';
 import { users } from '../../data/mockData';
 import { formatCurrency, getOrderStatusLabel, getOrderStatusColor, formatDate } from '../../utils/helpers';
+import '../../assets/styles/pages/admin-pages.css';
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; color: string }> = ({ icon, label, value, color }) => (
-  <div
-    style={{
-      background: '#fff', borderRadius: '12px', padding: '20px',
-      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-      display: 'flex', alignItems: 'center', gap: '16px',
-    }}
-  >
+  <div className="dashboard-stat-card">
     <div
-      style={{
-        width: '52px', height: '52px', borderRadius: '12px',
-        background: `${color}18`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '24px', flexShrink: 0,
-      }}
+      className={`dashboard-stat-icon ${
+        color === '#10b981'
+          ? 'admin-dashboard-icon-green'
+          : color === '#2563eb'
+            ? 'admin-dashboard-icon-blue'
+            : color === '#8b5cf6'
+              ? 'admin-dashboard-icon-purple'
+              : 'admin-dashboard-icon-amber'
+      }`}
     >
       {icon}
     </div>
     <div>
-      <div style={{ fontSize: '24px', fontWeight: 800, color: '#111827' }}>{value}</div>
-      <div style={{ fontSize: '13px', color: '#6b7280' }}>{label}</div>
+      <div className="dashboard-stat-value">{value}</div>
+      <div className="dashboard-stat-label">{label}</div>
     </div>
   </div>
 );
@@ -46,37 +44,28 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: 0 }}>Dashboard</h1>
-        <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>
+      <div className="dashboard-title-wrap">
+        <h1 className="dashboard-title">Dashboard</h1>
+        <p className="dashboard-subtitle">
           Tổng quan hệ thống ElectricShop
         </p>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
+      <div className="dashboard-stats-grid">
         <StatCard icon={<DollarOutlined />} label="Doanh thu" value={formatCurrency(totalRevenue)} color="#10b981" />
         <StatCard icon={<AppstoreOutlined />} label="Sản phẩm" value={String(products.length)} color="#2563eb" />
         <StatCard icon={<ShoppingCartOutlined />} label="Đơn hàng" value={String(orders.length)} color="#8b5cf6" />
         <StatCard icon={<TeamOutlined />} label="Khách hàng" value={String(users.filter((u) => u.role === 'user').length)} color="#f59e0b" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
-        {/* Recent Orders */}
-        <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700 }}>Đơn hàng gần đây</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="dashboard-content-grid">
+        <div className="dashboard-card">
+          <h3 className="dashboard-card-title">Đơn hàng gần đây</h3>
+          <table className="admin-table">
             <thead>
-              <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+              <tr className="dashboard-table-head-row">
                 {['Mã đơn', 'Ngày đặt', 'Tổng tiền', 'Người xác nhận', 'Trạng thái'].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      padding: '8px 10px', textAlign: 'left',
-                      fontSize: '12px', fontWeight: 700,
-                      color: '#6b7280', textTransform: 'uppercase',
-                    }}
-                  >
+                  <th key={h} className="dashboard-table-th">
                     {h}
                   </th>
                 ))}
@@ -86,21 +75,16 @@ const DashboardPage: React.FC = () => {
               {recentOrders.map((order) => {
                 const confirmedBy = employees[order.id % employees.length];
                 return (
-                  <tr key={order.id} style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '10px', fontSize: '14px', fontWeight: 600 }}>#{order.id}</td>
-                    <td style={{ padding: '10px', fontSize: '13px', color: '#6b7280' }}>{formatDate(order.createdAt)}</td>
-                    <td style={{ padding: '10px', fontSize: '14px', fontWeight: 600 }}>{formatCurrency(order.total)}</td>
-                    <td style={{ padding: '10px', fontSize: '13px', color: '#6b7280' }}>
+                  <tr key={order.id} className="dashboard-table-row">
+                    <td className="dashboard-table-cell dashboard-cell-id">#{order.id}</td>
+                    <td className="dashboard-cell-muted">{formatDate(order.createdAt)}</td>
+                    <td className="dashboard-table-cell dashboard-cell-total">{formatCurrency(order.total)}</td>
+                    <td className="dashboard-cell-muted">
                       {order.status !== 'pending' ? confirmedBy : '-'}
                     </td>
-                    <td style={{ padding: '10px' }}>
+                    <td className="dashboard-table-cell">
                       <span
-                        style={{
-                          padding: '3px 10px', borderRadius: '999px',
-                          fontSize: '12px', fontWeight: 600,
-                          background: `${getOrderStatusColor(order.status)}22`,
-                          color: getOrderStatusColor(order.status),
-                        }}
+                        className={`dashboard-status-badge ${order.status}`}
                       >
                         {getOrderStatusLabel(order.status)}
                       </span>
@@ -112,10 +96,9 @@ const DashboardPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Quick Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700 }}>Trạng thái đơn hàng</h3>
+        <div className="dashboard-side-column">
+          <div className="dashboard-card">
+            <h3 className="dashboard-card-title">Trạng thái đơn hàng</h3>
             {[
               { status: 'pending', label: 'Chờ xác nhận' },
               { status: 'confirmed', label: 'Đã xác nhận' },
@@ -126,32 +109,27 @@ const DashboardPage: React.FC = () => {
               const count = orders.filter((o) => o.status === status).length;
               const pct = orders.length > 0 ? (count / orders.length) * 100 : 0;
               return (
-                <div key={status} style={{ marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '13px', color: '#374151' }}>{label}</span>
-                    <span style={{ fontSize: '13px', fontWeight: 600 }}>{count}</span>
+                <div key={status} className="dashboard-progress-item">
+                  <div className="dashboard-progress-head">
+                    <span className="dashboard-progress-label">{label}</span>
+                    <span className="dashboard-progress-count">{count}</span>
                   </div>
-                  <div style={{ height: '6px', background: '#f3f4f6', borderRadius: '999px' }}>
-                    <div
-                      style={{
-                        height: '100%', borderRadius: '999px',
-                        background: getOrderStatusColor(status),
-                        width: `${pct}%`,
-                        transition: 'width 0.3s',
-                      }}
-                    />
-                  </div>
+                  <progress
+                    className={`dashboard-progress-native ${status}`}
+                    value={pct}
+                    max={100}
+                  />
                 </div>
               );
             })}
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-            <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 700 }}>Đơn hàng chờ xử lý</h3>
-            <div style={{ fontSize: '40px', fontWeight: 800, color: pendingOrders > 0 ? '#f59e0b' : '#10b981' }}>
+          <div className="dashboard-card">
+            <h3 className="dashboard-card-title-sm">Đơn hàng chờ xử lý</h3>
+            <div className={`dashboard-pending-value ${pendingOrders > 0 ? 'admin-stat-amber' : 'admin-stat-green'}`}>
               {pendingOrders}
             </div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
+            <div className="dashboard-pending-label">
               {pendingOrders > 0 ? 'Đơn hàng cần xác nhận' : 'Tất cả đã được xử lý ✓'}
             </div>
           </div>

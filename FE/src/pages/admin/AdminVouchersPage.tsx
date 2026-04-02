@@ -5,6 +5,7 @@ import { vouchers as initialVouchers } from '../../data/mockData';
 import { useAuth } from '../../hooks/useAuth';
 import { Voucher } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
+import '../../assets/styles/pages/admin-pages.css';
 
 type VoucherFormState = {
   code: string;
@@ -122,47 +123,26 @@ const AdminVouchersPage: React.FC = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+      <div className="admin-page-header">
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: 0 }}>
-            <GiftOutlined style={{ marginRight: 8, color: '#2563eb' }} />Quản lý voucher
+          <h1 className="dashboard-title">
+            <GiftOutlined className="admin-icon-inline" />Quản lý voucher
           </h1>
-          <p style={{ color: '#6b7280', margin: '6px 0 0', fontSize: '14px' }}>
+          <p className="dashboard-subtitle">
             {`Tổng ${voucherList.length} voucher, ${totalActive} voucher đang hoạt động.`}
           </p>
         </div>
-        {!isReadOnly && <button
-          onClick={openCreateModal}
-          style={{
-            border: 'none',
-            borderRadius: '8px',
-            background: '#2563eb',
-            color: '#fff',
-            fontWeight: 700,
-            padding: '10px 14px',
-            cursor: 'pointer',
-          }}
-        >
-          <PlusOutlined style={{ marginRight: 6 }} />Thêm voucher
+        {!isReadOnly && <button onClick={openCreateModal} className="admin-news-add-btn">
+          <PlusOutlined />Thêm voucher
         </button>}
       </div>
 
-      <div style={{ background: '#fff', borderRadius: '12px', padding: '18px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-news-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+            <tr className="dashboard-table-head-row">
               {['Mã', 'Tên voucher', 'Giảm giá', 'Đơn tối thiểu', 'Hạn dùng', 'Trạng thái', 'Thao tác'].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: '10px',
-                    textAlign: 'left',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#6b7280',
-                    textTransform: 'uppercase',
-                  }}
-                >
+                <th key={h} className="dashboard-table-th">
                   {h}
                 </th>
               ))}
@@ -172,78 +152,38 @@ const AdminVouchersPage: React.FC = () => {
             {voucherList.map((voucher) => {
               const active = voucher.isActive && new Date(voucher.expiredAt) >= new Date();
               return (
-                <tr key={voucher.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                  <td style={{ padding: '12px 10px' }}>
-                    <span
-                      style={{
-                        fontWeight: 700,
-                        fontSize: '13px',
-                        border: '1px dashed #94a3b8',
-                        borderRadius: '8px',
-                        padding: '4px 8px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
+                <tr key={voucher.id} className="dashboard-table-row">
+                  <td className="admin-news-cell-date">
+                    <span className="admin-voucher-code">
                       <TagOutlined />{voucher.code}
                     </span>
                   </td>
-                  <td style={{ padding: '12px 10px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#1f2937' }}>{voucher.title}</div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{voucher.description}</div>
+                  <td className="admin-news-cell-date">
+                    <div className="admin-voucher-title">{voucher.title}</div>
+                    <div className="admin-voucher-desc">{voucher.description}</div>
                   </td>
-                  <td style={{ padding: '12px 10px', fontSize: '14px', fontWeight: 600 }}>
+                  <td className="admin-news-cell-date admin-voucher-discount">
                     {voucher.discountType === 'percent'
                       ? `${voucher.discountValue}%`
                       : formatCurrency(voucher.discountValue)}
                   </td>
-                  <td style={{ padding: '12px 10px', fontSize: '14px' }}>{formatCurrency(voucher.minOrderValue)}</td>
-                  <td style={{ padding: '12px 10px', fontSize: '14px' }}>{formatDate(voucher.expiredAt)}</td>
-                  <td style={{ padding: '12px 10px' }}>
-                    <span
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '999px',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        background: active ? '#dcfce7' : '#fee2e2',
-                        color: active ? '#166534' : '#991b1b',
-                      }}
-                    >
+                  <td className="admin-news-cell-date">{formatCurrency(voucher.minOrderValue)}</td>
+                  <td className="admin-news-cell-date">{formatDate(voucher.expiredAt)}</td>
+                  <td className="admin-news-cell-date">
+                    <span className={`admin-voucher-status ${active ? 'active' : 'inactive'}`}>
                       {active ? 'Đang hoạt động' : 'Hết hiệu lực'}
                     </span>
                   </td>
-                  <td style={{ padding: '12px 10px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                  <td className="admin-news-cell-date">
+                    <div className="admin-news-actions">
                       {isReadOnly ? (
-                        <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>
+                        <span className="admin-readonly-text">Chỉ xem</span>
                       ) : (
                         <>
-                          <button
-                            onClick={() => openEditModal(voucher)}
-                            style={{
-                              border: 'none',
-                              borderRadius: '7px',
-                              background: '#0ea5e9',
-                              color: '#fff',
-                              padding: '8px 10px',
-                              cursor: 'pointer',
-                            }}
-                          >
+                          <button onClick={() => openEditModal(voucher)} className="admin-news-action-btn edit">
                             <EditOutlined /> Sửa
                           </button>
-                          <button
-                            onClick={() => handleDeleteVoucher(voucher.id)}
-                            style={{
-                              border: 'none',
-                              borderRadius: '7px',
-                              background: '#ef4444',
-                              color: '#fff',
-                              padding: '8px 10px',
-                              cursor: 'pointer',
-                            }}
-                          >
+                          <button onClick={() => handleDeleteVoucher(voucher.id)} className="admin-news-action-btn delete">
                             <DeleteOutlined /> Xóa
                           </button>
                         </>
@@ -264,85 +204,85 @@ const AdminVouchersPage: React.FC = () => {
         size="md"
       >
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="admin-news-form-grid">
             <div>
-              <label style={labelStyle}>Mã voucher *</label>
+              <label className="admin-form-label">Mã voucher *</label>
               <input
                 value={form.code}
                 onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
                 placeholder="VD: ELECTRIC20"
               />
             </div>
             <div>
-              <label style={labelStyle}>Hạn dùng *</label>
+              <label className="admin-form-label">Hạn dùng *</label>
               <input
                 type="date"
                 value={form.expiredAt}
                 onChange={(e) => setForm((prev) => ({ ...prev, expiredAt: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
               />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Tên voucher *</label>
+            <div className="admin-form-full">
+              <label className="admin-form-label">Tên voucher *</label>
               <input
                 value={form.title}
                 onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
               />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Mô tả</label>
+            <div className="admin-form-full">
+              <label className="admin-form-label">Mô tả</label>
               <input
                 value={form.description}
                 onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
               />
             </div>
             <div>
-              <label style={labelStyle}>Loại giảm giá</label>
+              <label className="admin-form-label">Loại giảm giá</label>
               <select
                 value={form.discountType}
                 onChange={(e) => setForm((prev) => ({ ...prev, discountType: e.target.value as Voucher['discountType'] }))}
-                style={inputStyle}
+                className="admin-form-select"
               >
                 <option value="percent">Phần trăm (%)</option>
                 <option value="amount">Số tiền (VND)</option>
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Giá trị giảm *</label>
+              <label className="admin-form-label">Giá trị giảm *</label>
               <input
                 type="number"
                 min={0}
                 value={form.discountValue}
                 onChange={(e) => setForm((prev) => ({ ...prev, discountValue: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
               />
             </div>
             <div>
-              <label style={labelStyle}>Đơn tối thiểu *</label>
+              <label className="admin-form-label">Đơn tối thiểu *</label>
               <input
                 type="number"
                 min={0}
                 value={form.minOrderValue}
                 onChange={(e) => setForm((prev) => ({ ...prev, minOrderValue: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
               />
             </div>
             <div>
-              <label style={labelStyle}>Giảm tối đa</label>
+              <label className="admin-form-label">Giảm tối đa</label>
               <input
                 type="number"
                 min={0}
                 value={form.maxDiscountValue}
                 onChange={(e) => setForm((prev) => ({ ...prev, maxDiscountValue: e.target.value }))}
-                style={inputStyle}
+                className="admin-form-input"
                 placeholder="Không bắt buộc"
               />
             </div>
-            <div style={{ gridColumn: '1 / -1', marginTop: '4px' }}>
-              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <div className="admin-form-checkbox-row">
+              <label className="admin-form-checkbox-label">
                 <input
                   type="checkbox"
                   checked={form.isActive}
@@ -353,11 +293,11 @@ const AdminVouchersPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <button type="button" onClick={closeModal} style={{ ...actionBtnStyle, background: '#e2e8f0', color: '#334155' }}>
+          <div className="admin-form-actions">
+            <button type="button" onClick={closeModal} className="admin-action-btn cancel">
               Hủy
             </button>
-            <button type="submit" style={{ ...actionBtnStyle, background: '#2563eb', color: '#fff' }}>
+            <button type="submit" className="admin-action-btn primary">
               {editingVoucher ? 'Lưu thay đổi' : 'Thêm voucher'}
             </button>
           </div>
@@ -365,31 +305,6 @@ const AdminVouchersPage: React.FC = () => {
       </Modal>}
     </div>
   );
-};
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  marginBottom: '6px',
-  fontSize: '13px',
-  fontWeight: 600,
-  color: '#334155',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  border: '1px solid #cbd5e1',
-  borderRadius: '8px',
-  padding: '9px 10px',
-  fontSize: '14px',
-  outline: 'none',
-};
-
-const actionBtnStyle: React.CSSProperties = {
-  border: 'none',
-  borderRadius: '8px',
-  padding: '10px 14px',
-  fontWeight: 700,
-  cursor: 'pointer',
 };
 
 export default AdminVouchersPage;

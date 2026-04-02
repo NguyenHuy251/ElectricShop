@@ -1,5 +1,5 @@
 import React from 'react';
-import { COLORS } from '../../constants';
+import '../../assets/styles/components/ui-common.css';
 
 interface StarRatingProps {
   rating: number;
@@ -18,24 +18,26 @@ const StarRating: React.FC<StarRatingProps> = ({
     return { key: i, filled, half };
   });
 
+  const sizeClass = size <= 13 ? 'size-13' : size <= 16 ? 'size-16' : 'size-18';
+
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+    <span className={`common-star-rating ${sizeClass}`}>
       {stars.map(({ key, filled, half }) => (
-        <span key={key} style={{ fontSize: size, lineHeight: 1 }}>
+        <span key={key} className="common-star-item">
           {filled ? (
-            <span style={{ color: COLORS.star }}>★</span>
+            <span className="common-star-filled">★</span>
           ) : half ? (
-            <span style={{ position: 'relative', display: 'inline-block' }}>
-              <span style={{ color: COLORS.border }}>★</span>
-              <span style={{ position: 'absolute', left: 0, top: 0, width: '50%', overflow: 'hidden', color: COLORS.star }}>★</span>
+            <span className="common-star-half">
+              <span className="common-star-empty">★</span>
+              <span className="common-star-half-fill common-star-filled">★</span>
             </span>
           ) : (
-            <span style={{ color: COLORS.border }}>★</span>
+            <span className="common-star-empty">★</span>
           )}
         </span>
       ))}
       {showValue && (
-        <span style={{ fontSize: size - 2, color: COLORS.textSecondary, marginLeft: 4 }}>
+        <span className="common-star-value">
           {rating.toFixed(1)}{reviewCount !== undefined && ` (${reviewCount})`}
         </span>
       )}

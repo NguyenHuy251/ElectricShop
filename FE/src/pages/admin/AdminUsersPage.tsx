@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { AuthUser } from '../../types';
+import '../../assets/styles/pages/admin-pages.css';
 
 const AdminUsersPage: React.FC = () => {
   const { currentUser, getAccounts, deleteAccount, updateAccount } = useAuth();
@@ -147,80 +148,60 @@ const AdminUsersPage: React.FC = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="admin-page-header">
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, margin: 0 }}>Quản lý tài khoản</h1>
-          <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '13px' }}>{accounts.length} tài khoản</p>
+          <h1 className="admin-page-title">Quản lý tài khoản</h1>
+          <p className="admin-page-subtitle">{accounts.length} tài khoản</p>
         </div>
         <Button variant="outline" onClick={() => void loadAccounts()} loading={loading}>
           <ReloadOutlined /> Làm mới
         </Button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div className="dashboard-stats-grid">
         {[
           { label: 'Tổng tài khoản', value: accounts.length, color: '#2563eb' },
           { label: 'Khách hàng', value: totalUsers, color: '#10b981' },
           { label: 'Quản trị viên', value: totalAdmins, color: '#f59e0b' },
           { label: 'Đã vô hiệu hóa', value: totalInactive, color: '#ef4444' },
         ].map((stat) => (
-          <div key={stat.label} style={{ background: '#fff', borderRadius: '10px', padding: '16px', borderLeft: `4px solid ${stat.color}` }}>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: stat.color }}>{stat.value}</div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>{stat.label}</div>
+          <div
+            key={stat.label}
+            className={`admin-users-stat-card ${
+              stat.color === '#2563eb' ? 'admin-stat-blue' :
+              stat.color === '#10b981' ? 'admin-stat-green' :
+              stat.color === '#f59e0b' ? 'admin-stat-amber' :
+              'admin-stat-red'
+            }`}
+          >
+            <div className="admin-users-stat-value">{stat.value}</div>
+            <div className="admin-users-stat-label">{stat.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
+      <div className="admin-search-wrap">
         <input
           type="text"
           placeholder="Tìm theo tên hiển thị, username hoặc email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            border: '1.5px solid #e5e7eb',
-            borderRadius: '8px',
-            fontSize: '14px',
-            outline: 'none',
-            boxSizing: 'border-box',
-          }}
+          className="admin-search-input"
         />
       </div>
 
       {error && (
-        <div
-          style={{
-            marginBottom: '12px',
-            background: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '8px',
-            padding: '10px 12px',
-            color: '#dc2626',
-            fontSize: '13px',
-          }}
-        >
+        <div className="admin-users-error">
           {error}
         </div>
       )}
 
-      <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+            <tr className="admin-table-head-row">
               {['Tài khoản', 'Username', 'Email', 'SĐT', 'Vai trò', 'Trạng thái', 'Thao tác'].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#6b7280',
-                    textTransform: 'uppercase',
-                  }}
-                >
+                <th key={h} className="admin-table-th">
                   {h}
                 </th>
               ))}
@@ -228,17 +209,17 @@ const AdminUsersPage: React.FC = () => {
           </thead>
           <tbody>
             {filtered.map((account) => (
-              <tr key={account.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                <td style={{ padding: '12px 16px' }}>
+              <tr key={account.id} className="admin-table-row">
+                <td className="admin-table-cell">
                   <div>
-                    <div style={{ fontSize: '14px', fontWeight: 600 }}>{account.name}</div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>ID: {account.id}</div>
+                    <div className="admin-table-title">{account.name}</div>
+                    <div className="admin-table-meta">ID: {account.id}</div>
                   </div>
                 </td>
-                <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>{account.username || '—'}</td>
-                <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>{account.email || '—'}</td>
-                <td style={{ padding: '12px 16px', fontSize: '13px', color: '#374151' }}>{account.phone || '—'}</td>
-                <td style={{ padding: '12px 16px' }}>
+                <td className="admin-table-cell-text">{account.username || '—'}</td>
+                <td className="admin-table-cell-text">{account.email || '—'}</td>
+                <td className="admin-table-cell-text">{account.phone || '—'}</td>
+                <td className="admin-table-cell">
                   <Badge
                     bg={
                       account.role === 'admin'
@@ -256,21 +237,21 @@ const AdminUsersPage: React.FC = () => {
                     }
                   >
                     {account.role === 'admin' ? (
-                      <>
+                      <span className="admin-users-role-badge">
                         <SettingOutlined /> Admin
-                      </>
+                      </span>
                     ) : account.isEmployee ? (
-                      <>
+                      <span className="admin-users-role-badge">
                         <UserOutlined /> Nhân viên
-                      </>
+                      </span>
                     ) : (
-                      <>
+                      <span className="admin-users-role-badge">
                         <UserOutlined /> Khách hàng
-                      </>
+                      </span>
                     )}
                   </Badge>
                 </td>
-                <td style={{ padding: '12px 16px' }}>
+                <td className="admin-table-cell">
                   <Badge
                     bg={account.isActive === false ? '#fef2f2' : '#ecfdf5'}
                     color={account.isActive === false ? '#dc2626' : '#059669'}
@@ -278,7 +259,7 @@ const AdminUsersPage: React.FC = () => {
                     {account.isActive === false ? 'Đã khóa' : 'Hoạt động'}
                   </Badge>
                 </td>
-                <td style={{ padding: '12px 16px', display: 'flex', gap: '6px' }}>
+                <td className="admin-table-cell admin-table-actions">
                   <Button
                     size="sm"
                     onClick={() => handleEdit(account)}
@@ -300,7 +281,7 @@ const AdminUsersPage: React.FC = () => {
             ))}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+                <td colSpan={7} className="admin-empty-state">
                   Không tìm thấy tài khoản
                 </td>
               </tr>
@@ -310,7 +291,7 @@ const AdminUsersPage: React.FC = () => {
       </div>
 
       <Modal isOpen={!!editingAccount} onClose={() => setEditingAccount(null)} title={`Chỉnh sửa: ${editingAccount?.name}`} size="md">
-        <form onSubmit={handleSubmitEdit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <form onSubmit={handleSubmitEdit} className="admin-users-form">
           <Input
             label="Họ và tên"
             value={editForm.tenHienThi}
@@ -334,18 +315,12 @@ const AdminUsersPage: React.FC = () => {
             value={editForm.diaChi}
             onChange={(e) => setEditForm((prev) => ({ ...prev, diaChi: e.target.value }))}
           />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>Vai trò</label>
+          <div className="admin-users-role-field">
+            <label className="admin-users-role-label">Vai trò</label>
             <select
               value={editForm.vaiTro}
               onChange={(e) => setEditForm((prev) => ({ ...prev, vaiTro: e.target.value }))}
-              style={{
-                padding: '10px 12px',
-                border: '1.5px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none',
-              }}
+              className="admin-users-role-select"
             >
               <option value="User">Khách hàng</option>
               <option value="Employee">Nhân viên</option>
@@ -354,36 +329,18 @@ const AdminUsersPage: React.FC = () => {
           </div>
 
           {editError && (
-            <div
-              style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                color: '#dc2626',
-                fontSize: '13px',
-              }}
-            >
+            <div className="admin-users-error">
               {editError}
             </div>
           )}
 
           {editSuccess && (
-            <div
-              style={{
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                color: '#166534',
-                fontSize: '13px',
-              }}
-            >
+            <div className="admin-users-success">
               {editSuccess}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="admin-users-form-actions">
             <Button type="submit" size="lg" loading={editLoading}>
               Lưu thay đổi
             </Button>

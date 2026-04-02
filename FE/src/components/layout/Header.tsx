@@ -23,6 +23,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useProducts } from '../../hooks/useProducts';
 import { categories } from '../../data/mockData';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+import '../../assets/styles/layout/header.css';
 
 const Header: React.FC = () => {
   const { currentUser, logout, isLoggedIn } = useAuth();
@@ -38,95 +39,55 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header style={{
-      background: '#1e3a5f',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-      position: 'sticky', top: 0, zIndex: 100,
-    }}>
+    <header className="site-header">
       {/* Top Bar */}
-      <div style={{
-        background: '#172b45',
-        padding: '6px 0',
-        fontSize: '12px',
-        color: '#93c5fd',
-        textAlign: 'center',
-      }}>
-        <CarOutlined style={{ marginRight: 6 }} />
-        Miễn phí vận chuyển cho đơn hàng trên 2.000.000đ | <PhoneOutlined style={{ margin: '0 6px 0 10px' }} />Hotline: 0336113905
+      <div className="site-header-top">
+        <CarOutlined className="site-icon site-icon--inline" />
+        Miễn phí vận chuyển cho đơn hàng trên 2.000.000đ |{' '}
+        <PhoneOutlined className="site-icon site-icon--topbar" />
+        Hotline: 0336113905
       </div>
 
       {/* Main Header */}
-      <div style={{
-        maxWidth: '1200px', margin: '0 auto',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: '16px',
-      }}>
+      <div className="site-header-main">
         {/* Logo */}
-        <Link to="/" style={{
-          textDecoration: 'none',
-          display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,
-        }}>
-          <ThunderboltOutlined style={{ fontSize: '28px', color: '#f59e0b' }} />
+        <Link to="/" className="site-logo">
+          <ThunderboltOutlined className="site-icon site-icon--logo" />
           <div>
-            <div style={{ fontSize: '18px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
-              Electric
-            </div>
-            <div style={{ fontSize: '11px', color: '#93c5fd', fontWeight: 600 }}>SHOP</div>
+            <div className="site-logo-title">Electric</div>
+            <div className="site-logo-subtitle">SHOP</div>
           </div>
         </Link>
 
         {/* Search */}
-        <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex' }}>
-          <div style={{ display: 'flex', flex: 1, borderRadius: '8px', overflow: 'hidden' }}>
+        <form onSubmit={handleSearch} className="site-search-form">
+          <div className="site-search-wrap">
             <input
               type="text"
               placeholder="Tìm kiếm sản phẩm..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                flex: 1, padding: '10px 16px', border: 'none',
-                fontSize: '14px', outline: 'none',
-              }}
+              className="site-search-input"
             />
-            <button
-              type="submit"
-              style={{
-                background: '#f59e0b', border: 'none', padding: '0 20px',
-                color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: '16px',
-              }}
-            >
+            <button type="submit" className="site-search-btn">
               <SearchOutlined />
             </button>
           </div>
         </form>
 
         {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <Link to="/vouchers" style={{
-            textDecoration: 'none',
-            position: 'relative',
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            color: '#fff', padding: '4px 10px',
-          }}>
-            <GiftOutlined style={{ fontSize: '20px' }} />
-            <span style={{ fontSize: '11px' }}>Voucher</span>
+        <div className="site-header-actions">
+          <Link to="/vouchers" className="site-action-link site-action-link--voucher">
+            <GiftOutlined className="site-icon site-icon--action" />
+            <span className="site-action-label">Voucher</span>
           </Link>
 
           {/* Cart */}
-          <Link to="/cart" style={{
-            textDecoration: 'none', position: 'relative',
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            color: '#fff', padding: '4px 12px',
-          }}>
-            <ShoppingCartOutlined style={{ fontSize: '22px' }} />
-            <span style={{ fontSize: '11px' }}>Giỏ hàng</span>
+          <Link to="/cart" className="site-action-link">
+            <ShoppingCartOutlined className="site-icon site-icon--cart" />
+            <span className="site-action-label">Giỏ hàng</span>
             {cartCount > 0 && (
-              <span style={{
-                position: 'absolute', top: 0, right: 4,
-                background: '#ef4444', color: '#fff',
-                borderRadius: '999px', fontSize: '10px', fontWeight: 700,
-                padding: '1px 5px', minWidth: '16px', textAlign: 'center',
-              }}>
+              <span className="site-cart-badge">
                 {cartCount}
               </span>
             )}
@@ -134,209 +95,105 @@ const Header: React.FC = () => {
 
           {/* User */}
           {isLoggedIn ? (
-            <div style={{ position: 'relative' }}>
+            <div className="site-user-menu">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  color: '#fff', gap: '2px',
-                }}
+                className="site-user-menu-btn"
               >
                 <img
                   src={currentUser!.avatar}
                   alt={currentUser!.name}
-                  style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                  className="site-user-avatar"
                 />
-                <span style={{ fontSize: '11px' }}>{currentUser!.name.split(' ').pop()}</span>
+                <span className="site-user-name-short">{currentUser!.name.split(' ').pop()}</span>
               </button>
 
               {menuOpen && (
-                <div
-                  style={{
-                    position: 'absolute', right: 0, top: '100%', marginTop: '4px',
-                    background: '#fff', borderRadius: '10px',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                    minWidth: '180px', zIndex: 200, overflow: 'hidden',
-                  }}
-                  onMouseLeave={() => setMenuOpen(false)}
-                >
+                <div className="site-user-dropdown" onMouseLeave={() => setMenuOpen(false)}>
                   {(currentUser?.role === 'admin' || currentUser?.isEmployee) && (
                     <Link
                       to="/admin"
                       onClick={() => setMenuOpen(false)}
-                      style={dropItemStyle}
+                      className="site-dropdown-item"
                     >
-                      <SettingOutlined style={{ marginRight: 6 }} />Quản trị
+                      <SettingOutlined className="site-icon site-icon--dropdown" />Quản trị
                     </Link>
                   )}
                   <Link
                     to="/my-contacts"
                     onClick={() => setMenuOpen(false)}
-                    style={dropItemStyle}
+                      className="site-dropdown-item"
                   >
-                    <MessageOutlined style={{ marginRight: 6 }} />Liên hệ
+                    <MessageOutlined className="site-icon site-icon--dropdown" />Liên hệ
                   </Link>
                   
-                  <Link to="/profile" onClick={() => setMenuOpen(false)} style={dropItemStyle}>
-                    <UserOutlined style={{ marginRight: 6 }} />Tài khoản
+                  <Link to="/profile" onClick={() => setMenuOpen(false)} className="site-dropdown-item">
+                    <UserOutlined className="site-icon site-icon--dropdown" />Tài khoản
                   </Link>
-                  <Link to="/orders" onClick={() => setMenuOpen(false)} style={dropItemStyle}>
-                    <InboxOutlined style={{ marginRight: 6 }} />Đơn hàng
+                  <Link to="/orders" onClick={() => setMenuOpen(false)} className="site-dropdown-item">
+                    <InboxOutlined className="site-icon site-icon--dropdown" />Đơn hàng
                   </Link>
                   <button
                     onClick={() => { setMenuOpen(false); logout(); }}
-                    style={{ ...dropItemStyle, background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#ef4444' }}
+                    className="site-dropdown-item site-dropdown-logout"
                   >
-                    <LogoutOutlined style={{ marginRight: 6 }} />Đăng xuất
+                    <LogoutOutlined className="site-icon site-icon--dropdown" />Đăng xuất
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Link
-                to="/login"
-                style={{
-                  textDecoration: 'none', color: '#fff', fontSize: '13px',
-                  padding: '8px 12px', borderRadius: '6px',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                }}
-              >
-                Đăng nhập
-              </Link>
-              <Link
-                to="/register"
-                style={{
-                  textDecoration: 'none', color: '#1e3a5f', fontSize: '13px',
-                  padding: '8px 12px', borderRadius: '6px',
-                  background: '#f59e0b', fontWeight: 600,
-                }}
-              >
-                Đăng ký
-              </Link>
+            <div className="site-auth-links">
+              <Link to="/login" className="site-auth-login">Đăng nhập</Link>
+              <Link to="/register" className="site-auth-register">Đăng ký</Link>
             </div>
           )}
         </div>
       </div>
 
       {/* Category Nav */}
-      <nav style={{
-        background: '#2563eb',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-      }}>
-        <div style={{
-          maxWidth: '1200px', margin: '0 auto',
-          padding: '0 16px',
-          display: 'flex', gap: '0',
-        }}>
+      <nav className="site-header-nav">
+        <div className="site-header-nav-wrap">
           <Link
             to="/"
-            style={{
-              textDecoration: 'none',
-              color: '#fff',
-              padding: '10px 14px',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'background 0.15s',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            className="site-nav-link"
           >
-            <HomeOutlined style={{ fontSize: '14px' }} /> Trang chủ
+            <HomeOutlined className="site-icon site-icon--nav" /> Trang chủ
           </Link>
 
           <Link
             to="/news"
-            style={{
-              textDecoration: 'none',
-              color: '#fff',
-              padding: '10px 14px',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'background 0.15s',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            className="site-nav-link"
           >
-            <ReadOutlined style={{ fontSize: '14px' }} /> Tin tức
+            <ReadOutlined className="site-icon site-icon--nav" /> Tin tức
           </Link>
 
           <Link
             to="/contact"
-            style={{
-              textDecoration: 'none',
-              color: '#fff',
-              padding: '10px 14px',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              transition: 'background 0.15s',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            className="site-nav-link"
           >
-            <PhoneOutlined style={{ fontSize: '14px' }} /> Liên hệ
+            <PhoneOutlined className="site-icon site-icon--nav" /> Liên hệ
           </Link>
 
           <div
-            style={{ position: 'relative' }}
+            className="site-products-menu"
             onMouseEnter={() => setProductsMenuOpen(true)}
             onMouseLeave={() => setProductsMenuOpen(false)}
           >
             <button
               type="button"
-              style={{
-                border: 'none',
-                background: productsMenuOpen ? 'rgba(255,255,255,0.15)' : 'transparent',
-                color: '#fff',
-                padding: '10px 14px',
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+              className={`site-products-menu-btn ${productsMenuOpen ? 'open' : ''}`}
             >
-              <AppstoreOutlined style={{ fontSize: '14px' }} /> Sản phẩm <DownOutlined style={{ fontSize: '10px' }} />
+                <AppstoreOutlined className="site-icon site-icon--nav" /> Sản phẩm <DownOutlined className="site-icon site-icon--chevron" />
             </button>
 
             {productsMenuOpen && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  minWidth: '210px',
-                  background: '#fff',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-                  zIndex: 300,
-                  overflow: 'hidden',
-                }}
-              >
+              <div className="site-products-dropdown">
                 {categories.map((cat) => (
                   <Link
                     key={cat.id}
                     to={`/products?category=${cat.id}`}
-                    style={{
-                      textDecoration: 'none',
-                      color: '#1f2937',
-                      padding: '10px 12px',
-                      fontSize: '13px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
+                    className="site-products-item"
                     onClick={() => setProductsMenuOpen(false)}
                   >
                     {getCategoryIcon(cat, { fontSize: '14px' })} {cat.name}
@@ -349,15 +206,6 @@ const Header: React.FC = () => {
       </nav>
     </header>
   );
-};
-
-const dropItemStyle: React.CSSProperties = {
-  display: 'block',
-  padding: '10px 16px',
-  fontSize: '14px',
-  color: '#374151',
-  textDecoration: 'none',
-  transition: 'background 0.15s',
 };
 
 export default Header;

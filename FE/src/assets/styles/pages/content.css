@@ -1,0 +1,425 @@
+.vouchers-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 36px;
+}
+
+.vouchers-hero {
+  background: linear-gradient(135deg, #1d4ed8, #0f766e);
+  border-radius: 16px;
+  color: #fff;
+  padding: 24px;
+  margin-bottom: 22px;
+}
+
+.vouchers-hero-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.vouchers-hero-icon,
+.voucher-state-icon,
+.voucher-copy-icon,
+.news-hero-icon,
+.news-detail-title-icon {
+  margin-right: 6px;
+}
+
+.vouchers-hero-icon {
+  margin-right: 10px;
+}
+
+.vouchers-hero-desc {
+  margin: 10px 0 0;
+  opacity: 0.9;
+}
+
+.vouchers-list {
+  display: grid;
+  gap: 14px;
+}
+
+.voucher-card {
+  background: #fff;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.voucher-card.expired {
+  border: 1px solid #fecaca;
+}
+
+.voucher-card.active {
+  border: 1px solid #bfdbfe;
+}
+
+.voucher-side {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 220px;
+}
+
+.voucher-side.expired {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.voucher-side.active {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+}
+
+.voucher-state {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.voucher-discount {
+  font-size: 26px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.voucher-body {
+  padding: 18px 20px;
+  flex: 2 1 340px;
+}
+
+.voucher-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.voucher-desc {
+  margin: 0 0 10px;
+  color: #475569;
+}
+
+.voucher-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: #334155;
+  font-size: 14px;
+}
+
+.voucher-action {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 180px;
+}
+
+.voucher-code {
+  border: 1px dashed #94a3b8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 15px;
+  background: #f8fafc;
+  color: #0f172a;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.voucher-copy-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.voucher-copy-btn.active {
+  cursor: pointer;
+  background: #0f766e;
+  color: #fff;
+}
+
+.voucher-copy-btn.expired {
+  cursor: not-allowed;
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.news-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 26px 16px 36px;
+}
+
+.news-hero {
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1e3a5f, #0ea5e9);
+  color: #fff;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.news-hero-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.news-hero-desc {
+  margin: 8px 0 0;
+  opacity: 0.92;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.news-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.news-card-cover {
+  height: 160px;
+  background: #dbeafe;
+}
+
+.news-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-card-body {
+  padding: 14px;
+}
+
+.news-card-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #111827;
+}
+
+.news-card-desc {
+  margin: 0 0 10px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.news-card-date {
+  color: #64748b;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.news-card-author {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.news-author-name {
+  font-weight: 600;
+}
+
+.news-read-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.news-detail-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.news-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.news-detail-article {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.news-detail-cover {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+}
+
+.news-detail-body {
+  padding: 22px;
+}
+
+.news-detail-title {
+  margin: 0 0 10px;
+  font-size: 30px;
+  line-height: 1.25;
+  color: #0f172a;
+}
+
+.news-detail-title-icon {
+  color: #2563eb;
+}
+
+.news-detail-date {
+  color: #64748b;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.news-detail-author {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.news-detail-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.news-detail-content p:first-child {
+  margin-top: 0;
+}
+
+.contact-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.contact-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  color: #111827;
+}
+
+.contact-desc {
+  margin: 0 0 20px;
+  color: #64748b;
+}
+
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.contact-info-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.contact-info-label {
+  margin: 0 0 6px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.contact-info-value {
+  margin: 0;
+  color: #475569;
+}
+
+.contact-form {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+}
+
+.contact-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.contact-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.contact-input,
+.contact-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.contact-textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.contact-form-bottom {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.contact-required-note {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.contact-submit {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.contact-success {
+  margin: 12px 0 0;
+  color: #166534;
+  background: #dcfce7;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+}

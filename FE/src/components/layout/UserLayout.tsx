@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import '../../assets/styles/layout/layout.css';
 
 interface UserLayoutProps {
   children: React.ReactNode;
@@ -8,9 +9,9 @@ interface UserLayoutProps {
 
 const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f3f4f6' }}>
+    <div className="user-layout">
       <Header />
-      <main style={{ flex: 1 }}>{children}</main>
+      <main className="user-layout-main">{children}</main>
       <Footer />
     </div>
   );

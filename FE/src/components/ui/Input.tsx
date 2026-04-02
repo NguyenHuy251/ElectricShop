@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../assets/styles/components/ui-common.css';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,36 +9,19 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Input: React.FC<InputProps> = ({ label, error, leftIcon, style, ...rest }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <div className="ui-input-wrap">
       {label && (
-        <label style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>{label}</label>
+        <label className="ui-input-label">{label}</label>
       )}
-      <div style={{ position: 'relative' }}>
+      <div className="ui-input-box">
         {leftIcon && (
-          <span
-            style={{
-              position: 'absolute',
-              left: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#9ca3af',
-            }}
-          >
+          <span className="ui-input-icon">
             {leftIcon}
           </span>
         )}
         <input
-          style={{
-            width: '100%',
-            padding: leftIcon ? '10px 12px 10px 36px' : '10px 12px',
-            border: `1.5px solid ${error ? '#ef4444' : '#d1d5db'}`,
-            borderRadius: '8px',
-            fontSize: '14px',
-            outline: 'none',
-            transition: 'border-color 0.2s',
-            boxSizing: 'border-box',
-            ...style,
-          }}
+          className={`ui-input-field ${leftIcon ? 'with-icon' : ''} ${error ? 'error' : ''}`}
+          style={style}
           onFocus={(e) => {
             e.target.style.borderColor = '#2563eb';
           }}
@@ -47,7 +31,7 @@ const Input: React.FC<InputProps> = ({ label, error, leftIcon, style, ...rest })
           {...rest}
         />
       </div>
-      {error && <span style={{ fontSize: '12px', color: '#ef4444' }}>{error}</span>}
+      {error && <span className="ui-input-error">{error}</span>}
     </div>
   );
 };

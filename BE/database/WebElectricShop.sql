@@ -265,7 +265,7 @@ INSERT INTO TaiKhoan (tenDangNhap, matKhau, tenHienThi, email, sdt, diaChi, vaiT
 -- =====================================
 -- KHACH HANG
 -- =====================================
-INSERT INTO KhachHang (idTaiKhoan, maKhachHang, hoTen, ngaySinh, gioiTinh, diemTichLuy, hangThanhVien, ghiChu, trangThai) VALUES
+INSERT INTO KhachHang (idTaiKhoan, maKhachHang, hoTen, ngaySinh, gioiTinh, ghiChu, trangThai) VALUES
 (2, 'KH001', N'Nguyễn Văn A', '1998-05-12', N'Nam', N'Khách mua thường xuyên', 1),
 (3, 'KH002', N'Trần Thị B', '1999-08-20', N'Nữ', NULL, 1),
 (4, 'KH003', N'Lê Văn C', '1995-03-01', N'Nam', N'Ưu tiên tư vấn sản phẩm mới', 1),

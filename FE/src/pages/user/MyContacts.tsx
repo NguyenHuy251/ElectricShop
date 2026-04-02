@@ -5,6 +5,13 @@ import { useAuth } from '../../hooks/useAuth';
 import { getContactsByAccount } from '../../services/contactService';
 import { ContactMessage } from '../../types';
 import { formatDate } from '../../utils/helpers';
+import '../../assets/styles/pages/user-pages.css';
+
+const getStatusClass = (status: ContactMessage['trangThai']) => {
+  if (status === 'new') return 'contacts-status contacts-status--new';
+  if (status === 'contacted') return 'contacts-status contacts-status--contacted';
+  return 'contacts-status contacts-status--closed';
+};
 
 const MyContactsPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -22,92 +29,49 @@ const MyContactsPage: React.FC = () => {
     );
   }, [currentUser]);
 
-  const getStatusTag = (status: ContactMessage['trangThai']) => {
-    if (status === 'new') {
-      return <span style={{ ...statusStyle, background: '#fee2e2', color: '#991b1b' }}>Chờ phản hồi</span>;
-    }
-    if (status === 'contacted') {
-      return <span style={{ ...statusStyle, background: '#dbeafe', color: '#1d4ed8' }}>Đã phản hồi</span>;
-    }
-    return <span style={{ ...statusStyle, background: '#dcfce7', color: '#166534' }}>Đã đóng</span>;
-  };
-
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-        <h1 style={{ margin: 0, fontSize: '26px', color: '#111827' }}>
-          <MessageOutlined style={{ marginRight: 8, color: '#2563eb' }} />Liên hệ của tôi
+    <div className="contacts-page">
+      <div className="contacts-page__header">
+        <h1 className="contacts-page__title">
+          <MessageOutlined className="contacts-page__title-icon" />Liên hệ của tôi
         </h1>
         <button
           onClick={() => navigate('/contact')}
           title="Gửi liên hệ mới"
-          style={{
-            width: '36px',
-            height: '36px',
-            border: 'none',
-            borderRadius: '10px',
-            background: '#2563eb',
-            color: '#fff',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '16px',
-            fontWeight: 700,
-          }}
+          className="contacts-page__add"
         >
           <PlusOutlined />
         </button>
       </div>
-      <p style={{ margin: '8px 0 20px', color: '#64748b' }}>
+      <p className="contacts-page__desc">
         Theo dõi các liên hệ bạn đã gửi và kiểm tra phản hồi từ chủ shop.
       </p>
 
-      <div style={{ display: 'grid', gap: '12px' }}>
+      <div className="contacts-list">
         {contacts.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              background: '#fff',
-              borderRadius: '12px',
-              border: '1px solid #e5e7eb',
-              padding: '14px',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+          <div key={item.id} className="contacts-card">
+            <div className="contacts-card__head">
               <div>
-                <p style={{ margin: 0, fontWeight: 700, color: '#0f172a' }}>{item.tieuDe}</p>
-                <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>Gửi lúc: {formatDate(item.ngayTao)}</p>
+                <p className="contacts-card__title">{item.tieuDe}</p>
+                <p className="contacts-card__date">Gửi lúc: {formatDate(item.ngayTao)}</p>
               </div>
-              <div>{getStatusTag(item.trangThai)}</div>
+              <div className={getStatusClass(item.trangThai)}>{item.trangThai === 'new' ? 'Chờ phản hồi' : item.trangThai === 'contacted' ? 'Đã phản hồi' : 'Đã đóng'}</div>
             </div>
 
-            <div style={{ fontSize: '14px', color: '#334155', lineHeight: 1.6 }}>
+            <div className="contacts-card__content">
               {item.noiDung}
             </div>
 
             {item.phanHoi ? (
-              <div
-                style={{
-                  marginTop: '10px',
-                  background: '#ecfeff',
-                  border: '1px solid #a5f3fc',
-                  borderRadius: '8px',
-                  padding: '10px',
-                }}
-              >
-                <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: '#0e7490' }}>
-                  Phản hồi từ chủ shop
-                </p>
-                <p style={{ margin: '0 0 4px', fontSize: '14px', color: '#164e63', lineHeight: 1.5 }}>
-                  {item.phanHoi}
-                </p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#0e7490' }}>
+              <div className="contacts-card__reply">
+                <p className="contacts-card__reply-title">Phản hồi từ chủ shop</p>
+                <p className="contacts-card__reply-text">{item.phanHoi}</p>
+                <p className="contacts-card__reply-meta">
                   {item.nguoiPhanHoi || 'Admin'}{item.ngayPhanHoi ? ` • ${formatDate(item.ngayPhanHoi)}` : ''}
                 </p>
               </div>
             ) : (
-              <div style={{ marginTop: '10px', fontSize: '13px', color: '#64748b' }}>
+              <div className="contacts-card__empty-reply">
                 Shop chưa phản hồi liên hệ này.
               </div>
             )}
@@ -115,20 +79,13 @@ const MyContactsPage: React.FC = () => {
         ))}
 
         {contacts.length === 0 && (
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '30px 16px', textAlign: 'center', color: '#94a3b8' }}>
+          <div className="contacts-empty">
             Bạn chưa có liên hệ nào. Hãy gửi liên hệ ở trang Liên hệ để bắt đầu.
           </div>
         )}
       </div>
     </div>
   );
-};
-
-const statusStyle: React.CSSProperties = {
-  padding: '4px 10px',
-  borderRadius: '999px',
-  fontWeight: 700,
-  fontSize: '12px',
 };
 
 export default MyContactsPage;

@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { HeartOutlined, InboxOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
-import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
+import { formatCurrency, formatDate, getOrderStatusLabel } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { Order } from '../../types';
+import '../../assets/styles/pages/user-pages.css';
+
+const getOrderStatusClass = (status: Order['status']) => `order-status order-status--${status}`;
 
 const OrderHistoryPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -20,45 +23,37 @@ const OrderHistoryPage: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24 }}><InboxOutlined style={{ marginRight: 8 }} />Đơn hàng của tôi</h1>
+    <div className="orders-page">
+      <h1 className="orders-page__title">
+        <InboxOutlined className="orders-page__title-icon" />Đơn hàng của tôi
+      </h1>
 
       {userOrders.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 16px', background: '#fff', borderRadius: 12 }}>
-          <div style={{ fontSize: 72, marginBottom: 16 }}><InboxOutlined /></div>
-          <h3 style={{ color: '#374151', marginBottom: 8 }}>Bạn chưa có đơn hàng nào</h3>
-          <p style={{ color: '#6b7280', marginBottom: 24 }}>Hãy mua sắm và tận hưởng những ưu đãi tuyệt vời!</p>
-          <Button onClick={() => navigate('/products')}><ShoppingOutlined /> Mua sắm ngay</Button>
+        <div className="orders-empty">
+          <div className="orders-empty__icon">
+            <InboxOutlined />
+          </div>
+          <h3 className="orders-empty__title">Bạn chưa có đơn hàng nào</h3>
+          <p className="orders-empty__text">Hãy mua sắm và tận hưởng những ưu đãi tuyệt vời!</p>
+          <Button onClick={() => navigate('/products')}>
+            <ShoppingOutlined /> Mua sắm ngay
+          </Button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="orders-list">
           {userOrders.map((order) => (
-            <div key={order.id} style={{
-              background: '#fff', borderRadius: 12, overflow: 'hidden',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f3f4f6',
-            }}>
-              {/* Order header */}
-              <div style={{
-                padding: '14px 20px', display: 'flex', alignItems: 'center',
-                justifyContent: 'space-between', borderBottom: '1px solid #f9fafb',
-                background: '#fafafa',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 700, fontSize: 14, color: '#111827' }}>#{order.id}</span>
-                  <span style={{ fontSize: 13, color: '#6b7280' }}>{formatDate(order.createdAt)}</span>
-                  <span style={{
-                    padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600,
-                    background: getOrderStatusColor(order.status) + '22',
-                    color: getOrderStatusColor(order.status),
-                  }}>
-                    {getOrderStatusLabel(order.status)}
-                  </span>
+            <div key={order.id} className="orders-card">
+              <div className="orders-card__header">
+                <div className="orders-card__meta">
+                  <span className="orders-card__id">#{order.id}</span>
+                  <span className="orders-card__date">{formatDate(order.createdAt)}</span>
+                  <span className={getOrderStatusClass(order.status)}>{getOrderStatusLabel(order.status)}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontWeight: 700, fontSize: 15, color: '#2563eb' }}>
-                    {formatCurrency(order.total)}
-                  </span>
-                  <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>Chi tiết</Button>
+                <div className="orders-card__actions">
+                  <span className="orders-card__total">{formatCurrency(order.total)}</span>
+                  <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
+                    Chi tiết
+                  </Button>
                   {order.status === 'pending' && (
                     <Button size="sm" variant="danger" onClick={() => updateOrderStatus(order.id, 'cancelled')}>
                       Hủy
@@ -67,29 +62,23 @@ const OrderHistoryPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Order items preview */}
-              <div style={{ padding: '14px 20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div className="orders-card__preview">
                 {order.items.slice(0, 3).map((item) => (
-                  <div key={item.productId} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div key={item.productId} className="orders-card__item">
                     <img
                       src={item.image}
                       alt={item.productName}
-                      style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6 }}
+                      className="orders-card__thumb"
                       onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/e5e7eb/9ca3af?text=img'; }}
                     />
                     <div>
-                      <p style={{ margin: 0, fontSize: 12, fontWeight: 500, color: '#374151', maxWidth: 180,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.productName}
-                      </p>
-                      <p style={{ margin: 0, fontSize: 11, color: '#9ca3af' }}>
-                        {formatCurrency(item.price)} × {item.quantity}
-                      </p>
+                      <p className="orders-card__item-name">{item.productName}</p>
+                      <p className="orders-card__item-qty">{formatCurrency(item.price)} × {item.quantity}</p>
                     </div>
                   </div>
                 ))}
                 {order.items.length > 3 && (
-                  <span style={{ fontSize: 12, color: '#9ca3af', alignSelf: 'center' }}>
+                  <span className="orders-card__item-qty orders-card__more">
                     +{order.items.length - 3} sản phẩm khác
                   </span>
                 )}
@@ -99,7 +88,6 @@ const OrderHistoryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Order detail modal */}
       <Modal
         isOpen={!!selectedOrder}
         onClose={() => setSelectedOrder(null)}
@@ -108,65 +96,58 @@ const OrderHistoryPage: React.FC = () => {
       >
         {selectedOrder && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20,
-              padding: 16, background: '#f9fafb', borderRadius: 8 }}>
+            <div className="order-detail__summary-grid">
               <div>
-                <p style={infoLabel}>Ngày đặt</p>
-                <p style={infoValue}>{formatDate(selectedOrder.createdAt)}</p>
+                <p className="order-detail__label">Ngày đặt</p>
+                <p className="order-detail__value">{formatDate(selectedOrder.createdAt)}</p>
               </div>
               <div>
-                <p style={infoLabel}>Trạng thái</p>
-                <span style={{
-                  padding: '3px 10px', borderRadius: 99, fontSize: 13, fontWeight: 600,
-                  background: getOrderStatusColor(selectedOrder.status) + '22',
-                  color: getOrderStatusColor(selectedOrder.status),
-                }}>
+                <p className="order-detail__label">Trạng thái</p>
+                <span className={`${getOrderStatusClass(selectedOrder.status)} order-detail__status`}>
                   {getOrderStatusLabel(selectedOrder.status)}
                 </span>
               </div>
               <div>
-                <p style={infoLabel}>Địa chỉ giao hàng</p>
-                <p style={infoValue}>{selectedOrder.address}</p>
+                <p className="order-detail__label">Địa chỉ giao hàng</p>
+                <p className="order-detail__value">{selectedOrder.address}</p>
               </div>
               <div>
-                <p style={infoLabel}>Phương thức thanh toán</p>
-                <p style={infoValue}>COD</p>
+                <p className="order-detail__label">Phương thức thanh toán</p>
+                <p className="order-detail__value">COD</p>
               </div>
             </div>
 
-            <h4 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600 }}>Sản phẩm đã đặt</h4>
-            {selectedOrder.items.map((item) => (
-              <div key={item.productId} style={{
-                display: 'flex', gap: 12, alignItems: 'center',
-                padding: '10px 0', borderBottom: '1px solid #f3f4f6',
-              }}>
-                <img src={item.image} alt={item.productName}
-                  style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6 }}
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/56x56/e5e7eb/9ca3af?text=img'; }}
-                />
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontWeight: 500, fontSize: 14 }}>{item.productName}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: 13, color: '#6b7280' }}>
-                    {formatCurrency(item.price)} × {item.quantity}
-                  </p>
+            <h4 className="order-detail__section-title">Sản phẩm đã đặt</h4>
+            <div className="order-detail__items">
+              {selectedOrder.items.map((item) => (
+                <div key={item.productId} className="order-detail__item">
+                  <img
+                    src={item.image}
+                    alt={item.productName}
+                    className="order-detail__thumb"
+                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/56x56/e5e7eb/9ca3af?text=img'; }}
+                  />
+                  <div className="order-detail__item-body">
+                    <p className="order-detail__item-name">{item.productName}</p>
+                    <p className="order-detail__item-meta">
+                      {formatCurrency(item.price)} × {item.quantity}
+                    </p>
+                  </div>
+                  <span className="order-detail__item-total">
+                    {formatCurrency(item.price * item.quantity)}
+                  </span>
                 </div>
-                <span style={{ fontWeight: 600, color: '#2563eb' }}>
-                  {formatCurrency(item.price * item.quantity)}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
 
-            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '2px solid #e5e7eb',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700, fontSize: 16 }}>Tổng cộng</span>
-              <span style={{ fontWeight: 700, fontSize: 20, color: '#2563eb' }}>
-                {formatCurrency(selectedOrder.total)}
-              </span>
+            <div className="order-detail__total-row">
+              <span className="order-detail__total-label">Tổng cộng</span>
+              <span className="order-detail__total-value">{formatCurrency(selectedOrder.total)}</span>
             </div>
 
             {selectedOrder.note && (
-              <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', borderRadius: 8, fontSize: 13, color: '#92400e' }}>
-                <HeartOutlined style={{ marginRight: 6 }} />Ghi chú: {selectedOrder.note}
+              <div className="order-detail__note">
+                <HeartOutlined className="order-detail__note-icon" />Ghi chú: {selectedOrder.note}
               </div>
             )}
           </div>
@@ -175,8 +156,5 @@ const OrderHistoryPage: React.FC = () => {
     </div>
   );
 };
-
-const infoLabel: React.CSSProperties = { margin: '0 0 2px', fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', fontWeight: 600 };
-const infoValue: React.CSSProperties = { margin: 0, fontSize: 14, fontWeight: 500, color: '#111827' };
 
 export default OrderHistoryPage;

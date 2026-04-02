@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../assets/styles/components/ui-common.css';
 
 interface PaginationProps {
   page: number;
@@ -21,19 +22,19 @@ const Pagination: React.FC<PaginationProps> = ({ page, total, pageSize, onChange
   }
 
   return (
-    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="ui-pagination">
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
-        style={btnStyle(false)}
+        className="ui-pagination-btn"
       >
         ‹
       </button>
       {pages.map((p, i) =>
         p === '...' ? (
-          <span key={i} style={{ padding: '0 4px', color: '#6b7280' }}>...</span>
+          <span key={i} className="ui-pagination-dot">...</span>
         ) : (
-          <button key={p} onClick={() => onChange(p as number)} style={btnStyle(p === page)}>
+          <button key={p} onClick={() => onChange(p as number)} className={`ui-pagination-btn ${p === page ? 'active' : ''}`}>
             {p}
           </button>
         )
@@ -41,24 +42,12 @@ const Pagination: React.FC<PaginationProps> = ({ page, total, pageSize, onChange
       <button
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
-        style={btnStyle(false)}
+        className="ui-pagination-btn"
       >
         ›
       </button>
     </div>
   );
 };
-
-const btnStyle = (active: boolean): React.CSSProperties => ({
-  width: '36px',
-  height: '36px',
-  borderRadius: '8px',
-  border: active ? 'none' : '1px solid #e5e7eb',
-  background: active ? '#2563eb' : '#fff',
-  color: active ? '#fff' : '#374151',
-  fontWeight: active ? 700 : 400,
-  cursor: 'pointer',
-  fontSize: '14px',
-});
 
 export default Pagination;

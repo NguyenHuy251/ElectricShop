@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
+import '../../assets/styles/pages/admin-pages.css';
 
 export interface Supplier {
   id: number;
@@ -138,136 +139,79 @@ const AdminSuppliersPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#111827' }}>
+    <div className="admin-import-page">
+      <div className="admin-page-header">
+        <h1 className="admin-import-header-title">
           Quản lý Nhà cung cấp
         </h1>
         {!isReadOnly && (
-          <button
-            onClick={() => handleOpenModal()}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              background: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
+          <button onClick={() => handleOpenModal()} className="admin-import-create-btn">
             <PlusOutlined /> Thêm nhà cung cấp
           </button>
         )}
       </div>
 
-      <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-import-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #e5e7eb', background: '#f9fafb' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+            <tr className="admin-import-head-row">
+              <th className="admin-import-th">
                 ID
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Tên nhà cung cấp
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Điện thoại
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Email
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Địa chỉ
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th admin-import-th-center">
                 Hành động
               </th>
             </tr>
           </thead>
           <tbody>
             {suppliers.map((supplier) => (
-              <tr key={supplier.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', color: '#111827', fontWeight: 600 }}>#{supplier.id}</td>
-                <td style={{ padding: '16px', color: '#111827', fontWeight: 600 }}>
+              <tr key={supplier.id} className="admin-import-row">
+                <td className="admin-import-cell admin-import-cell-strong">#{supplier.id}</td>
+                <td className="admin-import-cell admin-import-cell-strong">
                   {supplier.tenNhaCungCap}
                 </td>
-                <td style={{ padding: '16px', color: '#475569' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <PhoneOutlined style={{ color: '#2563eb' }} />
+                <td className="admin-import-cell admin-import-cell-muted">
+                  <div className="admin-supplier-contact">
+                    <PhoneOutlined className="admin-supplier-icon phone" />
                     {supplier.sdt}
                   </div>
                 </td>
-                <td style={{ padding: '16px', color: '#475569' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MailOutlined style={{ color: '#f59e0b' }} />
+                <td className="admin-import-cell admin-import-cell-muted">
+                  <div className="admin-supplier-contact">
+                    <MailOutlined className="admin-supplier-icon mail" />
                     {supplier.email}
                   </div>
                 </td>
-                <td style={{ padding: '16px', color: '#475569' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <EnvironmentOutlined style={{ color: '#ef4444' }} />
+                <td className="admin-import-cell admin-import-cell-muted">
+                  <div className="admin-supplier-contact">
+                    <EnvironmentOutlined className="admin-supplier-icon address" />
                     {supplier.diaChi}
                   </div>
                 </td>
-                <td
-                  style={{
-                    padding: '16px',
-                    textAlign: 'center',
-                    display: 'flex',
-                    gap: '8px',
-                    justifyContent: 'center',
-                  }}
-                >
+                <td className="admin-import-cell admin-import-cell-center">
                   {!isReadOnly && (
-                    <>
-                      <button
-                        onClick={() => handleOpenModal(supplier)}
-                        style={{
-                          padding: '6px 12px',
-                          background: '#dbeafe',
-                          color: '#0369a1',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontWeight: 600,
-                        }}
-                      >
+                    <div className="admin-import-actions">
+                      <button onClick={() => handleOpenModal(supplier)} className="admin-import-action-btn view">
                         <EditOutlined /> Sửa
                       </button>
-                      <button
-                        onClick={() => handleDelete(supplier.id)}
-                        style={{
-                          padding: '6px 12px',
-                          background: '#fee2e2',
-                          color: '#dc2626',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontWeight: 600,
-                        }}
-                      >
+                      <button onClick={() => handleDelete(supplier.id)} className="admin-import-action-btn delete">
                         <DeleteOutlined /> Xóa
                       </button>
-                    </>
+                    </div>
                   )}
-                  {isReadOnly && <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ xem</span>}
+                  {isReadOnly && <span className="admin-readonly-text">Chỉ xem</span>}
                 </td>
               </tr>
             ))}
@@ -276,77 +220,56 @@ const AdminSuppliersPage: React.FC = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div style={{ padding: '24px' }}>
-          <h2 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: 700, color: '#111827' }}>
+        <div className="admin-import-modal-body">
+          <h2 className="admin-import-modal-title">
             {editingSupplier ? 'Chỉnh sửa nhà cung cấp' : 'Thêm nhà cung cấp mới'}
           </h2>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                Tên nhà cung cấp <span style={{ color: '#dc2626' }}>*</span>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
+                Tên nhà cung cấp <span className="admin-import-label-required">*</span>
               </label>
               <input
                 type="text"
                 name="tenNhaCungCap"
                 value={formData.tenNhaCungCap}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Nhập tên nhà cung cấp"
               />
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                Điện thoại <span style={{ color: '#dc2626' }}>*</span>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
+                Điện thoại <span className="admin-import-label-required">*</span>
               </label>
               <input
                 type="tel"
                 name="sdt"
                 value={formData.sdt}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Nhập số điện thoại"
               />
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                Email <span style={{ color: '#dc2626' }}>*</span>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
+                Email <span className="admin-import-label-required">*</span>
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Nhập email"
               />
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
                 Địa chỉ
               </label>
               <input
@@ -354,46 +277,16 @@ const AdminSuppliersPage: React.FC = () => {
                 name="diaChi"
                 value={formData.diaChi}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Nhập địa chỉ"
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                style={{
-                  padding: '10px 20px',
-                  background: '#e5e7eb',
-                  color: '#111827',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+            <div className="admin-import-form-actions">
+              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">
                 Hủy
               </button>
-              <button
-                type="submit"
-                style={{
-                  padding: '10px 20px',
-                  background: '#2563eb',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+              <button type="submit" className="admin-import-btn primary">
                 {editingSupplier ? 'Cập nhật' : 'Thêm mới'}
               </button>
             </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { formatDate, formatCurrency } from '../../utils/helpers';
+import '../../assets/styles/pages/admin-pages.css';
 
 export interface Employee {
   id: number;
@@ -201,141 +202,80 @@ const AdminEmployeesPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#111827' }}>
+    <div className="admin-import-page">
+      <div className="admin-page-header">
+        <h1 className="admin-import-header-title">
           Quản lý Nhân viên
         </h1>
-        <button
-          onClick={() => handleOpenModal()}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            background: '#2563eb',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
-        >
+        <button onClick={() => handleOpenModal()} className="admin-import-create-btn">
           <PlusOutlined /> Thêm nhân viên
         </button>
       </div>
 
-      <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-import-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #e5e7eb', background: '#f9fafb' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+            <tr className="admin-import-head-row">
+              <th className="admin-import-th">
                 Mã NV
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Họ tên
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Chức vụ
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Bộ phận
               </th>
-              <th style={{ padding: '16px', textAlign: 'right', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th admin-import-th-right">
                 Lương
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Trạng thái
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th admin-import-th-center">
                 Hành động
               </th>
             </tr>
           </thead>
           <tbody>
             {employees.map((employee) => (
-              <tr key={employee.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '16px', color: '#111827', fontWeight: 600 }}>
+              <tr key={employee.id} className="admin-import-row">
+                <td className="admin-import-cell admin-import-cell-strong">
                   {employee.maNhanVien}
                 </td>
-                <td style={{ padding: '16px', color: '#111827' }}>
+                <td className="admin-import-cell">
                   {employee.hoTen}
                 </td>
-                <td style={{ padding: '16px', color: '#475569' }}>
+                <td className="admin-import-cell admin-import-cell-muted">
                   {employee.chucVu}
                 </td>
-                <td style={{ padding: '16px', color: '#475569' }}>
+                <td className="admin-import-cell admin-import-cell-muted">
                   {employee.boPhan}
                 </td>
-                <td style={{ padding: '16px', color: '#111827', fontWeight: 600, textAlign: 'right' }}>
+                <td className="admin-import-cell admin-import-cell-right admin-import-cell-strong">
                   {formatCurrency(employee.luongCoBan)}
                 </td>
-                <td style={{ padding: '16px' }}>
+                <td className="admin-import-cell">
                   <select
                     value={employee.trangThai ? '1' : '0'}
                     onChange={(e) => handleStatusChange(employee.id, e.target.value === '1')}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '4px',
-                      border: '1px solid #d1d5db',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                    }}
+                    className="admin-employee-status-select"
                   >
                     <option value="1">Hoạt động</option>
                     <option value="0">Tạm dừng</option>
                   </select>
                 </td>
-                <td
-                  style={{
-                    padding: '16px',
-                    textAlign: 'center',
-                    display: 'flex',
-                    gap: '8px',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <button
-                    onClick={() => handleOpenModal(employee)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#dbeafe',
-                      color: '#0369a1',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <EditOutlined /> Sửa
-                  </button>
-                  <button
-                    onClick={() => handleDelete(employee.id)}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#fee2e2',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    <DeleteOutlined /> Xóa
-                  </button>
+                <td className="admin-import-cell admin-import-cell-center">
+                  <div className="admin-import-actions">
+                    <button onClick={() => handleOpenModal(employee)} className="admin-import-action-btn view">
+                      <EditOutlined /> Sửa
+                    </button>
+                    <button onClick={() => handleDelete(employee.id)} className="admin-import-action-btn delete">
+                      <DeleteOutlined /> Xóa
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -344,57 +284,43 @@ const AdminEmployeesPage: React.FC = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div style={{ padding: '24px' }}>
-          <h2 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: 700, color: '#111827' }}>
+        <div className="admin-import-modal-body">
+          <h2 className="admin-import-modal-title">
             {editingEmployee ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
           </h2>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                Mã nhân viên <span style={{ color: '#dc2626' }}>*</span>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
+                Mã nhân viên <span className="admin-import-label-required">*</span>
               </label>
               <input
                 type="text"
                 name="maNhanVien"
                 value={formData.maNhanVien}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Ví dụ: NV001"
               />
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                Họ tên <span style={{ color: '#dc2626' }}>*</span>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
+                Họ tên <span className="admin-import-label-required">*</span>
               </label>
               <input
                 type="text"
                 name="hoTen"
                 value={formData.hoTen}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Nhập họ tên"
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+            <div className="admin-employee-grid">
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+                <label className="admin-import-label">
                   Điện thoại
                 </label>
                 <input
@@ -402,41 +328,27 @@ const AdminEmployeesPage: React.FC = () => {
                   name="sdt"
                   value={formData.sdt}
                   onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className="admin-import-input"
                   placeholder="0901234567"
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                  Email <span style={{ color: '#dc2626' }}>*</span>
+                <label className="admin-import-label">
+                  Email <span className="admin-import-label-required">*</span>
                 </label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className="admin-import-input"
                   placeholder="email@gmail.com"
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
                 Địa chỉ
               </label>
               <input
@@ -444,64 +356,43 @@ const AdminEmployeesPage: React.FC = () => {
                 name="diaChi"
                 value={formData.diaChi}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className="admin-import-input"
                 placeholder="Nhập địa chỉ"
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+            <div className="admin-employee-grid">
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                  Chức vụ <span style={{ color: '#dc2626' }}>*</span>
+                <label className="admin-import-label">
+                  Chức vụ <span className="admin-import-label-required">*</span>
                 </label>
                 <input
                   type="text"
                   name="chucVu"
                   value={formData.chucVu}
                   onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className="admin-import-input"
                   placeholder="Ví dụ: Nhân viên bán hàng"
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                  Bộ phận <span style={{ color: '#dc2626' }}>*</span>
+                <label className="admin-import-label">
+                  Bộ phận <span className="admin-import-label-required">*</span>
                 </label>
                 <input
                   type="text"
                   name="boPhan"
                   value={formData.boPhan}
                   onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className="admin-import-input"
                   placeholder="Ví dụ: Bán hàng"
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+            <div className="admin-employee-grid">
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+                <label className="admin-import-label">
                   Ngày vào làm
                 </label>
                 <input
@@ -509,18 +400,11 @@ const AdminEmployeesPage: React.FC = () => {
                   name="ngayVaoLam"
                   value={formData.ngayVaoLam}
                   onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className="admin-import-input"
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+                <label className="admin-import-label">
                   Lương cơ bản
                 </label>
                 <input
@@ -528,61 +412,31 @@ const AdminEmployeesPage: React.FC = () => {
                   name="luongCoBan"
                   value={formData.luongCoBan}
                   onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className="admin-import-input"
                   placeholder="0"
                   min="0"
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="admin-employee-checkbox-row">
               <input
                 type="checkbox"
                 name="trangThai"
                 checked={formData.trangThai}
                 onChange={handleInputChange}
-                style={{ cursor: 'pointer' }}
+                className="admin-employee-checkbox"
               />
-              <label style={{ fontWeight: 600, color: '#111827', cursor: 'pointer' }}>
+              <label className="admin-employee-checkbox-label">
                 Kích hoạt nhân viên
               </label>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                style={{
-                  padding: '10px 20px',
-                  background: '#e5e7eb',
-                  color: '#111827',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+            <div className="admin-import-form-actions">
+              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">
                 Hủy
               </button>
-              <button
-                type="submit"
-                style={{
-                  padding: '10px 20px',
-                  background: '#2563eb',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+              <button type="submit" className="admin-import-btn primary">
                 {editingEmployee ? 'Cập nhật' : 'Thêm mới'}
               </button>
             </div>

@@ -20,8 +20,8 @@ import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ui/ProductCard';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import { getReplyByReviewId, upsertReply } from '../../services/reviewReplyService';
+import '../../assets/styles/pages/user-pages.css';
 
-// Mock data for reviews
 interface Review {
   id: number;
   tenKhachHang: string;
@@ -56,19 +56,20 @@ const ProductDetailPage: React.FC = () => {
   const { addToCart, isInCart } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'reviews'>('desc');
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
-  const [refreshToken, setRefreshToken] = useState(0);
 
   const product = getProductById(Number(id));
   const reviews = product ? (mockReviewsByProduct[product.id] || []) : [];
   const isAdmin = currentUser?.role === 'admin';
+
   if (!product) {
     return (
-      <div style={{ textAlign: 'center', padding: '80px 16px' }}>
-        <div style={{ fontSize: '64px', marginBottom: '16px' }}><AlertOutlined /></div>
+      <div className="product-not-found">
+        <div className="product-not-found__icon"><AlertOutlined /></div>
         <h2>Không tìm thấy sản phẩm</h2>
         <Button onClick={() => navigate('/products')}>← Quay lại</Button>
       </div>
@@ -83,131 +84,84 @@ const ProductDetailPage: React.FC = () => {
     .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
     .slice(0, 4);
 
+  const stockClass = product.stock > 5
+    ? 'product-detail-stock product-detail-stock--ok'
+    : product.stock > 0
+      ? 'product-detail-stock product-detail-stock--low'
+      : 'product-detail-stock product-detail-stock--out';
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px' }}>
-      {/* Breadcrumb */}
-      <nav style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px' }}>
-        <span onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>Trang chủ</span>
+    <div className="product-detail-page">
+      <nav className="product-detail-breadcrumb">
+        <span className="product-detail-breadcrumb__link" onClick={() => navigate('/')}>Trang chủ</span>
         {' › '}
-        <span onClick={() => navigate('/products')} style={{ cursor: 'pointer' }}>Sản phẩm</span>
+        <span className="product-detail-breadcrumb__link" onClick={() => navigate('/products')}>Sản phẩm</span>
         {' › '}
         <span>{category?.name}</span>
         {' › '}
-        <span style={{ color: '#111827' }}>{product.name}</span>
+        <span className="product-detail-breadcrumb__current">{product.name}</span>
       </nav>
 
-      {/* Main */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '32px',
-          background: '#fff',
-          borderRadius: '16px',
-          padding: '24px',
-          marginBottom: '24px',
-        }}
-      >
-        {/* Image */}
-        <div style={{ position: 'relative' }}>
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            style={{ width: '100%', borderRadius: '12px', objectFit: 'cover', aspectRatio: '1/1' }}
-          />
-          {discount > 0 && (
-            <span
-              style={{
-                position: 'absolute', top: '12px', left: '12px',
-                background: '#ef4444', color: '#fff',
-                padding: '4px 12px', borderRadius: '6px',
-                fontSize: '14px', fontWeight: 700,
-              }}
-            >
-              -{discount}%
-            </span>
-          )}
+      <div className="product-detail-main">
+        <div className="product-detail-image-wrap">
+          <img src={product.images[0]} alt={product.name} className="product-detail-image" />
+          {discount > 0 && <span className="product-detail-discount">-{discount}%</span>}
         </div>
 
-        {/* Info */}
         <div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
-            {category && getCategoryIcon(category, { marginRight: 6 })} {category?.name} • {product.brand}
+          <div className="product-detail-meta">
+            {category && getCategoryIcon(category)} {category?.name} • {product.brand}
           </div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#111827', margin: '0 0 12px', lineHeight: 1.3 }}>
-            {product.name}
-          </h1>
 
-          {/* Rating */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <span style={{ color: '#f59e0b', fontSize: '16px' }}>
+          <h1 className="product-detail-title">{product.name}</h1>
+
+          <div className="product-detail-rating">
+            <span className="product-detail-rating__stars">
               {'★'.repeat(Math.round(product.rating))}
               {'☆'.repeat(5 - Math.round(product.rating))}
             </span>
-            <span style={{ color: '#6b7280', fontSize: '13px' }}>
+            <span className="product-detail-rating__text">
               {product.rating} ({product.reviewCount} đánh giá)
             </span>
           </div>
 
-          {/* Price */}
-          <div
-            style={{
-              background: '#eff6ff', borderRadius: '12px',
-              padding: '16px', marginBottom: '20px',
-            }}
-          >
-            <div style={{ fontSize: '32px', fontWeight: 800, color: '#2563eb' }}>
-              {formatCurrency(product.price)}
-            </div>
+          <div className="product-detail-price-box">
+            <div className="product-detail-price">{formatCurrency(product.price)}</div>
             {product.originalPrice && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                <span style={{ textDecoration: 'line-through', color: '#9ca3af', fontSize: '16px' }}>
-                  {formatCurrency(product.originalPrice)}
-                </span>
-                <span
-                  style={{
-                    background: '#ef4444', color: '#fff',
-                    padding: '2px 8px', borderRadius: '4px', fontSize: '13px', fontWeight: 700,
-                  }}
-                >
+              <div className="product-detail-price-row">
+                <span className="product-detail-price-old">{formatCurrency(product.originalPrice)}</span>
+                <span className="product-detail-price-save">
                   Tiết kiệm {formatCurrency(product.originalPrice - product.price)}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Stock */}
-          <div
-            style={{
-              fontSize: '13px', marginBottom: '20px',
-              color: product.stock > 5 ? '#10b981' : product.stock > 0 ? '#f59e0b' : '#ef4444',
-            }}
-          >
+          <div className={stockClass}>
             {product.stock > 5
               ? `Còn hàng (${product.stock} sản phẩm)`
               : product.stock > 0
-              ? `Chỉ còn ${product.stock} sản phẩm`
-              : 'Hết hàng'}
-            <span style={{ marginLeft: 8 }}>
-              {product.stock > 5 ? <CheckCircleOutlined /> : product.stock > 0 ? <AlertOutlined /> : <CloseCircleOutlined />}
-            </span>
+                ? `Chỉ còn ${product.stock} sản phẩm`
+                : 'Hết hàng'}
+            {product.stock > 5 ? <CheckCircleOutlined /> : product.stock > 0 ? <AlertOutlined /> : <CloseCircleOutlined />}
           </div>
 
-          {/* Quantity */}
           {product.stock > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <span style={{ fontSize: '14px', color: '#374151', fontWeight: 600 }}>Số lượng:</span>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
+            <div className="product-detail-qty">
+              <span className="product-detail-qty__label">Số lượng:</span>
+              <div className="product-detail-qty__control">
                 <button
+                  type="button"
+                  className="product-detail-qty__btn"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  style={{ padding: '8px 14px', background: '#f9fafb', border: 'none', cursor: 'pointer', fontSize: '18px' }}
                 >
                   -
                 </button>
-                <span style={{ padding: '8px 16px', fontSize: '15px', fontWeight: 600 }}>{quantity}</span>
+                <span className="product-detail-qty__value">{quantity}</span>
                 <button
+                  type="button"
+                  className="product-detail-qty__btn"
                   onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                  style={{ padding: '8px 14px', background: '#f9fafb', border: 'none', cursor: 'pointer', fontSize: '18px' }}
                 >
                   +
                 </button>
@@ -215,36 +169,39 @@ const ProductDetailPage: React.FC = () => {
             </div>
           )}
 
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="product-detail-actions">
             <Button
+              className="product-detail-actions__cart"
               variant={isInCart(product.id) ? 'secondary' : 'primary'}
               size="lg"
               onClick={() => addToCart(product, quantity)}
               disabled={product.stock === 0}
-              style={{ flex: 1 }}
             >
-              {isInCart(product.id) ? <><CheckCircleOutlined /> Đã thêm vào giỏ</> : <><ShoppingCartOutlined /> Thêm vào giỏ hàng</>}
+              {isInCart(product.id)
+                ? <><CheckCircleOutlined /> Đã thêm vào giỏ</>
+                : <><ShoppingCartOutlined /> Thêm vào giỏ hàng</>}
             </Button>
             <Button
               variant="danger"
               size="lg"
-              onClick={() => { addToCart(product, quantity); navigate('/cart'); }}
+              onClick={() => {
+                addToCart(product, quantity);
+                navigate('/cart');
+              }}
               disabled={product.stock === 0}
             >
               Mua ngay
             </Button>
           </div>
 
-          {/* Features */}
-          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="product-detail-features">
             {[
               { key: 'ship', icon: <TruckOutlined />, text: 'Miễn phí vận chuyển toàn quốc' },
               { key: 'warranty', icon: <SafetyCertificateOutlined />, text: 'Bảo hành chính hãng 12 tháng' },
               { key: 'return', icon: <RollbackOutlined />, text: 'Đổi trả trong 30 ngày' },
               { key: 'cod', icon: <CreditCardOutlined />, text: 'Thanh toán khi nhận hàng' },
             ].map((benefit) => (
-              <div key={benefit.key} style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div key={benefit.key} className="product-detail-feature">
                 {benefit.icon} {benefit.text}
               </div>
             ))}
@@ -252,194 +209,130 @@ const ProductDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '20px' }}>
+      <div className="product-detail-tabs">
+        <div className="product-detail-tab-head">
           {(['desc', 'specs', 'reviews'] as const).map((tab) => (
             <button
               key={tab}
+              type="button"
+              className={activeTab === tab ? 'product-detail-tab-btn product-detail-tab-btn--active' : 'product-detail-tab-btn'}
               onClick={() => setActiveTab(tab)}
-              style={{
-                padding: '10px 20px', border: 'none', cursor: 'pointer',
-                fontSize: '14px', fontWeight: 600,
-                background: 'none',
-                color: activeTab === tab ? '#2563eb' : '#6b7280',
-                borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent',
-                marginBottom: '-2px',
-              }}
             >
               {tab === 'desc' ? 'Mô tả sản phẩm' : tab === 'specs' ? 'Thông số kỹ thuật' : `Đánh giá (${reviews.length})`}
             </button>
           ))}
         </div>
 
-        {activeTab === 'desc' ? (
-          <p style={{ fontSize: '15px', lineHeight: 1.7, color: '#374151', margin: 0 }}>
-            {product.description}
-          </p>
-        ) : activeTab === 'specs' ? (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        {activeTab === 'desc' && <p className="product-detail-desc">{product.description}</p>}
+
+        {activeTab === 'specs' && (
+          <table className="product-detail-specs">
             <tbody>
               {Object.entries(product.specs).map(([key, value]) => (
-                <tr key={key} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '10px 16px', fontSize: '14px', fontWeight: 600, color: '#374151', width: '200px', background: '#f9fafb' }}>{key}</td>
-                  <td style={{ padding: '10px 16px', fontSize: '14px', color: '#6b7280' }}>{value}</td>
+                <tr key={key}>
+                  <td className="product-detail-specs__key">{key}</td>
+                  <td className="product-detail-specs__value">{value}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        ) : (
+        )}
+
+        {activeTab === 'reviews' && (
           <div>
             {reviews.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    style={{
-                      padding: '16px',
-                      background: '#f9fafb',
-                      borderRadius: '8px',
-                      borderLeft: '4px solid #2563eb',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-                      <span style={{ fontWeight: 600, color: '#111827' }}>{review.tenKhachHang}</span>
-                      <span style={{ fontSize: '13px', color: '#94a3b8' }}>
-                        {formatDate(review.ngayDanhGia)}
-                      </span>
-                    </div>
-                    <div style={{ marginBottom: '8px', display: 'flex', gap: '2px' }}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <StarOutlined
-                          key={i}
-                          style={{
-                            color: i < review.soSao ? '#f59e0b' : '#d1d5db',
-                            fontSize: '14px',
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <p style={{ margin: 0, color: '#374151', fontSize: '14px', lineHeight: 1.5 }}>
-                      {review.noiDung}
-                    </p>
-
-                    {getReplyByReviewId(review.id) && (
-                      <div
-                        style={{
-                          marginTop: '12px',
-                          padding: '10px 12px',
-                          background: '#ecfeff',
-                          borderRadius: '6px',
-                          border: '1px solid #a5f3fc',
-                        }}
-                      >
-                        <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#0e7490', fontWeight: 700 }}>
-                          Phản hồi của người bán
-                        </p>
-                        <p style={{ margin: 0, color: '#164e63', fontSize: '14px', lineHeight: 1.5 }}>
-                          {getReplyByReviewId(review.id)?.content}
-                        </p>
-                        <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#0e7490' }}>
-                          {getReplyByReviewId(review.id)?.repliedBy} • {formatDate(getReplyByReviewId(review.id)?.repliedAt || '')}
-                        </p>
+              <div className="product-detail-reviews">
+                {reviews.map((review) => {
+                  const reply = getReplyByReviewId(review.id);
+                  return (
+                    <div key={review.id} className="product-detail-review">
+                      <div className="product-detail-review__head">
+                        <span className="product-detail-review__name">{review.tenKhachHang}</span>
+                        <span className="product-detail-review__date">{formatDate(review.ngayDanhGia)}</span>
                       </div>
-                    )}
 
-                    {isAdmin && (
-                      <div style={{ marginTop: '10px' }}>
-                        <button
-                          onClick={() => {
-                            setReplyTargetId(review.id);
-                            setReplyText(getReplyByReviewId(review.id)?.content || '');
-                          }}
-                          style={{
-                            padding: '6px 10px',
-                            background: '#e0f2fe',
-                            color: '#075985',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            fontSize: '13px',
-                          }}
-                        >
-                          Phản hồi
-                        </button>
+                      <div className="product-detail-review__stars">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <StarOutlined
+                            key={idx}
+                            className={idx < review.soSao ? 'product-detail-review__star product-detail-review__star--on' : 'product-detail-review__star'}
+                          />
+                        ))}
+                      </div>
 
-                        {replyTargetId === review.id && (
-                          <div style={{ marginTop: '10px' }}>
-                            <textarea
-                              value={replyText}
-                              onChange={(e) => setReplyText(e.target.value)}
-                              rows={3}
-                              placeholder="Nhập phản hồi của người bán"
-                              style={{
-                                width: '100%',
-                                boxSizing: 'border-box',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '6px',
-                                padding: '8px 10px',
-                                fontSize: '14px',
-                                fontFamily: 'inherit',
-                              }}
-                            />
-                            <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
-                              <button
-                                onClick={() => {
-                                  if (!replyText.trim()) {
-                                    return;
-                                  }
-                                  upsertReply({
-                                    reviewId: review.id,
-                                    content: replyText.trim(),
-                                    repliedBy: currentUser?.name || 'Admin',
-                                    repliedAt: new Date().toISOString(),
-                                  });
-                                  setReplyTargetId(null);
-                                  setReplyText('');
-                                  setRefreshToken((prev) => prev + 1);
-                                }}
-                                style={{
-                                  padding: '6px 12px',
-                                  background: '#2563eb',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  fontWeight: 600,
-                                  fontSize: '13px',
-                                }}
-                              >
-                                Gửi phản hồi
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setReplyTargetId(null);
-                                  setReplyText('');
-                                }}
-                                style={{
-                                  padding: '6px 12px',
-                                  background: '#e2e8f0',
-                                  color: '#334155',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  fontWeight: 600,
-                                  fontSize: '13px',
-                                }}
-                              >
-                                Hủy
-                              </button>
+                      <p className="product-detail-review__content">{review.noiDung}</p>
+
+                      {reply && (
+                        <div className="product-detail-reply">
+                          <p className="product-detail-reply__title">Phản hồi của người bán</p>
+                          <p className="product-detail-reply__text">{reply.content}</p>
+                          <p className="product-detail-reply__meta">
+                            {reply.repliedBy} • {formatDate(reply.repliedAt || '')}
+                          </p>
+                        </div>
+                      )}
+
+                      {isAdmin && (
+                        <div className="product-detail-admin-reply">
+                          <button
+                            type="button"
+                            className="product-detail-admin-reply__btn"
+                            onClick={() => {
+                              setReplyTargetId(review.id);
+                              setReplyText(reply?.content || '');
+                            }}
+                          >
+                            Phản hồi
+                          </button>
+
+                          {replyTargetId === review.id && (
+                            <div className="product-detail-admin-reply__box">
+                              <textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                rows={3}
+                                placeholder="Nhập phản hồi của người bán"
+                                className="product-detail-admin-reply__textarea"
+                              />
+                              <div className="product-detail-admin-reply__actions">
+                                <button
+                                  type="button"
+                                  className="product-detail-admin-reply__submit"
+                                  onClick={() => {
+                                    if (!replyText.trim()) return;
+                                    upsertReply({
+                                      reviewId: review.id,
+                                      content: replyText.trim(),
+                                      repliedBy: currentUser?.name || 'Admin',
+                                      repliedAt: new Date().toISOString(),
+                                    });
+                                    setReplyTargetId(null);
+                                    setReplyText('');
+                                  }}
+                                >
+                                  Gửi phản hồi
+                                </button>
+                                <button
+                                  type="button"
+                                  className="product-detail-admin-reply__cancel"
+                                  onClick={() => {
+                                    setReplyTargetId(null);
+                                    setReplyText('');
+                                  }}
+                                >
+                                  Hủy
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
-              <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px' }}>
+              <p className="product-detail-reviews-empty">
                 Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!
               </p>
             )}
@@ -447,13 +340,12 @@ const ProductDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* Related */}
       {related.length > 0 && (
-        <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Sản phẩm liên quan</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
+        <div className="product-detail-related">
+          <h2 className="product-detail-related__title">Sản phẩm liên quan</h2>
+          <div className="product-detail-related__grid">
+            {related.map((relProduct) => (
+              <ProductCard key={relProduct.id} product={relProduct} />
             ))}
           </div>
         </div>

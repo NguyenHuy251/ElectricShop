@@ -19,27 +19,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, width =
 
   if (!isOpen) return null;
 
+  const sizeClass = width <= 420 ? 'sm' : width <= 600 ? 'md' : 'lg';
+
   return (
-    <div
-      style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.45)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div style={{ background: COLORS.surface, borderRadius: 12, width: '100%', maxWidth: width,
-        maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+    <div className="ui-modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className={`ui-modal-shell ${sizeClass}`}>
         {/* Header */}
-        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${COLORS.border}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.text }}>{title}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22,
-            cursor: 'pointer', color: COLORS.textLight, lineHeight: 1, padding: 4 }}>✕</button>
+        <div className="ui-modal-head">
+          <h3 className="ui-modal-title">{title}</h3>
+          <button onClick={onClose} className="ui-modal-close">✕</button>
         </div>
         {/* Body */}
-        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>{children}</div>
+        <div className="ui-modal-body">{children}</div>
         {/* Footer */}
         {footer && (
-          <div style={{ padding: '14px 24px', borderTop: `1px solid ${COLORS.border}`,
-            display: 'flex', justifyContent: 'flex-end', gap: 10 }}>{footer}</div>
+          <div className="ui-modal-footer">{footer}</div>
         )}
       </div>
     </div>

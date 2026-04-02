@@ -3,6 +3,7 @@ import { CloseOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-d
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
 import { formatDate, formatCurrency } from '../../utils/helpers';
+import '../../assets/styles/pages/admin-pages.css';
 
 export interface ImportReceiptItem {
   id: number;
@@ -199,57 +200,36 @@ const AdminImportReceiptsPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#111827' }}>
+    <div className="admin-import-page">
+      <div className="admin-page-header">
+        <h1 className="admin-import-header-title">
           Quản lý Phiếu nhập hàng
         </h1>
-        <button
-          onClick={handleOpenModal}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            background: '#2563eb',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
-        >
+        <button onClick={handleOpenModal} className="admin-import-create-btn">
           <PlusOutlined /> Tạo phiếu nhập
         </button>
       </div>
 
-      <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-import-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #e5e7eb', background: '#f9fafb' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+            <tr className="admin-import-head-row">
+              <th className="admin-import-th">
                 ID
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Nhà cung cấp
               </th>
-              <th style={{ padding: '16px', textAlign: 'right', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th admin-import-th-right">
                 Tổng tiền
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Ngày nhập
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th">
                 Người thực hiện
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontWeight: 600, color: '#475569' }}>
+              <th className="admin-import-th admin-import-th-center">
                 Hành động
               </th>
             </tr>
@@ -261,63 +241,29 @@ const AdminImportReceiptsPage: React.FC = () => {
               const performedBy = employees[receipt.id % employees.length];
 
               return (
-                <tr key={receipt.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '16px', color: '#111827', fontWeight: 600 }}>#{receipt.id}</td>
-                  <td style={{ padding: '16px', color: '#111827' }}>
+                <tr key={receipt.id} className="admin-import-row">
+                  <td className="admin-import-cell admin-import-cell-strong">#{receipt.id}</td>
+                  <td className="admin-import-cell">
                     {receipt.tenNhaCungCap}
                   </td>
-                  <td style={{ padding: '16px', color: '#111827', fontWeight: 600, textAlign: 'right' }}>
+                  <td className="admin-import-cell admin-import-cell-right admin-import-cell-strong">
                     {formatCurrency(receipt.tongTien)}
                   </td>
-                  <td style={{ padding: '16px', color: '#475569' }}>
+                  <td className="admin-import-cell admin-import-cell-muted">
                     {formatDate(receipt.ngayNhap)}
                   </td>
-                  <td style={{ padding: '16px', color: '#475569' }}>
+                  <td className="admin-import-cell admin-import-cell-muted">
                     {performedBy}
                   </td>
-                  <td
-                    style={{
-                      padding: '16px',
-                      textAlign: 'center',
-                      display: 'flex',
-                      gap: '8px',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <button
-                      onClick={() => handleViewDetail(receipt)}
-                      style={{
-                        padding: '6px 12px',
-                        background: '#dbeafe',
-                        color: '#0369a1',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontWeight: 600,
-                      }}
-                    >
-                      <EyeOutlined /> Xem chi tiết
-                    </button>
-                    <button
-                      onClick={() => handleDelete(receipt.id)}
-                      style={{
-                        padding: '6px 12px',
-                        background: '#fee2e2',
-                        color: '#dc2626',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontWeight: 600,
-                      }}
-                    >
-                      <DeleteOutlined /> Xóa
-                    </button>
+                  <td className="admin-import-cell admin-import-cell-center">
+                    <div className="admin-import-actions">
+                      <button onClick={() => handleViewDetail(receipt)} className="admin-import-action-btn view">
+                        <EyeOutlined /> Xem chi tiết
+                      </button>
+                      <button onClick={() => handleDelete(receipt.id)} className="admin-import-action-btn delete">
+                        <DeleteOutlined /> Xóa
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -328,29 +274,21 @@ const AdminImportReceiptsPage: React.FC = () => {
 
       {/* Create Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} size="lg">
-        <div style={{ padding: '20px', maxHeight: '80vh', overflowY: 'auto' }}>
-          <h2 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: 700, color: '#111827' }}>
+        <div className="admin-import-modal-body">
+          <h2 className="admin-import-modal-title">
             Tạo phiếu nhập hàng mới
           </h2>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
-                Chọn nhà cung cấp <span style={{ color: '#dc2626' }}>*</span>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
+                Chọn nhà cung cấp <span className="admin-import-label-required">*</span>
               </label>
               <select
                 name="idNhaCungCap"
                 value={formData.idNhaCungCap}
                 onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                  cursor: 'pointer',
-                }}
+                className="admin-import-control"
               >
                 <option value="">-- Chọn nhà cung cấp --</option>
                 {mockSuppliers.map((supplier) => (
@@ -361,51 +299,27 @@ const AdminImportReceiptsPage: React.FC = () => {
               </select>
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#111827' }}>
+            <div className="admin-import-field">
+              <label className="admin-import-label">
                 Người thực hiện
               </label>
               <input
                 value={currentUser?.name || currentUser?.username || 'Nhân viên phụ trách'}
                 readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                  background: '#f8fafc',
-                  color: '#334155',
-                }}
+                className="admin-import-input readonly"
               />
             </div>
 
-            <div style={{ marginBottom: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px' }}>
-              <p style={{ margin: '0 0 16px', fontWeight: 600, color: '#111827' }}>Sản phẩm nhập</p>
+            <div className="admin-import-items-box">
+              <p className="admin-import-items-title">Sản phẩm nhập</p>
 
               {formData.items.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    marginBottom: '16px',
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(260px, 2fr) minmax(120px, 1fr) minmax(140px, 1fr) 44px',
-                    gap: '12px',
-                    alignItems: 'end',
-                  }}
-                >
+                <div key={index} className="admin-import-item-row">
                   <select
                     name="idSanPham"
                     value={item.idSanPham}
                     onChange={(e) => handleInputChange(e, index)}
-                    style={{
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                    }}
+                    className="admin-import-control"
                   >
                     <option value="">-- Chọn sản phẩm --</option>
                     {mockProducts.map((product) => (
@@ -420,13 +334,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                     name="soLuong"
                     value={item.soLuong}
                     onChange={(e) => handleInputChange(e, index)}
-                    style={{
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      boxSizing: 'border-box',
-                    }}
+                    className="admin-import-input"
                     placeholder="Số lượng"
                     min="1"
                   />
@@ -436,13 +344,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                     name="giaNhap"
                     value={item.giaNhap}
                     onChange={(e) => handleInputChange(e, index)}
-                    style={{
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      boxSizing: 'border-box',
-                    }}
+                    className="admin-import-input"
                     placeholder="Giá nhập"
                     min="0"
                   />
@@ -452,18 +354,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                     onClick={() => handleRemoveItem(index)}
                     aria-label="Xóa sản phẩm"
                     title="Xóa sản phẩm"
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      background: '#fee2e2',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                    className="admin-import-remove-item-btn"
                   >
                     <CloseOutlined />
                   </button>
@@ -473,49 +364,17 @@ const AdminImportReceiptsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleAddItem}
-                style={{
-                  padding: '8px 16px',
-                  background: '#dbeafe',
-                  color: '#0369a1',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  marginTop: '8px',
-                }}
+                className="admin-import-add-item-btn"
               >
                 + Thêm sản phẩm
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                style={{
-                  padding: '10px 20px',
-                  background: '#e5e7eb',
-                  color: '#111827',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+            <div className="admin-import-form-actions">
+              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">
                 Hủy
               </button>
-              <button
-                type="submit"
-                style={{
-                  padding: '10px 20px',
-                  background: '#2563eb',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+              <button type="submit" className="admin-import-btn primary">
                 Tạo phiếu nhập
               </button>
             </div>
@@ -526,66 +385,62 @@ const AdminImportReceiptsPage: React.FC = () => {
       {/* Detail Modal */}
       {selectedReceipt && (
         <Modal isOpen={isDetailModalOpen} onClose={handleCloseDetailModal}>
-          <div style={{ padding: '24px', maxHeight: '80vh', overflowY: 'auto' }}>
-            <h2 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: 700, color: '#111827' }}>
+          <div className="admin-import-modal-body">
+            <h2 className="admin-import-modal-title">
               Chi tiết Phiếu nhập #{selectedReceipt.id}
             </h2>
 
-            <div style={{ marginBottom: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px' }}>
-              <div style={{ marginBottom: '12px' }}>
-                <span style={{ fontWeight: 600, color: '#475569' }}>Nhà cung cấp:</span>
-                <span style={{ marginLeft: '12px', color: '#111827' }}>{selectedReceipt.tenNhaCungCap}</span>
+            <div className="admin-import-summary">
+              <div className="admin-import-summary-row">
+                <span className="admin-import-summary-label">Nhà cung cấp:</span>
+                <span className="admin-import-summary-value">{selectedReceipt.tenNhaCungCap}</span>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <span style={{ fontWeight: 600, color: '#475569' }}>Ngày nhập:</span>
-                <span style={{ marginLeft: '12px', color: '#111827' }}>
+              <div className="admin-import-summary-row">
+                <span className="admin-import-summary-label">Ngày nhập:</span>
+                <span className="admin-import-summary-value">
                   {formatDate(selectedReceipt.ngayNhap)}
                 </span>
               </div>
               <div>
-                <span style={{ fontWeight: 600, color: '#475569' }}>Tổng tiền:</span>
-                <span
-                  style={{ marginLeft: '12px', color: '#2563eb', fontWeight: 700, fontSize: '18px' }}
-                >
+                <span className="admin-import-summary-label">Tổng tiền:</span>
+                <span className="admin-import-summary-total">
                   {formatCurrency(selectedReceipt.tongTien)}
                 </span>
               </div>
             </div>
 
-            <p style={{ fontWeight: 600, color: '#111827', marginBottom: '12px' }}>Chi tiết sản phẩm:</p>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <p className="admin-import-detail-title">Chi tiết sản phẩm:</p>
+            <div className="admin-import-detail-wrap">
+              <table className="admin-table">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
-                    <th style={{ padding: '12px ', textAlign: 'left', fontWeight: 600, color: '#475569', fontSize: '14px' }}>
+                  <tr className="admin-import-detail-head-row">
+                    <th className="admin-import-detail-th">
                       Sản phẩm
                     </th>
-                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: '#475569', fontSize: '14px' }}>
+                    <th className="admin-import-detail-th admin-import-detail-right">
                       Số lượng
                     </th>
-                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: '#475569', fontSize: '14px' }}>
+                    <th className="admin-import-detail-th admin-import-detail-right">
                       Giá nhập
                     </th>
-                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: '#475569', fontSize: '14px' }}>
+                    <th className="admin-import-detail-th admin-import-detail-right">
                       Thành tiền
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {selectedReceipt.items.map((item) => (
-                    <tr key={item.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '12px', color: '#111827', fontSize: '14px' }}>
+                    <tr key={item.id} className="admin-import-detail-row">
+                      <td className="admin-import-detail-td">
                         {item.tenSanPham}
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'right', color: '#111827', fontSize: '14px' }}>
+                      <td className="admin-import-detail-td admin-import-detail-right">
                         {item.soLuong}
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'right', color: '#111827', fontSize: '14px' }}>
+                      <td className="admin-import-detail-td admin-import-detail-right">
                         {formatCurrency(item.giaNhap)}
                       </td>
-                      <td
-                        style={{ padding: '12px', textAlign: 'right', color: '#111827', fontWeight: 600, fontSize: '14px' }}
-                      >
+                      <td className="admin-import-detail-td admin-import-detail-right admin-import-detail-td-strong">
                         {formatCurrency(item.soLuong * item.giaNhap)}
                       </td>
                     </tr>
@@ -594,19 +449,8 @@ const AdminImportReceiptsPage: React.FC = () => {
               </table>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-              <button
-                onClick={handleCloseDetailModal}
-                style={{
-                  padding: '10px 20px',
-                  background: '#2563eb',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
+            <div className="admin-import-detail-close-row">
+              <button onClick={handleCloseDetailModal} className="admin-import-btn primary">
                 Đóng
               </button>
             </div>

@@ -4,6 +4,7 @@ import { ContactMessage } from '../../types';
 import { getContactMessages, updateContactReply, updateContactStatus } from '../../services/contactService';
 import { formatDate } from '../../utils/helpers';
 import { useAuth } from '../../hooks/useAuth';
+import '../../assets/styles/pages/admin-pages.css';
 
 const AdminContactsPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -42,39 +43,29 @@ const AdminContactsPage: React.FC = () => {
 
   const getStatusTag = (status: ContactMessage['trangThai']) => {
     if (status === 'new') {
-      return <span style={{ ...statusStyle, background: '#fee2e2', color: '#991b1b' }}>Mới</span>;
+      return <span className="admin-status-tag new">Mới</span>;
     }
     if (status === 'contacted') {
-      return <span style={{ ...statusStyle, background: '#dbeafe', color: '#1d4ed8' }}>Đã liên hệ</span>;
+      return <span className="admin-status-tag contacted">Đã liên hệ</span>;
     }
-    return <span style={{ ...statusStyle, background: '#dcfce7', color: '#166534' }}>Đã đóng</span>;
+    return <span className="admin-status-tag closed">Đã đóng</span>;
   };
 
   return (
     <div>
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '24px', color: '#111827' }}>
-          <MessageOutlined style={{ marginRight: 8, color: '#2563eb' }} />Quản lý liên hệ
+      <div className="dashboard-title-wrap">
+        <h1 className="dashboard-title">
+          <MessageOutlined className="admin-icon-inline" />Quản lý liên hệ
         </h1>
-        <p style={{ margin: '6px 0 0', color: '#64748b' }}>Theo dõi và xử lý yêu cầu liên hệ từ khách hàng.</p>
+        <p className="dashboard-subtitle">Theo dõi và xử lý yêu cầu liên hệ từ khách hàng.</p>
       </div>
 
-      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-contacts-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #f1f5f9', background: '#f8fafc' }}>
+            <tr className="admin-contacts-head-row">
               {['Họ tên', 'Email / SĐT', 'Tiêu đề', 'Nội dung', 'Ngày gửi', 'Trạng thái', 'Xử lý'].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: '10px',
-                    textAlign: 'left',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                  }}
-                >
+                <th key={h} className="admin-contacts-th">
                   {h}
                 </th>
               ))}
@@ -82,40 +73,35 @@ const AdminContactsPage: React.FC = () => {
           </thead>
           <tbody>
             {contacts.map((item) => (
-              <tr key={item.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                <td style={{ padding: '10px', fontWeight: 600 }}>{item.hoTen}</td>
-                <td style={{ padding: '10px', fontSize: '14px', color: '#475569' }}>
+              <tr key={item.id} className="admin-contacts-row">
+                <td className="admin-contacts-cell admin-contacts-name">{item.hoTen}</td>
+                <td className="admin-contacts-cell admin-contacts-contact">
                   <div>{item.email}</div>
                   <div>{item.sdt || '-'}</div>
                 </td>
-                <td style={{ padding: '10px', fontSize: '14px' }}>{item.tieuDe}</td>
-                <td style={{ padding: '10px', fontSize: '14px', color: '#334155', maxWidth: '320px' }}>
-                  <div style={{ marginBottom: item.phanHoi ? '8px' : 0 }}>{item.noiDung}</div>
+                <td className="admin-contacts-cell">{item.tieuDe}</td>
+                <td className="admin-contacts-cell admin-contacts-content">
+                  <div className={`admin-contacts-content-main${item.phanHoi ? '' : ' no-reply'}`}>{item.noiDung}</div>
                   {item.phanHoi && (
-                    <div style={{ background: '#ecfeff', border: '1px solid #a5f3fc', borderRadius: '6px', padding: '8px' }}>
-                      <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: '#0e7490' }}>
+                    <div className="admin-contacts-reply-box">
+                      <p className="admin-contacts-reply-title">
                         Phản hồi
                       </p>
-                      <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#164e63' }}>{item.phanHoi}</p>
-                      <p style={{ margin: 0, fontSize: '12px', color: '#0e7490' }}>
+                      <p className="admin-contacts-reply-text">{item.phanHoi}</p>
+                      <p className="admin-contacts-reply-meta">
                         {item.nguoiPhanHoi || 'Admin'}{item.ngayPhanHoi ? ` • ${formatDate(item.ngayPhanHoi)}` : ''}
                       </p>
                     </div>
                   )}
                 </td>
-                <td style={{ padding: '10px', fontSize: '13px', color: '#64748b' }}>{formatDate(item.ngayTao)}</td>
-                <td style={{ padding: '10px' }}>{getStatusTag(item.trangThai)}</td>
-                <td style={{ padding: '10px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '150px' }}>
+                <td className="admin-contacts-cell admin-contacts-date">{formatDate(item.ngayTao)}</td>
+                <td className="admin-contacts-cell">{getStatusTag(item.trangThai)}</td>
+                <td className="admin-contacts-cell">
+                  <div className="admin-contacts-actions">
                     <select
                       value={item.trangThai}
                       onChange={(e) => handleChangeStatus(item.id, e.target.value as ContactMessage['trangThai'])}
-                      style={{
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        padding: '6px 8px',
-                        fontSize: '13px',
-                      }}
+                      className="admin-contacts-select"
                     >
                       <option value="new">Mới</option>
                       <option value="contacted">Đã liên hệ</option>
@@ -127,50 +113,22 @@ const AdminContactsPage: React.FC = () => {
                         setReplyTargetId(item.id);
                         setReplyText(item.phanHoi || '');
                       }}
-                      style={{
-                        border: 'none',
-                        borderRadius: '6px',
-                        padding: '6px 10px',
-                        background: '#dbeafe',
-                        color: '#1d4ed8',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
+                      className="admin-contacts-btn reply"
                     >
                       {item.phanHoi ? 'Sửa phản hồi' : 'Phản hồi'}
                     </button>
 
                     {replyTargetId === item.id && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div className="admin-contacts-reply-editor">
                         <textarea
                           rows={3}
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
                           placeholder="Nhập phản hồi cho liên hệ này"
-                          style={{
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '6px',
-                            padding: '8px',
-                            fontSize: '13px',
-                            fontFamily: 'inherit',
-                            resize: 'vertical',
-                          }}
+                          className="admin-contacts-reply-input"
                         />
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button
-                            onClick={() => handleSaveReply(item.id)}
-                            style={{
-                              border: 'none',
-                              borderRadius: '6px',
-                              padding: '6px 10px',
-                              background: '#2563eb',
-                              color: '#fff',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                            }}
-                          >
+                        <div className="admin-contacts-btn-row">
+                          <button onClick={() => handleSaveReply(item.id)} className="admin-contacts-btn save">
                             Lưu
                           </button>
                           <button
@@ -178,16 +136,7 @@ const AdminContactsPage: React.FC = () => {
                               setReplyTargetId(null);
                               setReplyText('');
                             }}
-                            style={{
-                              border: 'none',
-                              borderRadius: '6px',
-                              padding: '6px 10px',
-                              background: '#e2e8f0',
-                              color: '#334155',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                            }}
+                            className="admin-contacts-btn cancel"
                           >
                             Hủy
                           </button>
@@ -202,20 +151,13 @@ const AdminContactsPage: React.FC = () => {
         </table>
 
         {contacts.length === 0 && (
-          <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94a3b8' }}>
+          <div className="admin-empty-muted">
             Chưa có liên hệ nào.
           </div>
         )}
       </div>
     </div>
   );
-};
-
-const statusStyle: React.CSSProperties = {
-  padding: '4px 10px',
-  borderRadius: '999px',
-  fontWeight: 700,
-  fontSize: '12px',
 };
 
 export default AdminContactsPage;

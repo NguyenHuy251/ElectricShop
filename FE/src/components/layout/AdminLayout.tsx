@@ -1,14 +1,15 @@
 import React from 'react';
 import AdminSidebar from './AdminSidebar';
+import '../../assets/styles/layout/layout.css';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => (
-  <div style={{ display: 'flex', minHeight: '100vh', background: '#f3f4f6' }}>
+  <div className="admin-layout">
     <AdminSidebar />
-    <main style={{ flex: 1, padding: '24px', overflow: 'auto' }}>{children}</main>
+    <main className="admin-layout-main">{children}</main>
   </div>
 );
 

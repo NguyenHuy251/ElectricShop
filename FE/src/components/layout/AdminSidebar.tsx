@@ -20,6 +20,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
+import '../../assets/styles/layout/admin-sidebar.css';
 
 const navItems = [
   { to: '/admin', icon: <BarChartOutlined />, label: 'Dashboard', exact: true },
@@ -110,126 +111,53 @@ const AdminSidebar: React.FC = () => {
   }, [isEmployee]);
 
   return (
-    <aside
-      style={{
-        width: '240px',
-        height: '100vh',
-        background: '#1e3a5f',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'sticky',
-        top: 0,
-        flexShrink: 0,
-        overflow: 'hidden',
-      }}
-    >
+    <aside className="admin-sidebar">
       {/* Logo */}
-      <div
-        style={{
-          padding: '20px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          cursor: 'pointer',
-        }}
-        onClick={() => navigate('/')}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <ThunderboltOutlined style={{ fontSize: '24px', color: '#f59e0b' }} />
+      <div className="admin-sidebar-logo" onClick={() => navigate('/')}>
+        <div className="admin-sidebar-logo-wrap">
+          <ThunderboltOutlined className="admin-sidebar-logo-icon" />
           <div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>ElectricShop</div>
-            <div style={{ fontSize: '11px', color: '#93c5fd' }}>Quản trị hệ thống</div>
+            <div className="admin-sidebar-brand">ElectricShop</div>
+            <div className="admin-sidebar-subtitle">Quản trị hệ thống</div>
           </div>
         </div>
       </div>
 
       {/* Admin info */}
-      <div
-        style={{
-          padding: '16px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '10px',
-        }}
-      >
+      <div className="admin-sidebar-user">
         <div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff' }}>{currentUser?.name}</div>
-          <div style={{ fontSize: '11px', color: '#93c5fd' }}>{isEmployee ? 'Employee' : 'Administrator'}</div>
+          <div className="admin-sidebar-user-name">{currentUser?.name}</div>
+          <div className="admin-sidebar-user-role">{isEmployee ? 'Employee' : 'Administrator'}</div>
         </div>
         <button
           onClick={logout}
           title="Đăng xuất"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '34px',
-            height: '34px',
-            background: 'rgba(239,68,68,0.15)',
-            border: '1px solid rgba(252,165,165,0.35)',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            color: '#fca5a5',
-            fontSize: '16px',
-            flexShrink: 0,
-          }}
+          className="admin-sidebar-logout-icon"
         >
           <LogoutOutlined />
         </button>
       </div>
 
       {/* Navigation */}
-      <nav
-        style={{
-          flex: 1,
-          padding: '8px 0',
-          overflowY: 'auto',
-          scrollbarWidth: 'thin',
-        }}
-      >
+      <nav className="admin-sidebar-nav">
         {visibleNavItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.exact}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '11px 16px',
-              textDecoration: 'none',
-              color: isActive ? '#fff' : '#93c5fd',
-              background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-              borderLeft: isActive ? '3px solid #f59e0b' : '3px solid transparent',
-              fontSize: '14px',
-              transition: 'all 0.15s',
-            })}
+            className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}
           >
-            <span style={{ fontSize: '16px' }}>{item.icon}</span>
+            <span className="admin-sidebar-icon">{item.icon}</span>
             {item.label}
           </NavLink>
         ))}
 
         <button
           onClick={() => setIsUserManagementOpen((prev) => !prev)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            gap: '10px',
-            padding: '11px 16px',
-            background: isUserManagementActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-            border: 'none',
-            borderLeft: isUserManagementActive ? '3px solid #f59e0b' : '3px solid transparent',
-            color: isUserManagementActive ? '#fff' : '#93c5fd',
-            fontSize: '14px',
-            cursor: 'pointer',
-            textAlign: 'left',
-          }}
+          className={`admin-sidebar-group-btn ${isUserManagementActive ? 'active' : ''}`}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '16px' }}>
+          <span className="admin-sidebar-group-head">
+            <span className="admin-sidebar-icon">
               <TeamOutlined />
             </span>
             Quản lý người dùng
@@ -238,25 +166,14 @@ const AdminSidebar: React.FC = () => {
         </button>
 
         {isUserManagementOpen && (
-          <div style={{ marginTop: '2px', marginBottom: '4px' }}>
+          <div className="admin-sidebar-submenu">
             {userManagementItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                style={({ isActive }) => ({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '9px 16px 9px 32px',
-                  textDecoration: 'none',
-                  color: isActive ? '#fff' : '#93c5fd',
-                  background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                  borderLeft: isActive ? '3px solid #f59e0b' : '3px solid transparent',
-                  fontSize: '13px',
-                  transition: 'all 0.15s',
-                })}
+                className={({ isActive }) => `admin-sidebar-sublink ${isActive ? 'active' : ''}`}
               >
-                <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                <span className="admin-sidebar-subicon">{item.icon}</span>
                 {item.label}
               </NavLink>
             ))}
@@ -265,24 +182,10 @@ const AdminSidebar: React.FC = () => {
 
         <button
           onClick={() => setIsImportManagementOpen((prev) => !prev)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            gap: '10px',
-            padding: '11px 16px',
-            background: isImportManagementActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-            border: 'none',
-            borderLeft: isImportManagementActive ? '3px solid #f59e0b' : '3px solid transparent',
-            color: isImportManagementActive ? '#fff' : '#93c5fd',
-            fontSize: '14px',
-            cursor: 'pointer',
-            textAlign: 'left',
-          }}
+          className={`admin-sidebar-group-btn ${isImportManagementActive ? 'active' : ''}`}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '16px' }}>
+          <span className="admin-sidebar-group-head">
+            <span className="admin-sidebar-icon">
               <CreditCardOutlined />
             </span>
             Nhập hàng
@@ -291,25 +194,14 @@ const AdminSidebar: React.FC = () => {
         </button>
 
         {isImportManagementOpen && (
-          <div style={{ marginTop: '2px', marginBottom: '4px' }}>
+          <div className="admin-sidebar-submenu">
             {importManagementItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                style={({ isActive }) => ({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '9px 16px 9px 32px',
-                  textDecoration: 'none',
-                  color: isActive ? '#fff' : '#93c5fd',
-                  background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                  borderLeft: isActive ? '3px solid #f59e0b' : '3px solid transparent',
-                  fontSize: '13px',
-                  transition: 'all 0.15s',
-                })}
+                className={({ isActive }) => `admin-sidebar-sublink ${isActive ? 'active' : ''}`}
               >
-                <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                <span className="admin-sidebar-subicon">{item.icon}</span>
                 {item.label}
               </NavLink>
             ))}
@@ -320,24 +212,10 @@ const AdminSidebar: React.FC = () => {
           <>
             <button
               onClick={() => setIsCustomerCareOpen((prev) => !prev)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                gap: '10px',
-                padding: '11px 16px',
-                background: isCustomerCareActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                border: 'none',
-                borderLeft: isCustomerCareActive ? '3px solid #f59e0b' : '3px solid transparent',
-                color: isCustomerCareActive ? '#fff' : '#93c5fd',
-                fontSize: '14px',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
+              className={`admin-sidebar-group-btn ${isCustomerCareActive ? 'active' : ''}`}
             >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '16px' }}>
+              <span className="admin-sidebar-group-head">
+                <span className="admin-sidebar-icon">
                   <MessageOutlined />
                 </span>
                 CSKH
@@ -346,25 +224,14 @@ const AdminSidebar: React.FC = () => {
             </button>
 
             {isCustomerCareOpen && (
-              <div style={{ marginTop: '2px', marginBottom: '4px' }}>
+              <div className="admin-sidebar-submenu">
                 {customerCareItems.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    style={({ isActive }) => ({
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '9px 16px 9px 32px',
-                      textDecoration: 'none',
-                      color: isActive ? '#fff' : '#93c5fd',
-                      background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                      borderLeft: isActive ? '3px solid #f59e0b' : '3px solid transparent',
-                      fontSize: '13px',
-                      transition: 'all 0.15s',
-                    })}
+                    className={({ isActive }) => `admin-sidebar-sublink ${isActive ? 'active' : ''}`}
                   >
-                    <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                    <span className="admin-sidebar-subicon">{item.icon}</span>
                     {item.label}
                   </NavLink>
                 ))}
@@ -375,15 +242,10 @@ const AdminSidebar: React.FC = () => {
       </nav>
 
       {/* Bottom Actions */}
-      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="admin-sidebar-bottom">
         <button
           onClick={() => navigate('/')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            width: '100%', padding: '10px 12px',
-            background: 'rgba(255,255,255,0.07)', border: 'none',
-            borderRadius: '8px', cursor: 'pointer', color: '#93c5fd', fontSize: '13px',
-          }}
+          className="admin-sidebar-shop-btn"
         >
           <ShopOutlined /> Xem cửa hàng
         </button>

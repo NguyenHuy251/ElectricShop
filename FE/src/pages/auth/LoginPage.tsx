@@ -4,6 +4,7 @@ import { AlertOutlined, LockOutlined, SettingOutlined, ThunderboltOutlined, User
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import '../../assets/styles/pages/auth.css';
 
 const LoginPage: React.FC = () => {
   const { login, isLoggedIn } = useAuth();
@@ -35,54 +36,27 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
-        padding: '16px',
-      }}
-    >
-      <div
-        style={{
-          background: '#fff',
-          borderRadius: '20px',
-          padding: '40px',
-          width: '100%',
-          maxWidth: '440px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-        }}
-      >
+    <div className="auth-page">
+      <div className="auth-card">
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}><ThunderboltOutlined style={{ color: '#f59e0b' }} /></div>
-          <h1 style={{ margin: 0, fontSize: '24px', color: '#1e3a5f' }}>ElectricShop</h1>
-          <p style={{ margin: '6px 0 0', color: '#6b7280', fontSize: '14px' }}>
+        <div className="auth-brand">
+          <div className="auth-brand-icon"><ThunderboltOutlined /></div>
+          <h1 className="auth-brand-title">ElectricShop</h1>
+          <p className="auth-brand-desc">
             Đăng nhập vào tài khoản của bạn
           </p>
         </div>
 
         {/* Demo accounts */}
-        <div
-          style={{
-            background: '#f0f9ff',
-            borderRadius: '8px',
-            padding: '12px',
-            marginBottom: '24px',
-            fontSize: '12px',
-            color: '#0369a1',
-          }}
-        >
+        <div className="auth-demo-box">
           <strong>Tài khoản demo:</strong>
           <br />
-          <UserOutlined style={{ marginRight: 6 }} />User: user1 / 123456
+          <UserOutlined />User: user1 / 123456
           <br />
-          <SettingOutlined style={{ marginRight: 6 }} />Admin: admin / 654321
+          <SettingOutlined />Admin: admin / 654321
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <Input
             label="Tên đăng nhập"
             type="text"
@@ -103,17 +77,8 @@ const LoginPage: React.FC = () => {
           />
 
           {error && (
-            <div
-              style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                color: '#dc2626',
-                fontSize: '13px',
-              }}
-            >
-              <AlertOutlined style={{ marginRight: 6 }} />{error}
+            <div className="auth-error">
+              <AlertOutlined />{error}
             </div>
           )}
 
@@ -122,22 +87,15 @@ const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <div
-          style={{
-            textAlign: 'center',
-            marginTop: '20px',
-            fontSize: '14px',
-            color: '#6b7280',
-          }}
-        >
+        <div className="auth-footer">
           Chưa có tài khoản?{' '}
-          <Link to="/register" style={{ color: '#2563eb', fontWeight: 600 }}>
+          <Link to="/register" className="auth-link-primary">
             Đăng ký ngay
           </Link>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '12px' }}>
-          <Link to="/" style={{ color: '#6b7280', fontSize: '13px', textDecoration: 'none' }}>
+        <div className="auth-back-home">
+          <Link to="/" className="auth-back-home-link">
             ← Về trang chủ
           </Link>
         </div>
