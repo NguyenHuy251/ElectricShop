@@ -1,6 +1,7 @@
 import {
   createAccount,
   getAccountById,
+  getCurrentAccountById,
   getAllAccounts,
   getLoginByUsername,
   softDeleteAccountById,
@@ -27,7 +28,7 @@ export class AuthError extends Error {
 }
 
 const mapTaiKhoan = (row: TaiKhoanRow): TaiKhoanPublic => {
-  const isEmployee = row.vaiTro === 'Employee';
+  const isEmployee = row.isEmployee ?? row.vaiTro === 'Employee';
   const employeeRole = isEmployee ? 'staff' : undefined;
 
   return {
@@ -166,7 +167,7 @@ export const updateAccountInfo = async (payload: UpdateAccountRequestBody): Prom
 };
 
 export const getAccountByIdService = async (id: number): Promise<TaiKhoanPublic> => {
-  const user = await getAccountById(id);
+  const user = await getCurrentAccountById(id);
 
   if (!user) {
     throw new AuthError('Không tìm thấy tài khoản', 404);

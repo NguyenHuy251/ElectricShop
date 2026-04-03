@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from './useAuth';
 
 /**
@@ -7,11 +7,29 @@ import { useAuth } from './useAuth';
  */
 export const useAuthInitialize = () => {
   const { isLoggedIn, getCurrentUser } = useAuth();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const isLoggedInRef = useRef(isLoggedIn);
+  const getCurrentUserRef = useRef(getCurrentUser);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      // Validate token và lấy dữ liệu mới từ server
-      getCurrentUser();
-    }
-  }, []); // Chỉ chạy một lần khi mount
+    let isMounted = true;
+
+    const initAuth = async () => {
+      if (isLoggedInRef.current) {
+        await getCurrentUserRef.current();
+      }
+
+      if (isMounted) {
+        setIsInitialized(true);
+      }
+    };
+
+    void initAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  return isInitialized;
 };

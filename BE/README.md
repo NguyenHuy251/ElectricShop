@@ -77,6 +77,7 @@ Base URL mac dinh: `http://localhost:5000`
 - `POST /api/auth/register`
 - `PUT /api/auth/change-password` (can token)
 - `GET /api/auth/accounts` (admin)
+	- URL: `http://localhost:5000/api/auth/accounts`
 - `PATCH /api/auth/:id` (admin hoac chinh user do)
 - `DELETE /api/auth/:id` (admin)
 
@@ -100,16 +101,24 @@ Luu y: FE hien con dung mock/localStorage o nhieu module. De production-ready ca
 
 - `GET /api/auth/me`
 	- Lay thong tin user hien tai theo token
+	- URL: `http://localhost:5000/api/auth/me`
 
 ## 4.2. Product module
 
 - `GET /api/products`
+	- URL: `http://localhost:5000/api/products`
 - `GET /api/products/:id`
+	- URL: `http://localhost:5000/api/products/1`
 - `GET /api/products/slug/:slug`
+	- URL: `http://localhost:5000/api/products/slug/quat-panasonic-5-canh`
 - `POST /api/products` (admin)
+	- URL: `http://localhost:5000/api/products`
 - `PUT /api/products/:id` (admin)
+	- URL: `http://localhost:5000/api/products/1`
 - `DELETE /api/products/:id` (admin)
+	- URL: `http://localhost:5000/api/products/1`
 - `PATCH /api/products/:id/status` (admin)
+	- URL: `http://localhost:5000/api/products/1/status`
 
 ## 4.3. Category module
 

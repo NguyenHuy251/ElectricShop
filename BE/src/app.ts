@@ -4,6 +4,7 @@ import type { Express } from 'express';
 import cors from 'cors';
 import { connectToDatabase } from './config/database.js';
 import authRouter from './routes/authRoutes.js';
+import productRouter from './routes/productRoutes.js';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/products', productRouter);
 
 // Test database connection
 app.get('/test-db', async (req, res) => {

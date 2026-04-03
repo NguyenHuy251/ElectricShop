@@ -11,6 +11,8 @@ export interface TaiKhoanRow {
   diaChi: string | null;
   vaiTro: string | null;
   trangThai: boolean;
+  ngayTao?: Date;
+  isEmployee?: boolean;
 }
 
 export const getLoginByUsername = async (tenDangNhap: string): Promise<TaiKhoanRow | null> => {
@@ -31,6 +33,17 @@ export const getAccountById = async (id: number): Promise<TaiKhoanRow | null> =>
     .request()
     .input('id', sql.Int, id)
     .execute('sp_TaiKhoan_LayTheoId');
+
+  return (result.recordset[0] as TaiKhoanRow | undefined) ?? null;
+};
+
+export const getCurrentAccountById = async (idTaiKhoan: number): Promise<TaiKhoanRow | null> => {
+  const pool = await connectToDatabase();
+
+  const result = await pool
+    .request()
+    .input('idTaiKhoan', sql.Int, idTaiKhoan)
+    .execute('sp_Auth_Me');
 
   return (result.recordset[0] as TaiKhoanRow | undefined) ?? null;
 };

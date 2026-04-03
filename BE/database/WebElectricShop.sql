@@ -73,7 +73,7 @@ CREATE TABLE SanPham(
     giaBan FLOAT,
     giaGoc FLOAT,
     baoHanhThang INT,
-    hinhAnh NVARCHAR(255),
+    hinhAnh NVARCHAR(MAX),
     soLuongBan INT DEFAULT 0,
     danhGia FLOAT DEFAULT 0,
     trangThai BIT DEFAULT 1,
@@ -86,7 +86,7 @@ CREATE TABLE SanPham(
 CREATE TABLE AnhSanPham(
     id INT IDENTITY PRIMARY KEY,
     idSanPham INT,
-    hinhAnh NVARCHAR(255),
+    hinhAnh NVARCHAR(MAX),
 
     FOREIGN KEY (idSanPham) REFERENCES SanPham(id)
 );	
@@ -750,3 +750,418 @@ BEGIN
     FROM dbo.LienHe
     WHERE id = @id;
 END
+GO
+
+IF OBJECT_ID('dbo.sp_Auth_Me', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_Auth_Me;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_Auth_Me
+    @idTaiKhoan INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        tk.id,
+        tk.tenDangNhap,
+        tk.tenHienThi,
+        tk.email,
+        tk.sdt,
+        tk.diaChi,
+        tk.vaiTro,
+        tk.trangThai,
+        tk.ngayTao,
+        CASE
+            WHEN EXISTS (
+                SELECT 1
+                FROM dbo.NhanVien nv
+                WHERE nv.idTaiKhoan = tk.id
+                  AND nv.trangThai = 1
+            ) THEN CAST(1 AS BIT)
+            ELSE CAST(0 AS BIT)
+        END AS isEmployee
+    FROM dbo.TaiKhoan tk
+    WHERE tk.id = @idTaiKhoan
+      AND tk.trangThai = 1;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        sp.idThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao,
+        dm.tenDanhMuc,
+        th.tenThuongHieu
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+    LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+    WHERE sp.trangThai = 1
+    ORDER BY sp.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        sp.idThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao,
+        dm.tenDanhMuc,
+        th.tenThuongHieu
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+    LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+    WHERE sp.id = @id
+      AND sp.trangThai = 1;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_LayTheoSlug', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_LayTheoSlug;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_LayTheoSlug
+    @slug NVARCHAR(200)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        sp.idThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao,
+        dm.tenDanhMuc,
+        th.tenThuongHieu
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+    LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+    WHERE sp.slug = @slug
+      AND sp.trangThai = 1;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_Them
+    @maSanPham NVARCHAR(50) = NULL,
+    @tenSanPham NVARCHAR(200),
+    @slug NVARCHAR(200),
+    @idDanhMuc INT = NULL,
+    @idThuongHieu INT = NULL,
+    @moTa NVARCHAR(MAX) = NULL,
+    @giaBan FLOAT,
+    @giaGoc FLOAT = NULL,
+    @baoHanhThang INT = NULL,
+    @hinhAnh NVARCHAR(MAX) = NULL,
+    @soLuongBan INT = 0,
+    @danhGia FLOAT = 0,
+    @trangThai BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.SanPham
+    (
+        maSanPham,
+        tenSanPham,
+        slug,
+        idDanhMuc,
+        idThuongHieu,
+        moTa,
+        giaBan,
+        giaGoc,
+        baoHanhThang,
+        hinhAnh,
+        soLuongBan,
+        danhGia,
+        trangThai,
+        ngayTao
+    )
+    VALUES
+    (
+        @maSanPham,
+        @tenSanPham,
+        @slug,
+        @idDanhMuc,
+        @idThuongHieu,
+        @moTa,
+        @giaBan,
+        @giaGoc,
+        @baoHanhThang,
+        @hinhAnh,
+        @soLuongBan,
+        @danhGia,
+        @trangThai,
+        GETDATE()
+    );
+
+    DECLARE @newId INT = SCOPE_IDENTITY();
+
+    IF @hinhAnh IS NOT NULL AND LTRIM(RTRIM(@hinhAnh)) <> ''
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM dbo.AnhSanPham
+            WHERE idSanPham = @newId
+              AND hinhAnh = @hinhAnh
+        )
+        BEGIN
+            INSERT INTO dbo.AnhSanPham (idSanPham, hinhAnh)
+            VALUES (@newId, @hinhAnh);
+        END
+    END
+
+    SELECT TOP 1
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        sp.idThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao,
+        dm.tenDanhMuc,
+        th.tenThuongHieu
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+    LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+    WHERE sp.id = @newId;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_Sua
+    @id INT,
+    @maSanPham NVARCHAR(50) = NULL,
+    @tenSanPham NVARCHAR(200) = NULL,
+    @slug NVARCHAR(200) = NULL,
+    @idDanhMuc INT = NULL,
+    @idThuongHieu INT = NULL,
+    @moTa NVARCHAR(MAX) = NULL,
+    @giaBan FLOAT = NULL,
+    @giaGoc FLOAT = NULL,
+    @baoHanhThang INT = NULL,
+    @hinhAnh NVARCHAR(MAX) = NULL,
+    @soLuongBan INT = NULL,
+    @danhGia FLOAT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.SanPham
+    SET
+        maSanPham = ISNULL(@maSanPham, maSanPham),
+        tenSanPham = ISNULL(@tenSanPham, tenSanPham),
+        slug = ISNULL(@slug, slug),
+        idDanhMuc = ISNULL(@idDanhMuc, idDanhMuc),
+        idThuongHieu = ISNULL(@idThuongHieu, idThuongHieu),
+        moTa = ISNULL(@moTa, moTa),
+        giaBan = ISNULL(@giaBan, giaBan),
+        giaGoc = ISNULL(@giaGoc, giaGoc),
+        baoHanhThang = ISNULL(@baoHanhThang, baoHanhThang),
+        hinhAnh = ISNULL(@hinhAnh, hinhAnh),
+        soLuongBan = ISNULL(@soLuongBan, soLuongBan),
+        danhGia = ISNULL(@danhGia, danhGia)
+    WHERE id = @id;
+
+    IF @hinhAnh IS NOT NULL AND LTRIM(RTRIM(@hinhAnh)) <> ''
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM dbo.AnhSanPham
+            WHERE idSanPham = @id
+              AND hinhAnh = @hinhAnh
+        )
+        BEGIN
+            INSERT INTO dbo.AnhSanPham (idSanPham, hinhAnh)
+            VALUES (@id, @hinhAnh);
+        END
+    END
+
+    SELECT TOP 1
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        sp.idThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao,
+        dm.tenDanhMuc,
+        th.tenThuongHieu
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+    LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+    WHERE sp.id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_AnhSanPham_LayTheoSanPham', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_AnhSanPham_LayTheoSanPham;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_AnhSanPham_LayTheoSanPham
+    @idSanPham INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        asp.id,
+        asp.idSanPham,
+        asp.hinhAnh
+    FROM dbo.AnhSanPham asp
+    WHERE asp.idSanPham = @idSanPham
+      AND asp.hinhAnh IS NOT NULL
+      AND LTRIM(RTRIM(asp.hinhAnh)) <> ''
+    ORDER BY asp.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_XoaMem', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_XoaMem;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_XoaMem
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.SanPham
+    SET trangThai = 0
+    WHERE id = @id
+      AND trangThai = 1;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_CapNhatTrangThai', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_CapNhatTrangThai;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_CapNhatTrangThai
+    @id INT,
+    @trangThai BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.SanPham
+    SET trangThai = @trangThai
+    WHERE id = @id;
+
+    SELECT TOP 1
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        sp.idThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao,
+        dm.tenDanhMuc,
+        th.tenThuongHieu
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+    LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+    WHERE sp.id = @id;
+END
+GO

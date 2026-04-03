@@ -9,6 +9,7 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { Product } from '../../types';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+import { deleteProductImageApi, getProductImagesApi, normalizeImageInputUrl } from '../../services/productApi';
 import '../../assets/styles/pages/admin-pages.css';
 
 const emptyProduct: Omit<Product, 'id'> = {
@@ -16,6 +17,13 @@ const emptyProduct: Omit<Product, 'id'> = {
   shortDescription: '', images: ['https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=400&fit=crop'],
   rating: 5, reviewCount: 0, stock: 0, brand: '', specs: {}, isFeatured: false, isNew: false,
 };
+
+const IMAGE_PLACEHOLDER = 'https://placehold.co/800x800?text=San+pham';
+
+interface SavedImageItem {
+  id: number | null;
+  imageUrl: string;
+}
 
 const AdminProductsPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -27,6 +35,8 @@ const AdminProductsPage: React.FC = () => {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, 'id'>>(emptyProduct);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [savedImages, setSavedImages] = useState<SavedImageItem[]>([]);
+  const [isLoadingSavedImages, setIsLoadingSavedImages] = useState(false);
 
   const filtered = products.filter(
     (p) =>
@@ -37,32 +47,94 @@ const AdminProductsPage: React.FC = () => {
   const openAdd = () => {
     setEditProduct(null);
     setForm(emptyProduct);
+    setSavedImages([]);
     setModalOpen(true);
   };
 
-  const openEdit = (product: Product) => {
+  const openEdit = async (product: Product) => {
     setEditProduct(product);
     setForm({ ...product });
+    setIsLoadingSavedImages(true);
+
+    try {
+      const response = await getProductImagesApi(product.id);
+      const normalizedSaved = response.data
+        .map((item) => ({
+          id: item.id,
+          imageUrl: normalizeImageInputUrl(item.imageUrl),
+        }))
+        .filter((item) => !!item.imageUrl);
+
+      const merged: SavedImageItem[] = [...normalizedSaved];
+      (product.images || []).forEach((url) => {
+        const normalized = normalizeImageInputUrl(url);
+        if (!normalized) {
+          return;
+        }
+
+        if (!merged.some((item) => item.imageUrl === normalized)) {
+          merged.push({ id: null, imageUrl: normalized });
+        }
+      });
+
+      setSavedImages(merged);
+    } catch (error) {
+      console.error('Không thể tải thư viện ảnh sản phẩm:', error);
+      setSavedImages((product.images || []).map((url) => ({
+        id: null,
+        imageUrl: normalizeImageInputUrl(url),
+      })));
+    } finally {
+      setIsLoadingSavedImages(false);
+    }
+
     setModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editProduct) {
-      updateProduct({ ...form, id: editProduct.id });
+      await updateProduct({ ...form, id: editProduct.id });
     } else {
-      addProduct({ ...form, id: Date.now() });
+      await addProduct({ ...form, id: Date.now() });
     }
     setModalOpen(false);
   };
 
-  const handleDelete = (id: number) => {
-    deleteProduct(id);
+  const handleDelete = async (id: number) => {
+    await deleteProduct(id);
     setDeleteConfirm(null);
   };
 
   const f = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const val = e.target.type === 'number' ? Number(e.target.value) : e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setForm((prev) => ({ ...prev, [k]: val }));
+  };
+
+  const setImageUrl = (url: string) => {
+    const normalizedUrl = normalizeImageInputUrl(url);
+    setForm((prev) => ({
+      ...prev,
+      images: normalizedUrl ? [normalizedUrl] : [],
+    }));
+  };
+
+  const primaryImage = form.images[0] || '';
+  const imagePreviewSrc = primaryImage || IMAGE_PLACEHOLDER;
+
+  const handleDeleteSavedImage = async (imageId: number | null, imageUrl: string) => {
+    if (!editProduct || imageId === null) {
+      return;
+    }
+
+    try {
+      await deleteProductImageApi(editProduct.id, imageId);
+      setSavedImages((prev) => prev.filter((item) => item.id !== imageId));
+      if (primaryImage === imageUrl) {
+        setImageUrl('');
+      }
+    } catch (error) {
+      console.error('Không thể xóa ảnh khỏi thư viện:', error);
+    }
   };
 
   return (
@@ -109,6 +181,9 @@ const AdminProductsPage: React.FC = () => {
                         src={product.images[0]}
                         alt={product.name}
                         className="admin-product-thumb"
+                        onError={(e) => {
+                          e.currentTarget.src = IMAGE_PLACEHOLDER;
+                        }}
                       />
                       <div>
                         <div className="admin-product-name">
@@ -201,6 +276,68 @@ const AdminProductsPage: React.FC = () => {
                 ))}
               </select>
             </div>
+          </div>
+          <div className="admin-product-field">
+            <label className="admin-product-label">Link hình ảnh</label>
+            <Input
+              value={primaryImage}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://..."
+            />
+            <div className="admin-product-image-preview">
+              <img
+                src={imagePreviewSrc}
+                alt={form.name || 'Xem trước hình ảnh sản phẩm'}
+                className="admin-product-image-preview__img"
+                onError={(e) => {
+                  e.currentTarget.src = IMAGE_PLACEHOLDER;
+                }}
+              />
+            </div>
+            {editProduct && (
+              <div className="admin-product-saved-images">
+                <div className="admin-product-saved-images__title">Ảnh đã lưu của sản phẩm</div>
+                {isLoadingSavedImages ? (
+                  <div className="admin-product-saved-images__empty">Đang tải danh sách ảnh...</div>
+                ) : savedImages.length === 0 ? (
+                  <div className="admin-product-saved-images__empty">Chưa có ảnh nào trong thư viện</div>
+                ) : (
+                  <div className="admin-product-saved-images__grid">
+                    {savedImages.map((item, index) => (
+                      <button
+                        key={`${item.id ?? 'local'}-${item.imageUrl}-${index}`}
+                        type="button"
+                        className={`admin-product-saved-images__item ${primaryImage === item.imageUrl ? 'active' : ''}`}
+                        onClick={() => setImageUrl(item.imageUrl)}
+                        title="Chọn ảnh này"
+                      >
+                        {item.id !== null && (
+                          <span
+                            className="admin-product-saved-images__delete"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void handleDeleteSavedImage(item.id, item.imageUrl);
+                            }}
+                            title="Xóa ảnh khỏi danh sách"
+                          >
+                            ×
+                          </span>
+                        )}
+                        <img
+                          src={item.imageUrl}
+                          alt={`Ảnh sản phẩm ${index + 1}`}
+                          className="admin-product-saved-images__img"
+                          onError={(e) => {
+                            e.currentTarget.src = IMAGE_PLACEHOLDER;
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="admin-product-form-grid-3">
             <Input label="Giá hiện tại (VND)" type="number" value={String(form.price)} onChange={f('price')} required />

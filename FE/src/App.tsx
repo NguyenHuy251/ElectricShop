@@ -1,6 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthInitialize } from './hooks/useAuthInitialize';
+import { useProductsInitialize } from './hooks/useProductsInitialize';
+import Loading from './components/common/Loading';
 
 // Layouts
 import UserLayout from './components/layout/UserLayout';
@@ -42,7 +44,12 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminContactsPage from './pages/admin/AdminContactsPage';
 
 function App() {
-  useAuthInitialize();
+  const authInitialized = useAuthInitialize();
+  const productsInitialized = useProductsInitialize();
+
+  if (!authInitialized || !productsInitialized) {
+    return <Loading fullScreen text="Đang tải dữ liệu..." />;
+  }
 
   return (
     <Routes>

@@ -1,10 +1,9 @@
 import { atom } from 'recoil';
 import { Product } from '../../types';
-import { products as mockProducts } from '../../data/mockData';
 
 export const productsAtom = atom<Product[]>({
   key: 'productsAtom',
-  default: mockProducts,
+  default: [],
 });
 
 export const searchQueryAtom = atom<string>({
