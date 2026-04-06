@@ -141,3 +141,20 @@ export interface ContactMessage {
   nguoiPhanHoi?: string;
   ngayPhanHoi?: string;
 }
+
+export type { ApiResponse } from './api';
+export type {
+  BackendAuthUser,
+  ChangePasswordPayload,
+  LoginResponse,
+  RegisterPayload,
+  UpdateAccountPayload,
+} from './auth';
+export type { BackendProduct, BackendProductImage } from './product';
+export type {
+  ContactStatus,
+  CreateContactMessagePayload,
+  GetContactsByAccountPayload,
+  UpdateContactReplyPayload,
+} from './contact';
+export type { SellerReply } from './reviewReply';

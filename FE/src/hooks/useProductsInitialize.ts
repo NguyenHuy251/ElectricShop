@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { productsAtom } from '../recoil/atoms/productAtom';
 import { products as mockProducts } from '../data/mockData';
-import { getProductsApi, mapBackendProductListToProducts } from '../services/productApi';
+import { getProducts, mapBackendProductListToProducts } from '../services';
 
 export const useProductsInitialize = () => {
   const setProducts = useSetRecoilState(productsAtom);
@@ -13,7 +13,7 @@ export const useProductsInitialize = () => {
 
     const initProducts = async () => {
       try {
-        const response = await getProductsApi();
+        const response = await getProducts();
         if (isMounted) {
           setProducts(mapBackendProductListToProducts(response.data));
         }

@@ -1165,3 +1165,356 @@ BEGIN
     WHERE sp.id = @id;
 END
 GO
+
+IF OBJECT_ID('dbo.sp_NhaCungCap_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhaCungCap_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhaCungCap_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT id, tenNhaCungCap, sdt, email, diaChi
+    FROM dbo.NhaCungCap
+    ORDER BY id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhaCungCap_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhaCungCap_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhaCungCap_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1 id, tenNhaCungCap, sdt, email, diaChi
+    FROM dbo.NhaCungCap
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhaCungCap_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhaCungCap_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhaCungCap_Them
+    @tenNhaCungCap NVARCHAR(200),
+    @sdt NVARCHAR(20) = NULL,
+    @email NVARCHAR(100) = NULL,
+    @diaChi NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.NhaCungCap (tenNhaCungCap, sdt, email, diaChi)
+    VALUES (@tenNhaCungCap, @sdt, @email, @diaChi);
+
+    DECLARE @newId INT = SCOPE_IDENTITY();
+
+    SELECT TOP 1 id, tenNhaCungCap, sdt, email, diaChi
+    FROM dbo.NhaCungCap
+    WHERE id = @newId;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhaCungCap_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhaCungCap_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhaCungCap_Sua
+    @id INT,
+    @tenNhaCungCap NVARCHAR(200) = NULL,
+    @sdt NVARCHAR(20) = NULL,
+    @email NVARCHAR(100) = NULL,
+    @diaChi NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.NhaCungCap
+    SET
+        tenNhaCungCap = ISNULL(@tenNhaCungCap, tenNhaCungCap),
+        sdt = ISNULL(@sdt, sdt),
+        email = ISNULL(@email, email),
+        diaChi = ISNULL(@diaChi, diaChi)
+    WHERE id = @id;
+
+    SELECT TOP 1 id, tenNhaCungCap, sdt, email, diaChi
+    FROM dbo.NhaCungCap
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhaCungCap_Xoa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhaCungCap_Xoa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhaCungCap_Xoa
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM dbo.PhieuNhap WHERE idNhaCungCap = @id)
+    BEGIN
+        RAISERROR(N'Nha cung cap da phat sinh phieu nhap, khong the xoa', 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM dbo.NhaCungCap
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_TonKho_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_TonKho_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_TonKho_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        sp.id AS idSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        ISNULL(SUM(COALESCE(btv.soLuongTon, 0)), 0) AS soLuongTon
+    FROM dbo.SanPham sp
+    LEFT JOIN dbo.BienTheSanPham btv ON btv.idSanPham = sp.id
+    GROUP BY sp.id, sp.tenSanPham, sp.slug
+    ORDER BY sp.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_PhieuNhap_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_PhieuNhap_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_PhieuNhap_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        pn.id,
+        pn.idNhaCungCap,
+        pn.idNhanVienLap,
+        pn.tongTien,
+        pn.ngayNhap,
+        ncc.tenNhaCungCap,
+        nv.hoTen AS tenNhanVienLap
+    FROM dbo.PhieuNhap pn
+    INNER JOIN dbo.NhaCungCap ncc ON ncc.id = pn.idNhaCungCap
+    LEFT JOIN dbo.NhanVien nv ON nv.id = pn.idNhanVienLap
+    ORDER BY pn.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_PhieuNhap_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_PhieuNhap_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_PhieuNhap_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        pn.id,
+        pn.idNhaCungCap,
+        pn.idNhanVienLap,
+        pn.tongTien,
+        pn.ngayNhap,
+        ncc.tenNhaCungCap,
+        nv.hoTen AS tenNhanVienLap
+    FROM dbo.PhieuNhap pn
+    INNER JOIN dbo.NhaCungCap ncc ON ncc.id = pn.idNhaCungCap
+    LEFT JOIN dbo.NhanVien nv ON nv.id = pn.idNhanVienLap
+    WHERE pn.id = @id;
+
+    SELECT
+        ctpn.id,
+        ctpn.idPhieuNhap,
+        ctpn.idSanPham,
+        ctpn.soLuong,
+        ctpn.giaNhap,
+        sp.tenSanPham
+    FROM dbo.ChiTietPhieuNhap ctpn
+    INNER JOIN dbo.SanPham sp ON sp.id = ctpn.idSanPham
+    WHERE ctpn.idPhieuNhap = @id
+    ORDER BY ctpn.id ASC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_PhieuNhap_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_PhieuNhap_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_PhieuNhap_Them
+    @idNhaCungCap INT,
+    @idNhanVienLap INT = NULL,
+    @itemsJson NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRANSACTION;
+
+    DECLARE @items TABLE (
+        idSanPham INT,
+        soLuong INT,
+        giaNhap FLOAT
+    );
+
+    INSERT INTO @items (idSanPham, soLuong, giaNhap)
+    SELECT idSanPham, soLuong, giaNhap
+    FROM OPENJSON(@itemsJson)
+    WITH (
+        idSanPham INT '$.idSanPham',
+        soLuong INT '$.soLuong',
+        giaNhap FLOAT '$.giaNhap'
+    );
+
+    IF NOT EXISTS (SELECT 1 FROM @items)
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RAISERROR(N'Phieu nhap phai co it nhat mot san pham', 16, 1);
+        RETURN;
+    END
+
+    INSERT INTO dbo.PhieuNhap (idNhaCungCap, idNhanVienLap, tongTien, ngayNhap)
+    VALUES (@idNhaCungCap, @idNhanVienLap, 0, GETDATE());
+
+    DECLARE @newId INT = SCOPE_IDENTITY();
+
+    INSERT INTO dbo.ChiTietPhieuNhap (idPhieuNhap, idSanPham, soLuong, giaNhap)
+    SELECT @newId, idSanPham, soLuong, giaNhap
+    FROM @items;
+
+    UPDATE dbo.PhieuNhap
+    SET tongTien = (
+        SELECT SUM(i.soLuong * i.giaNhap)
+        FROM @items i
+    )
+    WHERE id = @newId;
+
+    ;WITH firstVariant AS (
+        SELECT
+            btv.id,
+            btv.idSanPham,
+            ROW_NUMBER() OVER (PARTITION BY btv.idSanPham ORDER BY btv.id) AS rn
+        FROM dbo.BienTheSanPham btv
+    )
+    UPDATE btv
+    SET btv.soLuongTon = COALESCE(btv.soLuongTon, 0) + agg.soLuongNhap
+    FROM dbo.BienTheSanPham btv
+    INNER JOIN firstVariant fv ON fv.id = btv.id AND fv.rn = 1
+    INNER JOIN (
+        SELECT idSanPham, SUM(soLuong) AS soLuongNhap
+        FROM @items
+        GROUP BY idSanPham
+    ) agg ON agg.idSanPham = fv.idSanPham;
+
+    INSERT INTO dbo.BienTheSanPham (idSanPham, sku, mauSac, dungTich, giaBan, soLuongTon)
+    SELECT
+        agg.idSanPham,
+        CONCAT('AUTO-', agg.idSanPham, '-', @newId),
+        N'Mac dinh',
+        N'Mac dinh',
+        sp.giaBan,
+        agg.soLuongNhap
+    FROM (
+        SELECT idSanPham, SUM(soLuong) AS soLuongNhap
+        FROM @items
+        GROUP BY idSanPham
+    ) agg
+    INNER JOIN dbo.SanPham sp ON sp.id = agg.idSanPham
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM dbo.BienTheSanPham btv
+        WHERE btv.idSanPham = agg.idSanPham
+    );
+
+    COMMIT TRANSACTION;
+
+    EXEC dbo.sp_PhieuNhap_LayTheoId @id = @newId;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_PhieuNhap_Xoa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_PhieuNhap_Xoa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_PhieuNhap_Xoa
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRANSACTION;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.PhieuNhap WHERE id = @id)
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RAISERROR(N'Khong tim thay phieu nhap', 16, 1);
+        RETURN;
+    END
+
+    ;WITH firstVariant AS (
+        SELECT
+            btv.id,
+            btv.idSanPham,
+            ROW_NUMBER() OVER (PARTITION BY btv.idSanPham ORDER BY btv.id) AS rn
+        FROM dbo.BienTheSanPham btv
+    )
+    UPDATE btv
+    SET btv.soLuongTon = CASE
+        WHEN COALESCE(btv.soLuongTon, 0) - agg.soLuongNhap < 0 THEN 0
+        ELSE COALESCE(btv.soLuongTon, 0) - agg.soLuongNhap
+    END
+    FROM dbo.BienTheSanPham btv
+    INNER JOIN firstVariant fv ON fv.id = btv.id AND fv.rn = 1
+    INNER JOIN (
+        SELECT idSanPham, SUM(soLuong) AS soLuongNhap
+        FROM dbo.ChiTietPhieuNhap
+        WHERE idPhieuNhap = @id
+        GROUP BY idSanPham
+    ) agg ON agg.idSanPham = fv.idSanPham;
+
+    DELETE FROM dbo.ChiTietPhieuNhap
+    WHERE idPhieuNhap = @id;
+
+    DELETE FROM dbo.PhieuNhap
+    WHERE id = @id;
+
+    COMMIT TRANSACTION;
+END
+GO

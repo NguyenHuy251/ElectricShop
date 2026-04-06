@@ -9,7 +9,7 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { Product } from '../../types';
 import { getCategoryIcon } from '../../utils/categoryIcons';
-import { deleteProductImageApi, getProductImagesApi, normalizeImageInputUrl } from '../../services/productApi';
+import { deleteProductImage, getProductImages, normalizeImageInputUrl } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 const emptyProduct: Omit<Product, 'id'> = {
@@ -57,7 +57,7 @@ const AdminProductsPage: React.FC = () => {
     setIsLoadingSavedImages(true);
 
     try {
-      const response = await getProductImagesApi(product.id);
+      const response = await getProductImages(product.id);
       const normalizedSaved = response.data
         .map((item) => ({
           id: item.id,
@@ -127,7 +127,7 @@ const AdminProductsPage: React.FC = () => {
     }
 
     try {
-      await deleteProductImageApi(editProduct.id, imageId);
+      await deleteProductImage(editProduct.id, imageId);
       setSavedImages((prev) => prev.filter((item) => item.id !== imageId));
       if (primaryImage === imageUrl) {
         setImageUrl('');

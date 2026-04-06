@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CloseOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
+import { useProducts } from '../../hooks/useProducts';
+import {
+  createImportReceipt,
+  deleteImportReceipt,
+  getImportReceiptById,
+  getImportReceipts,
+  getSuppliers,
+} from '../../services';
 import { formatDate, formatCurrency } from '../../utils/helpers';
 import '../../assets/styles/pages/admin-pages.css';
 
@@ -16,66 +24,21 @@ export interface ImportReceiptItem {
 export interface ImportReceipt {
   id: number;
   idNhaCungCap: number;
+  idNhanVienLap: number | null;
   tongTien: number;
   ngayNhap: string;
   tenNhaCungCap: string;
+  tenNhanVienLap: string | null;
   items: ImportReceiptItem[];
 }
 
-// Mock data
-const mockSuppliers = [
-  { id: 1, tenNhaCungCap: 'Panasonic VN' },
-  { id: 2, tenNhaCungCap: 'Philips VN' },
-  { id: 3, tenNhaCungCap: 'Sunhouse' },
-  { id: 4, tenNhaCungCap: 'Xiaomi' },
-  { id: 5, tenNhaCungCap: 'Electrolux' },
-];
-
-const mockProducts = [
-  { id: 1, tenSanPham: 'Quạt Panasonic 5 cánh' },
-  { id: 2, tenSanPham: 'Nồi cơm Panasonic 1.8L' },
-  { id: 3, tenSanPham: 'Máy xay Philips' },
-  { id: 4, tenSanPham: 'Ấm Sunhouse' },
-  { id: 5, tenSanPham: 'Máy hút bụi Electrolux' },
-];
-
-const initialReceipts: ImportReceipt[] = [
-  {
-    id: 1,
-    idNhaCungCap: 1,
-    tongTien: 50000000,
-    ngayNhap: '2026-03-20',
-    tenNhaCungCap: 'Panasonic VN',
-    items: [
-      { id: 1, idSanPham: 1, soLuong: 20, giaNhap: 1200000, tenSanPham: 'Quạt Panasonic 5 cánh' },
-    ],
-  },
-  {
-    id: 2,
-    idNhaCungCap: 2,
-    tongTien: 30000000,
-    ngayNhap: '2026-03-18',
-    tenNhaCungCap: 'Philips VN',
-    items: [
-      { id: 2, idSanPham: 2, soLuong: 15, giaNhap: 1000000, tenSanPham: 'Nồi cơm Panasonic 1.8L' },
-    ],
-  },
-  {
-    id: 3,
-    idNhaCungCap: 3,
-    tongTien: 20000000,
-    ngayNhap: '2026-03-15',
-    tenNhaCungCap: 'Sunhouse',
-    items: [
-      { id: 3, idSanPham: 3, soLuong: 10, giaNhap: 700000, tenSanPham: 'Máy xay Philips' },
-    ],
-  },
-];
-
 const AdminImportReceiptsPage: React.FC = () => {
   const { currentUser } = useAuth();
+  const { products } = useProducts();
 
-  const [receipts, setReceipts] = useState<ImportReceipt[]>(initialReceipts);
+  const [receipts, setReceipts] = useState<ImportReceipt[]>([]);
+  const [suppliers, setSuppliers] = useState<Array<{ id: number; tenNhaCungCap: string }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<ImportReceipt | null>(null);
@@ -83,6 +46,32 @@ const AdminImportReceiptsPage: React.FC = () => {
     idNhaCungCap: '',
     items: [{ idSanPham: '', soLuong: '', giaNhap: '' }],
   });
+
+  const productOptions = useMemo(
+    () => products.map((product) => ({ id: product.id, tenSanPham: product.name })),
+    [products],
+  );
+
+  const loadData = async () => {
+    try {
+      const [receiptResponse, supplierResponse] = await Promise.all([getImportReceipts(), getSuppliers()]);
+      setReceipts(
+        receiptResponse.data.map((receipt) => ({
+          ...receipt,
+          items: [],
+        })),
+      );
+      setSuppliers(supplierResponse.data);
+    } catch (_error: unknown) {
+      alert('Khong the tai du lieu phieu nhap');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadData();
+  }, []);
 
   const handleOpenModal = () => {
     setFormData({
@@ -96,9 +85,17 @@ const AdminImportReceiptsPage: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleViewDetail = (receipt: ImportReceipt) => {
-    setSelectedReceipt(receipt);
-    setIsDetailModalOpen(true);
+  const handleViewDetail = async (receipt: ImportReceipt) => {
+    try {
+      const response = await getImportReceiptById(receipt.id);
+      setSelectedReceipt({
+        ...response.data.receipt,
+        items: response.data.items,
+      });
+      setIsDetailModalOpen(true);
+    } catch (_error: unknown) {
+      alert('Khong the tai chi tiet phieu nhap');
+    }
   };
 
   const handleCloseDetailModal = () => {
@@ -108,7 +105,7 @@ const AdminImportReceiptsPage: React.FC = () => {
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    index?: number
+    index?: number,
   ) => {
     const { name, value } = e.target;
 
@@ -141,72 +138,74 @@ const AdminImportReceiptsPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.idNhaCungCap || formData.items.length === 0) {
-      alert('Vui lòng chọn nhà cung cấp và thêm ít nhất một sản phẩm');
+      alert('Vui long chon nha cung cap va them it nhat mot san pham');
       return;
     }
 
-    const supplier = mockSuppliers.find((s) => s.id === parseInt(formData.idNhaCungCap));
+    const supplier = suppliers.find((s) => s.id === parseInt(formData.idNhaCungCap, 10));
     if (!supplier) {
-      alert('Nhà cung cấp không hợp lệ');
+      alert('Nha cung cap khong hop le');
       return;
     }
 
-    // Calculate total and create items
-    let totalAmount = 0;
-    const items: ImportReceiptItem[] = [];
+    const payloadItems: Array<{ idSanPham: number; soLuong: number; giaNhap: number }> = [];
 
-    formData.items.forEach((item, index) => {
+    for (let index = 0; index < formData.items.length; index += 1) {
+      const item = formData.items[index];
       if (!item.idSanPham || !item.soLuong || !item.giaNhap) {
-        alert(`Vui lòng nhập đầy đủ thông tin sản phẩm thứ ${index + 1}`);
+        alert(`Vui long nhap day du thong tin san pham thu ${index + 1}`);
         return;
       }
 
-      const product = mockProducts.find((p) => p.id === parseInt(item.idSanPham));
-      if (!product) return;
-
-      const itemTotal = parseInt(item.soLuong) * parseInt(item.giaNhap);
-      totalAmount += itemTotal;
-
-      items.push({
-        id: Math.random(),
-        idSanPham: parseInt(item.idSanPham),
-        soLuong: parseInt(item.soLuong),
-        giaNhap: parseInt(item.giaNhap),
-        tenSanPham: product.tenSanPham,
+      payloadItems.push({
+        idSanPham: parseInt(item.idSanPham, 10),
+        soLuong: parseInt(item.soLuong, 10),
+        giaNhap: parseInt(item.giaNhap, 10),
       });
-    });
+    }
 
-    const newReceipt: ImportReceipt = {
-      id: Math.max(...receipts.map((r) => r.id), 0) + 1,
-      idNhaCungCap: parseInt(formData.idNhaCungCap),
-      tongTien: totalAmount,
-      ngayNhap: new Date().toISOString().split('T')[0],
-      tenNhaCungCap: supplier.tenNhaCungCap,
-      items,
-    };
+    try {
+      const response = await createImportReceipt({
+        idNhaCungCap: parseInt(formData.idNhaCungCap, 10),
+        items: payloadItems,
+      });
 
-    setReceipts((prev) => [...prev, newReceipt]);
-    handleCloseModal();
+      setReceipts((prev) => [
+        {
+          ...response.data.receipt,
+          items: response.data.items,
+        },
+        ...prev,
+      ]);
+      handleCloseModal();
+    } catch (_error: unknown) {
+      alert('Khong the tao phieu nhap');
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa phiếu nhập này?')) {
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Ban co chac chan muon xoa phieu nhap nay?')) {
+      return;
+    }
+
+    try {
+      await deleteImportReceipt(id);
       setReceipts((prev) => prev.filter((r) => r.id !== id));
+    } catch (_error: unknown) {
+      alert('Khong the xoa phieu nhap');
     }
   };
 
   return (
     <div className="admin-import-page">
       <div className="admin-page-header">
-        <h1 className="admin-import-header-title">
-          Quản lý Phiếu nhập hàng
-        </h1>
+        <h1 className="admin-import-header-title">Quan ly Phieu nhap hang</h1>
         <button onClick={handleOpenModal} className="admin-import-create-btn">
-          <PlusOutlined /> Tạo phiếu nhập
+          <PlusOutlined /> Tao phieu nhap
         </button>
       </div>
 
@@ -214,104 +213,81 @@ const AdminImportReceiptsPage: React.FC = () => {
         <table className="admin-table">
           <thead>
             <tr className="admin-import-head-row">
-              <th className="admin-import-th">
-                ID
-              </th>
-              <th className="admin-import-th">
-                Nhà cung cấp
-              </th>
-              <th className="admin-import-th admin-import-th-right">
-                Tổng tiền
-              </th>
-              <th className="admin-import-th">
-                Ngày nhập
-              </th>
-              <th className="admin-import-th">
-                Người thực hiện
-              </th>
-              <th className="admin-import-th admin-import-th-center">
-                Hành động
-              </th>
+              <th className="admin-import-th">ID</th>
+              <th className="admin-import-th">Nha cung cap</th>
+              <th className="admin-import-th admin-import-th-right">Tong tien</th>
+              <th className="admin-import-th">Ngay nhap</th>
+              <th className="admin-import-th">Nguoi thuc hien</th>
+              <th className="admin-import-th admin-import-th-center">Hanh dong</th>
             </tr>
           </thead>
           <tbody>
-            {receipts.map((receipt) => {
-              // Mock data for person who performed the import
-              const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
-              const performedBy = employees[receipt.id % employees.length];
-
-              return (
-                <tr key={receipt.id} className="admin-import-row">
-                  <td className="admin-import-cell admin-import-cell-strong">#{receipt.id}</td>
-                  <td className="admin-import-cell">
-                    {receipt.tenNhaCungCap}
-                  </td>
-                  <td className="admin-import-cell admin-import-cell-right admin-import-cell-strong">
-                    {formatCurrency(receipt.tongTien)}
-                  </td>
-                  <td className="admin-import-cell admin-import-cell-muted">
-                    {formatDate(receipt.ngayNhap)}
-                  </td>
-                  <td className="admin-import-cell admin-import-cell-muted">
-                    {performedBy}
-                  </td>
-                  <td className="admin-import-cell admin-import-cell-center">
-                    <div className="admin-import-actions">
-                      <button onClick={() => handleViewDetail(receipt)} className="admin-import-action-btn view">
-                        <EyeOutlined /> Xem chi tiết
-                      </button>
-                      <button onClick={() => handleDelete(receipt.id)} className="admin-import-action-btn delete">
-                        <DeleteOutlined /> Xóa
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {isLoading && (
+              <tr>
+                <td colSpan={6} className="admin-empty-state">Dang tai du lieu phieu nhap...</td>
+              </tr>
+            )}
+            {!isLoading && receipts.map((receipt) => (
+              <tr key={receipt.id} className="admin-import-row">
+                <td className="admin-import-cell admin-import-cell-strong">#{receipt.id}</td>
+                <td className="admin-import-cell">{receipt.tenNhaCungCap}</td>
+                <td className="admin-import-cell admin-import-cell-right admin-import-cell-strong">
+                  {formatCurrency(receipt.tongTien)}
+                </td>
+                <td className="admin-import-cell admin-import-cell-muted">{formatDate(receipt.ngayNhap)}</td>
+                <td className="admin-import-cell admin-import-cell-muted">{receipt.tenNhanVienLap || '-'}</td>
+                <td className="admin-import-cell admin-import-cell-center">
+                  <div className="admin-import-actions">
+                    <button onClick={() => void handleViewDetail(receipt)} className="admin-import-action-btn view">
+                      <EyeOutlined /> Xem chi tiet
+                    </button>
+                    <button onClick={() => void handleDelete(receipt.id)} className="admin-import-action-btn delete">
+                      <DeleteOutlined /> Xoa
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {!isLoading && receipts.length === 0 && (
+              <tr>
+                <td colSpan={6} className="admin-empty-state">Chua co phieu nhap nao</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Create Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} size="lg">
         <div className="admin-import-modal-body">
-          <h2 className="admin-import-modal-title">
-            Tạo phiếu nhập hàng mới
-          </h2>
+          <h2 className="admin-import-modal-title">Tao phieu nhap hang moi</h2>
 
           <form onSubmit={handleSubmit}>
             <div className="admin-import-field">
-              <label className="admin-import-label">
-                Chọn nhà cung cấp <span className="admin-import-label-required">*</span>
-              </label>
+              <label className="admin-import-label">Chon nha cung cap <span className="admin-import-label-required">*</span></label>
               <select
                 name="idNhaCungCap"
                 value={formData.idNhaCungCap}
                 onChange={handleInputChange}
                 className="admin-import-control"
               >
-                <option value="">-- Chọn nhà cung cấp --</option>
-                {mockSuppliers.map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.tenNhaCungCap}
-                  </option>
+                <option value="">-- Chon nha cung cap --</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>{supplier.tenNhaCungCap}</option>
                 ))}
               </select>
             </div>
 
             <div className="admin-import-field">
-              <label className="admin-import-label">
-                Người thực hiện
-              </label>
+              <label className="admin-import-label">Nguoi thuc hien</label>
               <input
-                value={currentUser?.name || currentUser?.username || 'Nhân viên phụ trách'}
+                value={currentUser?.name || currentUser?.username || 'Nhan vien phu trach'}
                 readOnly
                 className="admin-import-input readonly"
               />
             </div>
 
             <div className="admin-import-items-box">
-              <p className="admin-import-items-title">Sản phẩm nhập</p>
+              <p className="admin-import-items-title">San pham nhap</p>
 
               {formData.items.map((item, index) => (
                 <div key={index} className="admin-import-item-row">
@@ -321,11 +297,9 @@ const AdminImportReceiptsPage: React.FC = () => {
                     onChange={(e) => handleInputChange(e, index)}
                     className="admin-import-control"
                   >
-                    <option value="">-- Chọn sản phẩm --</option>
-                    {mockProducts.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.tenSanPham}
-                      </option>
+                    <option value="">-- Chon san pham --</option>
+                    {productOptions.map((product) => (
+                      <option key={product.id} value={product.id}>{product.tenSanPham}</option>
                     ))}
                   </select>
 
@@ -335,7 +309,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                     value={item.soLuong}
                     onChange={(e) => handleInputChange(e, index)}
                     className="admin-import-input"
-                    placeholder="Số lượng"
+                    placeholder="So luong"
                     min="1"
                   />
 
@@ -345,15 +319,15 @@ const AdminImportReceiptsPage: React.FC = () => {
                     value={item.giaNhap}
                     onChange={(e) => handleInputChange(e, index)}
                     className="admin-import-input"
-                    placeholder="Giá nhập"
+                    placeholder="Gia nhap"
                     min="0"
                   />
 
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(index)}
-                    aria-label="Xóa sản phẩm"
-                    title="Xóa sản phẩm"
+                    aria-label="Xoa san pham"
+                    title="Xoa san pham"
                     className="admin-import-remove-item-btn"
                   >
                     <CloseOutlined />
@@ -361,85 +335,54 @@ const AdminImportReceiptsPage: React.FC = () => {
                 </div>
               ))}
 
-              <button
-                type="button"
-                onClick={handleAddItem}
-                className="admin-import-add-item-btn"
-              >
-                + Thêm sản phẩm
-              </button>
+              <button type="button" onClick={handleAddItem} className="admin-import-add-item-btn">+ Them san pham</button>
             </div>
 
             <div className="admin-import-form-actions">
-              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">
-                Hủy
-              </button>
-              <button type="submit" className="admin-import-btn primary">
-                Tạo phiếu nhập
-              </button>
+              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">Huy</button>
+              <button type="submit" className="admin-import-btn primary">Tao phieu nhap</button>
             </div>
           </form>
         </div>
       </Modal>
 
-      {/* Detail Modal */}
       {selectedReceipt && (
         <Modal isOpen={isDetailModalOpen} onClose={handleCloseDetailModal}>
           <div className="admin-import-modal-body">
-            <h2 className="admin-import-modal-title">
-              Chi tiết Phiếu nhập #{selectedReceipt.id}
-            </h2>
+            <h2 className="admin-import-modal-title">Chi tiet Phieu nhap #{selectedReceipt.id}</h2>
 
             <div className="admin-import-summary">
               <div className="admin-import-summary-row">
-                <span className="admin-import-summary-label">Nhà cung cấp:</span>
+                <span className="admin-import-summary-label">Nha cung cap:</span>
                 <span className="admin-import-summary-value">{selectedReceipt.tenNhaCungCap}</span>
               </div>
               <div className="admin-import-summary-row">
-                <span className="admin-import-summary-label">Ngày nhập:</span>
-                <span className="admin-import-summary-value">
-                  {formatDate(selectedReceipt.ngayNhap)}
-                </span>
+                <span className="admin-import-summary-label">Ngay nhap:</span>
+                <span className="admin-import-summary-value">{formatDate(selectedReceipt.ngayNhap)}</span>
               </div>
               <div>
-                <span className="admin-import-summary-label">Tổng tiền:</span>
-                <span className="admin-import-summary-total">
-                  {formatCurrency(selectedReceipt.tongTien)}
-                </span>
+                <span className="admin-import-summary-label">Tong tien:</span>
+                <span className="admin-import-summary-total">{formatCurrency(selectedReceipt.tongTien)}</span>
               </div>
             </div>
 
-            <p className="admin-import-detail-title">Chi tiết sản phẩm:</p>
+            <p className="admin-import-detail-title">Chi tiet san pham:</p>
             <div className="admin-import-detail-wrap">
               <table className="admin-table">
                 <thead>
                   <tr className="admin-import-detail-head-row">
-                    <th className="admin-import-detail-th">
-                      Sản phẩm
-                    </th>
-                    <th className="admin-import-detail-th admin-import-detail-right">
-                      Số lượng
-                    </th>
-                    <th className="admin-import-detail-th admin-import-detail-right">
-                      Giá nhập
-                    </th>
-                    <th className="admin-import-detail-th admin-import-detail-right">
-                      Thành tiền
-                    </th>
+                    <th className="admin-import-detail-th">San pham</th>
+                    <th className="admin-import-detail-th admin-import-detail-right">So luong</th>
+                    <th className="admin-import-detail-th admin-import-detail-right">Gia nhap</th>
+                    <th className="admin-import-detail-th admin-import-detail-right">Thanh tien</th>
                   </tr>
                 </thead>
                 <tbody>
                   {selectedReceipt.items.map((item) => (
                     <tr key={item.id} className="admin-import-detail-row">
-                      <td className="admin-import-detail-td">
-                        {item.tenSanPham}
-                      </td>
-                      <td className="admin-import-detail-td admin-import-detail-right">
-                        {item.soLuong}
-                      </td>
-                      <td className="admin-import-detail-td admin-import-detail-right">
-                        {formatCurrency(item.giaNhap)}
-                      </td>
+                      <td className="admin-import-detail-td">{item.tenSanPham}</td>
+                      <td className="admin-import-detail-td admin-import-detail-right">{item.soLuong}</td>
+                      <td className="admin-import-detail-td admin-import-detail-right">{formatCurrency(item.giaNhap)}</td>
                       <td className="admin-import-detail-td admin-import-detail-right admin-import-detail-td-strong">
                         {formatCurrency(item.soLuong * item.giaNhap)}
                       </td>
@@ -450,9 +393,7 @@ const AdminImportReceiptsPage: React.FC = () => {
             </div>
 
             <div className="admin-import-detail-close-row">
-              <button onClick={handleCloseDetailModal} className="admin-import-btn primary">
-                Đóng
-              </button>
+              <button onClick={handleCloseDetailModal} className="admin-import-btn primary">Dong</button>
             </div>
           </div>
         </Modal>

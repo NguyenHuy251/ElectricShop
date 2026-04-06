@@ -3,19 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { authAtom } from '../recoil/atoms/authAtom';
 import { AuthUser } from '../types';
 import {
-  changePasswordApi,
-  deleteAccountApi,
-  getAccountsApi,
-  loginApi,
-  registerApi,
-  updateAccountApi,
-  getCurrentUserApi,
-} from '../services/authApi';
-
-const mapRole = (vaiTro: string | null): 'user' | 'admin' => {
-  const normalized = vaiTro?.toLowerCase() ?? '';
-  return normalized === 'admin' ? 'admin' : 'user';
-};
+  changePassword as changePasswordService,
+  deleteAccount as deleteAccountService,
+  getAccounts as getAccountsService,
+  getCurrentUser as getCurrentUserService,
+  login as loginService,
+  register as registerService,
+  updateAccount as updateAccountService,
+} from '../services';
 
 const isAdminRole = (vaiTro: string | null): boolean => {
   return vaiTro?.toLowerCase() === 'admin';
@@ -75,7 +70,7 @@ export const useAuth = () => {
     matKhau: string,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const result = await loginApi(tenDangNhap, matKhau);
+      const result = await loginService(tenDangNhap, matKhau);
       localStorage.setItem('auth_token', result.token);
       setCurrentUser(mapBackendUser(result.data));
       return { success: true, message: result.message };
@@ -92,7 +87,7 @@ export const useAuth = () => {
     phone: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const result = await registerApi({
+      const result = await registerService({
         tenDangNhap,
         matKhau: password,
         tenHienThi: name,
@@ -114,7 +109,7 @@ export const useAuth = () => {
     }
 
     try {
-      const result = await changePasswordApi({
+      const result = await changePasswordService({
         id: currentUser.id,
         matKhauCu,
         matKhauMoi,
@@ -127,7 +122,7 @@ export const useAuth = () => {
 
   const getAccounts = async (): Promise<{ success: boolean; message: string; data: AuthUser[] }> => {
     try {
-      const result = await getAccountsApi();
+      const result = await getAccountsService();
       return {
         success: true,
         message: result.message,
@@ -140,7 +135,7 @@ export const useAuth = () => {
 
   const deleteAccount = async (id: number): Promise<{ success: boolean; message: string }> => {
     try {
-      const result = await deleteAccountApi(id);
+      const result = await deleteAccountService(id);
       return { success: true, message: result.message };
     } catch (error: unknown) {
       return { success: false, message: getErrorMessage(error) };
@@ -156,7 +151,7 @@ export const useAuth = () => {
     vaiTro?: string;
   }): Promise<{ success: boolean; message: string; data?: AuthUser }> => {
     try {
-      const result = await updateAccountApi(payload);
+      const result = await updateAccountService(payload);
       const updatedUser = mapBackendUser(result.data);
 
       if (currentUser && updatedUser.id === currentUser.id) {
@@ -178,7 +173,7 @@ export const useAuth = () => {
 
   const getCurrentUser = async (): Promise<{ success: boolean; data?: AuthUser }> => {
     try {
-      const result = await getCurrentUserApi();
+      const result = await getCurrentUserService();
       const user = mapBackendUser(result.data);
       setCurrentUser(user);
       return { success: true, data: user };

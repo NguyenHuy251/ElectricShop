@@ -3,11 +3,11 @@ import { productsAtom, searchQueryAtom, selectedCategoryAtom } from '../recoil/a
 import { filteredProductsSelector } from '../recoil/selectors/productSelectors';
 import { Product } from '../types';
 import {
-  createProductApi,
-  deleteProductApi,
+  createProduct as createProductService,
+  deleteProduct as deleteProductService,
   mapBackendProductToProduct,
-  updateProductApi,
-} from '../services/productApi';
+  updateProduct as updateProductService,
+} from '../services';
 
 export const useProducts = () => {
   const [products, setProducts] = useRecoilState(productsAtom);
@@ -19,19 +19,19 @@ export const useProducts = () => {
     products.find((p) => p.id === id);
 
   const addProduct = async (product: Product) => {
-    const response = await createProductApi(product);
+    const response = await createProductService(product);
     const createdProduct = mapBackendProductToProduct(response.data);
     setProducts((prev) => [...prev, createdProduct]);
   };
 
   const updateProduct = async (updated: Product) => {
-    const response = await updateProductApi(updated.id, updated);
+    const response = await updateProductService(updated.id, updated);
     const updatedProduct = mapBackendProductToProduct(response.data);
     setProducts((prev) => prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
   };
 
   const deleteProduct = async (id: number) => {
-    await deleteProductApi(id);
+    await deleteProductService(id);
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
