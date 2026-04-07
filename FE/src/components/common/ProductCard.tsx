@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Product } from '../../types';
-import { useCart } from '../../hooks/useCart';
 import StarRating from './StarRating';
 import { formatCurrency, calcDiscount } from '../../utils';
 
@@ -11,13 +9,6 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart, isInCart } = useCart();
-
-  const handleAddCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    addToCart(product);
-  };
-
   const discount = product.originalPrice ? calcDiscount(product.originalPrice, product.price) : 0;
 
   return (
@@ -58,19 +49,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </span>
             )}
           </div>
-        </div>
-
-        {/* Add to cart */}
-        <div className="common-product-card__add-wrap">
-          <button
-            onClick={handleAddCart}
-            disabled={product.stock === 0}
-            className={`common-product-card__add-btn ${
-              product.stock === 0 ? 'disabled' : isInCart(product.id) ? 'in-cart' : 'primary'
-            }`}
-          >
-            {product.stock === 0 ? 'Hết hàng' : isInCart(product.id) ? <><CheckOutlined /> Đã thêm</> : <><ShoppingCartOutlined /> Thêm vào giỏ</>}
-          </button>
         </div>
       </div>
     </Link>

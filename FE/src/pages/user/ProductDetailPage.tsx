@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   AlertOutlined,
@@ -20,35 +20,19 @@ import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ui/ProductCard';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import { getReplyByReviewId, upsertReply } from '../../services/reviewReplyService';
+import { createReview, getReviewsByProduct } from '../../services';
 import '../../assets/styles/pages/user-pages.css';
 
 interface Review {
   id: number;
+  idSanPham: number;
+  idTaiKhoan: number;
   tenKhachHang: string;
   soSao: number;
   noiDung: string;
   ngayDanhGia: string;
+  tenSanPham: string;
 }
-
-const mockReviewsByProduct: Record<number, Review[]> = {
-  1: [
-    { id: 1, tenKhachHang: 'Nguyễn Văn A', soSao: 5, noiDung: 'Quạt tốt, gió mạnh, chạy êm', ngayDanhGia: '2026-03-20' },
-    { id: 2, tenKhachHang: 'Trần Thị B', soSao: 4, noiDung: 'Ổn, hơi ồn một chút', ngayDanhGia: '2026-03-15' },
-  ],
-  2: [
-    { id: 3, tenKhachHang: 'Trần Thị B', soSao: 4, noiDung: 'Nồi cơm ok, nấu cơm nhanh', ngayDanhGia: '2026-03-19' },
-  ],
-  3: [
-    { id: 4, tenKhachHang: 'Lê Văn C', soSao: 5, noiDung: 'Máy xay rất mạnh, xay đều', ngayDanhGia: '2026-03-18' },
-    { id: 5, tenKhachHang: 'Phạm Thị D', soSao: 5, noiDung: 'Rất tốt, giao nhanh', ngayDanhGia: '2026-03-14' },
-  ],
-  4: [
-    { id: 6, tenKhachHang: 'Phạm Thị D', soSao: 4, noiDung: 'Ấm bình thường, giá hơi đắt', ngayDanhGia: '2026-03-17' },
-  ],
-  5: [
-    { id: 7, tenKhachHang: 'Nguyễn Văn A', soSao: 5, noiDung: 'Máy hút bụi rất tốt, hút sạch', ngayDanhGia: '2026-03-16' },
-  ],
-};
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,12 +43,59 @@ const ProductDetailPage: React.FC = () => {
 
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'reviews'>('desc');
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
 
   const product = getProductById(Number(id));
-  const reviews = product ? (mockReviewsByProduct[product.id] || []) : [];
   const isAdmin = currentUser?.role === 'admin';
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadReviews = async () => {
+      if (!product) {
+        return;
+      }
+
+      setReviewsLoading(true);
+      try {
+        const response = await getReviewsByProduct(product.id);
+        if (isMounted) {
+          setReviews(response.data.map((review) => ({
+            id: review.id,
+            idSanPham: review.idSanPham,
+            idTaiKhoan: review.idTaiKhoan,
+            tenKhachHang: review.tenKhachHang,
+            soSao: review.soSao,
+            noiDung: review.noiDung,
+            ngayDanhGia: review.ngayDanhGia,
+            tenSanPham: review.tenSanPham,
+          })));
+        }
+      } catch (error) {
+        console.error('Không thể tải đánh giá:', error);
+        if (isMounted) {
+          setReviews([]);
+        }
+      } finally {
+        if (isMounted) {
+          setReviewsLoading(false);
+        }
+      }
+    };
+
+    void loadReviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [product]);
 
   if (!product) {
     return (
@@ -83,6 +114,12 @@ const ProductDetailPage: React.FC = () => {
   const related = products
     .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
     .slice(0, 4);
+
+  const reviewCount = reviews.length > 0 ? reviews.length : product.reviewCount;
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.soSao, 0) / reviews.length
+    : product.rating;
+  const reviewStars = Math.round(averageRating);
 
   const stockClass = product.stock > 5
     ? 'product-detail-stock product-detail-stock--ok'
@@ -117,11 +154,11 @@ const ProductDetailPage: React.FC = () => {
 
           <div className="product-detail-rating">
             <span className="product-detail-rating__stars">
-              {'★'.repeat(Math.round(product.rating))}
-              {'☆'.repeat(5 - Math.round(product.rating))}
+              {'★'.repeat(reviewStars)}
+              {'☆'.repeat(5 - reviewStars)}
             </span>
             <span className="product-detail-rating__text">
-              {product.rating} ({product.reviewCount} đánh giá)
+              {averageRating.toFixed(1)} ({reviewCount} đánh giá)
             </span>
           </div>
 
@@ -240,7 +277,83 @@ const ProductDetailPage: React.FC = () => {
 
         {activeTab === 'reviews' && (
           <div>
-            {reviews.length > 0 ? (
+            {currentUser && (
+              <div className="product-detail-review-form">
+                <h3 className="product-detail-review-form__title">Viết đánh giá của bạn</h3>
+                <div className="product-detail-review-form__row">
+                  <label className="product-detail-review-form__label" htmlFor="review-rating">
+                    Số sao
+                  </label>
+                  <select
+                    id="review-rating"
+                    value={reviewRating}
+                    onChange={(e) => setReviewRating(Number(e.target.value))}
+                    className="product-detail-review-form__select"
+                  >
+                    {[5, 4, 3, 2, 1].map((value) => (
+                      <option key={value} value={value}>
+                        {value} sao
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <textarea
+                  value={reviewContent}
+                  onChange={(e) => setReviewContent(e.target.value)}
+                  rows={4}
+                  placeholder="Chia sẻ cảm nhận của bạn về sản phẩm"
+                  className="product-detail-review-form__textarea"
+                />
+                <div className="product-detail-review-form__actions">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={async () => {
+                      if (!reviewContent.trim()) {
+                        setReviewMessage('Vui lòng nhập nội dung đánh giá');
+                        return;
+                      }
+
+                      setReviewSubmitting(true);
+                      setReviewMessage('');
+                      try {
+                        await createReview({
+                          idSanPham: product.id,
+                          soSao: reviewRating,
+                          noiDung: reviewContent.trim(),
+                        });
+                        const refreshed = await getReviewsByProduct(product.id);
+                        setReviews(refreshed.data.map((review) => ({
+                          id: review.id,
+                          idSanPham: review.idSanPham,
+                          idTaiKhoan: review.idTaiKhoan,
+                          tenKhachHang: review.tenKhachHang,
+                          soSao: review.soSao,
+                          noiDung: review.noiDung,
+                          ngayDanhGia: review.ngayDanhGia,
+                          tenSanPham: review.tenSanPham,
+                        })));
+                        setReviewContent('');
+                        setReviewRating(5);
+                        setReviewMessage('Đã gửi đánh giá thành công');
+                      } catch (error) {
+                        setReviewMessage(error instanceof Error ? error.message : 'Không thể gửi đánh giá');
+                      } finally {
+                        setReviewSubmitting(false);
+                      }
+                    }}
+                    disabled={reviewSubmitting}
+                  >
+                    {reviewSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+                  </Button>
+                </div>
+                {reviewMessage && <p className="product-detail-review-form__message">{reviewMessage}</p>}
+              </div>
+            )}
+
+            {reviewsLoading ? (
+              <p className="product-detail-reviews-empty">Đang tải đánh giá...</p>
+            ) : reviews.length > 0 ? (
               <div className="product-detail-reviews">
                 {reviews.map((review) => {
                   const reply = getReplyByReviewId(review.id);

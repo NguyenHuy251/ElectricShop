@@ -15,7 +15,7 @@ const authRouter = Router();
 authRouter.post('/login', loginController);
 authRouter.post('/register', registerController);
 authRouter.get('/me', authenticateToken, getCurrentUserController);
-authRouter.get('/accounts', authenticateToken, requireRoles('Admin'), getAccountsController);
+authRouter.get('/accounts', authenticateToken, requireRoles('Admin', 'Employee'), getAccountsController);
 authRouter.put('/change-password', authenticateToken, changePasswordController);
 authRouter.patch('/:id', authenticateToken, updateAccountController);
 authRouter.delete('/:id', authenticateToken, requireRoles('Admin'), deleteAccountController);

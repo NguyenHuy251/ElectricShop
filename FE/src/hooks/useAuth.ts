@@ -1,6 +1,7 @@
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useResetRecoilState } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import { authAtom } from '../recoil/atoms/authAtom';
+import { cartAtom } from '../recoil/atoms/cartAtom';
 import { AuthUser } from '../types';
 import {
   changePassword as changePasswordService,
@@ -25,9 +26,12 @@ const mapBackendUser = (user: {
   diaChi: string | null;
   vaiTro: string | null;
   trangThai?: boolean;
+  isEmployee?: boolean;
+  employeeRole?: 'staff' | 'supervisor' | 'manager';
 }): AuthUser => {
   const displayName = user.tenHienThi || user.tenDangNhap;
-  const isEmployee = user.vaiTro === 'Employee';
+  const normalizedRole = (user.vaiTro || '').toLowerCase();
+  const isEmployee = user.isEmployee ?? normalizedRole === 'employee';
   const isAdmin = isAdminRole(user.vaiTro);
 
   return {
@@ -41,7 +45,7 @@ const mapBackendUser = (user: {
     username: user.tenDangNhap,
     isActive: user.trangThai,
     isEmployee,
-    employeeRole: isEmployee ? 'staff' : undefined,
+    employeeRole: isEmployee ? (user.employeeRole || 'staff') : undefined,
     vaiTro: user.vaiTro || undefined,
   };
 };
@@ -63,6 +67,7 @@ const buildAvatar = (name: string): string => {
 
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useRecoilState(authAtom);
+  const resetCart = useResetRecoilState(cartAtom);
   const navigate = useNavigate();
 
   const login = async (
@@ -167,6 +172,8 @@ export const useAuth = () => {
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('cart');
+    resetCart();
     setCurrentUser(null);
     navigate('/login');
   };

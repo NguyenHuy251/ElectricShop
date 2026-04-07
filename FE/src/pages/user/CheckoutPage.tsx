@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CheckCircleOutlined, CreditCardOutlined, FileTextOutlined, HomeOutlined } from '@ant-design/icons';
-import { cartTotalSelector } from '../../recoil/selectors/cartSelectors';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
@@ -11,12 +9,27 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import '../../assets/styles/pages/user-pages.css';
 
+interface CheckoutLocationState {
+  selectedProductIds?: number[];
+}
+
 const CheckoutPage: React.FC = () => {
-  const { cart, clearCart } = useCart();
-  const total = useRecoilValue(cartTotalSelector);
+  const { cart, clearCart, removeFromCart } = useCart();
   const { currentUser } = useAuth();
   const { addOrder } = useOrders();
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as CheckoutLocationState | null;
+  const rawSelectedProductIds = locationState?.selectedProductIds;
+  const selectedProductIds: number[] = Array.isArray(rawSelectedProductIds)
+    ? rawSelectedProductIds
+    : [];
+
+  const checkoutItems = selectedProductIds.length > 0
+    ? cart.filter((item) => selectedProductIds.includes(item.productId))
+    : cart;
+
+  const total = checkoutItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   const [form, setForm] = useState({
     name: currentUser?.name || '',
@@ -39,7 +52,7 @@ const CheckoutPage: React.FC = () => {
     setTimeout(() => {
       const order = addOrder({
         userId: currentUser!.id,
-        items: cart.map((item) => ({
+        items: checkoutItems.map((item) => ({
           productId: item.productId,
           productName: item.product.name,
           price: item.product.price,
@@ -53,7 +66,13 @@ const CheckoutPage: React.FC = () => {
         note: form.note,
       });
       setOrderId(order.id);
-      clearCart();
+
+      if (selectedProductIds.length > 0) {
+        selectedProductIds.forEach((id) => removeFromCart(id));
+      } else {
+        clearCart();
+      }
+
       setSuccess(true);
       setLoading(false);
     }, 1000);
@@ -82,7 +101,7 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  if (cart.length === 0) {
+  if (checkoutItems.length === 0) {
     navigate('/cart');
     return null;
   }
@@ -171,11 +190,11 @@ const CheckoutPage: React.FC = () => {
 
           <div className="checkout-summary">
             <h3 className="checkout-summary__title">
-              <FileTextOutlined className="checkout-panel__title-icon" />Đơn hàng ({cart.length} sản phẩm)
+              <FileTextOutlined className="checkout-panel__title-icon" />Đơn hàng ({checkoutItems.length} sản phẩm)
             </h3>
 
             <div className="checkout-summary__items">
-              {cart.map((item) => (
+              {checkoutItems.map((item) => (
                 <div key={item.productId} className="checkout-summary__item">
                   <div className="checkout-summary__thumb-wrap">
                     <img

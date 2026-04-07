@@ -14,14 +14,15 @@ Da co trong source:
 
 - Authentication API
 - Product API
+- Supplier API
+- Inventory API
+- Cart API
+- Report API
+- Review API
+
 
 Dang tiep tuc:
 
-- Inventory
-- Supplier
-- Cart
-- Report
-- Review
 - Voucher
 - Employees
 - Order
@@ -56,6 +57,44 @@ http://localhost:5000
 - PATCH /api/products/:id/status
 - DELETE /api/products/:id
 - DELETE /api/products/:id/images/:imageId
+
+### Supplier
+
+- GET /api/suppliers
+- GET /api/suppliers/:id
+- POST /api/suppliers
+- PUT /api/suppliers/:id
+- DELETE /api/suppliers/:id
+
+### Inventory
+
+- GET /api/inventory/stock
+- GET /api/inventory/import-receipts
+- GET /api/inventory/import-receipts/:id
+- POST /api/inventory/import-receipts
+- DELETE /api/inventory/import-receipts/:id
+
+### Cart
+
+- GET /api/cart
+- POST /api/cart/items
+- PATCH /api/cart/items/:productId
+- DELETE /api/cart/items/:productId
+- DELETE /api/cart/clear
+
+### Report
+
+- GET /api/reports/summary
+- GET /api/reports/revenue-by-date
+- GET /api/reports/top-products
+
+### Review
+
+- GET /api/reviews
+- GET /api/reviews/product/:id
+- POST /api/reviews
+- PATCH /api/reviews/:id
+- DELETE /api/reviews/:id
 
 ## Ghi chu
 

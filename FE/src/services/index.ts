@@ -4,3 +4,6 @@ export * from './contactService';
 export * from './reviewReplyService';
 export * from './supplierService';
 export * from './inventoryService';
+export * from './cartService';
+export * from './reportService';
+export * from './reviewService';

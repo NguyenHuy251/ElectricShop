@@ -7,6 +7,9 @@ import authRouter from './routes/authRoutes.js';
 import productRouter from './routes/productRoutes.js';
 import supplierRouter from './routes/supplierRoutes.js';
 import inventoryRouter from './routes/inventoryRoutes.js';
+import cartRouter from './routes/cartRoutes.js';
+import reportRouter from './routes/reportRoutes.js';
+import reviewRouter from './routes/reviewRoutes.js';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -33,6 +36,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/products', productRouter);
 app.use('/api/suppliers', supplierRouter);
 app.use('/api/inventory', inventoryRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/reports', reportRouter);
+app.use('/api/reviews', reviewRouter);
 
 app.get('/test-db', async (_req, res) => {
   try {

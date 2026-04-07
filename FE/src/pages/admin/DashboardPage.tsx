@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { AppstoreOutlined, DollarOutlined, ShoppingCartOutlined, TeamOutlined } from '@ant-design/icons';
 import { productsAtom } from '../../recoil/atoms/productAtom';
 import { useOrders } from '../../hooks/useOrders';
-import { users } from '../../data/mockData';
-import { formatCurrency, getOrderStatusLabel, getOrderStatusColor, formatDate } from '../../utils/helpers';
+import { formatCurrency, getOrderStatusLabel, formatDate } from '../../utils/helpers';
+import { getReportSummary, getTopProducts } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; color: string }> = ({ icon, label, value, color }) => (
@@ -33,10 +33,39 @@ const DashboardPage: React.FC = () => {
   const products = useRecoilValue(productsAtom);
   const { orders } = useOrders();
   const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
+  const [reportSummary, setReportSummary] = useState({
+    tongDonHang: 0,
+    tongDoanhThu: 0,
+    tongKhachHang: 0,
+    tongSanPhamBan: 0,
+  });
+  const [topProducts, setTopProducts] = useState<Array<{ idSanPham: number; tenSanPham: string; soLuongBan: number; doanhThu: number }>>([]);
 
-  const totalRevenue = orders
-    .filter((o) => o.status === 'delivered')
-    .reduce((sum, o) => sum + o.total, 0);
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadReports = async () => {
+      try {
+        const [summaryResponse, topProductsResponse] = await Promise.all([
+          getReportSummary(),
+          getTopProducts({ topN: 5 }),
+        ]);
+
+        if (isMounted) {
+          setReportSummary(summaryResponse.data);
+          setTopProducts(topProductsResponse.data);
+        }
+      } catch (error) {
+        console.error('Không thể tải báo cáo:', error);
+      }
+    };
+
+    void loadReports();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const pendingOrders = orders.filter((o) => o.status === 'pending').length;
 
@@ -52,10 +81,10 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <div className="dashboard-stats-grid">
-        <StatCard icon={<DollarOutlined />} label="Doanh thu" value={formatCurrency(totalRevenue)} color="#10b981" />
+        <StatCard icon={<DollarOutlined />} label="Doanh thu" value={formatCurrency(reportSummary.tongDoanhThu)} color="#10b981" />
         <StatCard icon={<AppstoreOutlined />} label="Sản phẩm" value={String(products.length)} color="#2563eb" />
-        <StatCard icon={<ShoppingCartOutlined />} label="Đơn hàng" value={String(orders.length)} color="#8b5cf6" />
-        <StatCard icon={<TeamOutlined />} label="Khách hàng" value={String(users.filter((u) => u.role === 'user').length)} color="#f59e0b" />
+        <StatCard icon={<ShoppingCartOutlined />} label="Đơn hàng" value={String(reportSummary.tongDonHang)} color="#8b5cf6" />
+        <StatCard icon={<TeamOutlined />} label="Khách hàng" value={String(reportSummary.tongKhachHang)} color="#f59e0b" />
       </div>
 
       <div className="dashboard-content-grid">
@@ -122,6 +151,27 @@ const DashboardPage: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+
+          <div className="dashboard-card">
+            <h3 className="dashboard-card-title-sm">Sản phẩm bán chạy</h3>
+            {topProducts.length > 0 ? (
+              <div className="dashboard-top-products">
+                {topProducts.map((product, index) => (
+                  <div key={product.idSanPham} className="dashboard-top-product-row">
+                    <span className="dashboard-top-product-rank">#{index + 1}</span>
+                    <div className="dashboard-top-product-info">
+                      <div className="dashboard-top-product-name">{product.tenSanPham}</div>
+                      <div className="dashboard-top-product-meta">
+                        {product.soLuongBan} sản phẩm • {formatCurrency(product.doanhThu)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="dashboard-pending-label">Chưa có dữ liệu bán chạy</div>
+            )}
           </div>
 
           <div className="dashboard-card">

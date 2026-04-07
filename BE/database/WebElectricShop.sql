@@ -1,4 +1,4 @@
-﻿create database ElectricShop
+create database ElectricShop
  
  CREATE TABLE TaiKhoan(
     id INT IDENTITY PRIMARY KEY,
@@ -1516,5 +1516,623 @@ BEGIN
     WHERE id = @id;
 
     COMMIT TRANSACTION;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_LayTheoTaiKhoan', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_LayTheoTaiKhoan;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_LayTheoTaiKhoan
+    @idTaiKhoan INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        gh.id,
+        gh.idTaiKhoan,
+        gh.idSanPham,
+        gh.soLuong,
+        sp.tenSanPham,
+        sp.slug,
+        sp.giaBan,
+        sp.hinhAnh,
+        sp.trangThai
+    FROM dbo.GioHang gh
+    INNER JOIN dbo.SanPham sp ON sp.id = gh.idSanPham
+    WHERE gh.idTaiKhoan = @idTaiKhoan
+    ORDER BY gh.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_ThemCapNhat', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_ThemCapNhat;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_ThemCapNhat
+    @idTaiKhoan INT,
+    @idSanPham INT,
+    @soLuong INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @soLuong <= 0
+    BEGIN
+        RAISERROR(N'soLuong phai lon hon 0', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.SanPham WHERE id = @idSanPham AND trangThai = 1)
+    BEGIN
+        RAISERROR(N'San pham khong ton tai hoac da ngung kinh doanh', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (SELECT 1 FROM dbo.GioHang WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham)
+    BEGIN
+        UPDATE dbo.GioHang
+        SET soLuong = soLuong + @soLuong
+        WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO dbo.GioHang (idTaiKhoan, idSanPham, soLuong)
+        VALUES (@idTaiKhoan, @idSanPham, @soLuong);
+    END
+
+    EXEC dbo.sp_GioHang_LayTheoTaiKhoan @idTaiKhoan = @idTaiKhoan;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_CapNhatSoLuong', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_CapNhatSoLuong;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_CapNhatSoLuong
+    @idTaiKhoan INT,
+    @idSanPham INT,
+    @soLuong INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @soLuong < 0
+    BEGIN
+        RAISERROR(N'soLuong khong duoc am', 16, 1);
+        RETURN;
+    END
+
+    IF @soLuong = 0
+    BEGIN
+        DELETE FROM dbo.GioHang
+        WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham;
+    END
+    ELSE
+    BEGIN
+        UPDATE dbo.GioHang
+        SET soLuong = @soLuong
+        WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham;
+    END
+
+    EXEC dbo.sp_GioHang_LayTheoTaiKhoan @idTaiKhoan = @idTaiKhoan;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_XoaSanPham', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_XoaSanPham;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_XoaSanPham
+    @idTaiKhoan INT,
+    @idSanPham INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.GioHang
+    WHERE idTaiKhoan = @idTaiKhoan
+      AND idSanPham = @idSanPham;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_XoaTatCa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_XoaTatCa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_XoaTatCa
+    @idTaiKhoan INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.GioHang
+    WHERE idTaiKhoan = @idTaiKhoan;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_SanPham_CapNhatDiemDanhGia', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_SanPham_CapNhatDiemDanhGia;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_SanPham_CapNhatDiemDanhGia
+    @idSanPham INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @avgScore FLOAT;
+
+    SELECT @avgScore = AVG(CAST(soSao AS FLOAT))
+    FROM dbo.DanhGia
+    WHERE idSanPham = @idSanPham;
+
+    UPDATE dbo.SanPham
+    SET danhGia = ISNULL(@avgScore, 0)
+    WHERE id = @idSanPham;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DanhGia_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DanhGia_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DanhGia_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        dg.id,
+        dg.idSanPham,
+        dg.idTaiKhoan,
+        dg.soSao,
+        dg.noiDung,
+        dg.ngayDanhGia,
+        tk.tenDangNhap,
+        tk.tenHienThi,
+        sp.tenSanPham
+    FROM dbo.DanhGia dg
+    INNER JOIN dbo.TaiKhoan tk ON tk.id = dg.idTaiKhoan
+    INNER JOIN dbo.SanPham sp ON sp.id = dg.idSanPham
+    ORDER BY dg.ngayDanhGia DESC, dg.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DanhGia_LayTheoSanPham', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DanhGia_LayTheoSanPham;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DanhGia_LayTheoSanPham
+    @idSanPham INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        dg.id,
+        dg.idSanPham,
+        dg.idTaiKhoan,
+        dg.soSao,
+        dg.noiDung,
+        dg.ngayDanhGia,
+        tk.tenDangNhap,
+        tk.tenHienThi,
+        sp.tenSanPham
+    FROM dbo.DanhGia dg
+    INNER JOIN dbo.TaiKhoan tk ON tk.id = dg.idTaiKhoan
+    INNER JOIN dbo.SanPham sp ON sp.id = dg.idSanPham
+    WHERE dg.idSanPham = @idSanPham
+    ORDER BY dg.ngayDanhGia DESC, dg.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DanhGia_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DanhGia_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DanhGia_Them
+    @idSanPham INT,
+    @idTaiKhoan INT,
+    @soSao INT,
+    @noiDung NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @soSao < 1 OR @soSao > 5
+    BEGIN
+        RAISERROR(N'soSao phai trong khoang 1-5', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.SanPham WHERE id = @idSanPham)
+    BEGIN
+        RAISERROR(N'Khong tim thay san pham', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (SELECT 1 FROM dbo.DanhGia WHERE idSanPham = @idSanPham AND idTaiKhoan = @idTaiKhoan)
+    BEGIN
+        UPDATE dbo.DanhGia
+        SET soSao = @soSao,
+            noiDung = @noiDung,
+            ngayDanhGia = GETDATE()
+        WHERE idSanPham = @idSanPham AND idTaiKhoan = @idTaiKhoan;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO dbo.DanhGia (idSanPham, idTaiKhoan, soSao, noiDung, ngayDanhGia)
+        VALUES (@idSanPham, @idTaiKhoan, @soSao, @noiDung, GETDATE());
+    END
+
+    EXEC dbo.sp_SanPham_CapNhatDiemDanhGia @idSanPham = @idSanPham;
+
+    SELECT TOP 1
+        dg.id,
+        dg.idSanPham,
+        dg.idTaiKhoan,
+        dg.soSao,
+        dg.noiDung,
+        dg.ngayDanhGia,
+        tk.tenDangNhap,
+        tk.tenHienThi,
+        sp.tenSanPham
+    FROM dbo.DanhGia dg
+    INNER JOIN dbo.TaiKhoan tk ON tk.id = dg.idTaiKhoan
+    INNER JOIN dbo.SanPham sp ON sp.id = dg.idSanPham
+    WHERE dg.idSanPham = @idSanPham
+      AND dg.idTaiKhoan = @idTaiKhoan
+    ORDER BY dg.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DanhGia_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DanhGia_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DanhGia_Sua
+    @id INT,
+    @idTaiKhoan INT,
+    @isAdmin BIT = 0,
+    @soSao INT = NULL,
+    @noiDung NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @idSanPham INT;
+
+    SELECT @idSanPham = idSanPham
+    FROM dbo.DanhGia
+    WHERE id = @id
+      AND (@isAdmin = 1 OR idTaiKhoan = @idTaiKhoan);
+
+    IF @idSanPham IS NULL
+    BEGIN
+        RAISERROR(N'Khong tim thay danh gia hoac khong co quyen cap nhat', 16, 1);
+        RETURN;
+    END
+
+    IF @soSao IS NOT NULL AND (@soSao < 1 OR @soSao > 5)
+    BEGIN
+        RAISERROR(N'soSao phai trong khoang 1-5', 16, 1);
+        RETURN;
+    END
+
+    UPDATE dbo.DanhGia
+    SET
+        soSao = ISNULL(@soSao, soSao),
+        noiDung = ISNULL(@noiDung, noiDung),
+        ngayDanhGia = GETDATE()
+    WHERE id = @id
+      AND (@isAdmin = 1 OR idTaiKhoan = @idTaiKhoan);
+
+    EXEC dbo.sp_SanPham_CapNhatDiemDanhGia @idSanPham = @idSanPham;
+
+    SELECT TOP 1
+        dg.id,
+        dg.idSanPham,
+        dg.idTaiKhoan,
+        dg.soSao,
+        dg.noiDung,
+        dg.ngayDanhGia,
+        tk.tenDangNhap,
+        tk.tenHienThi,
+        sp.tenSanPham
+    FROM dbo.DanhGia dg
+    INNER JOIN dbo.TaiKhoan tk ON tk.id = dg.idTaiKhoan
+    INNER JOIN dbo.SanPham sp ON sp.id = dg.idSanPham
+    WHERE dg.id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DanhGia_Xoa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DanhGia_Xoa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DanhGia_Xoa
+    @id INT,
+    @idTaiKhoan INT,
+    @isAdmin BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @idSanPham INT;
+
+    SELECT @idSanPham = idSanPham
+    FROM dbo.DanhGia
+    WHERE id = @id
+      AND (@isAdmin = 1 OR idTaiKhoan = @idTaiKhoan);
+
+    IF @idSanPham IS NULL
+    BEGIN
+        RAISERROR(N'Khong tim thay danh gia hoac khong co quyen xoa', 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM dbo.DanhGia
+    WHERE id = @id
+      AND (@isAdmin = 1 OR idTaiKhoan = @idTaiKhoan);
+
+    EXEC dbo.sp_SanPham_CapNhatDiemDanhGia @idSanPham = @idSanPham;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_BaoCao_TongQuan', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_BaoCao_TongQuan;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_BaoCao_TongQuan
+    @fromDate DATETIME = NULL,
+    @toDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        COUNT(*) AS tongDonHang,
+        ISNULL(SUM(dh.tongTien), 0) AS tongDoanhThu,
+        COUNT(DISTINCT dh.idTaiKhoan) AS tongKhachHang,
+        ISNULL(SUM(ctdh.soLuong), 0) AS tongSanPhamBan
+    FROM dbo.DonHang dh
+    LEFT JOIN dbo.ChiTietDonHang ctdh ON ctdh.idDonHang = dh.id
+    WHERE (@fromDate IS NULL OR dh.ngayDatHang >= @fromDate)
+      AND (@toDate IS NULL OR dh.ngayDatHang < DATEADD(DAY, 1, @toDate))
+      AND ISNULL(dh.trangThai, N'') NOT IN (N'Da huy', N'Huy', N'Canceled', N'Cancelled');
+END
+GO
+
+IF OBJECT_ID('dbo.sp_BaoCao_DoanhThuTheoNgay', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_BaoCao_DoanhThuTheoNgay;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_BaoCao_DoanhThuTheoNgay
+    @fromDate DATETIME = NULL,
+    @toDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        CAST(dh.ngayDatHang AS DATE) AS ngay,
+        ISNULL(SUM(dh.tongTien), 0) AS doanhThu,
+        COUNT(*) AS soDonHang
+    FROM dbo.DonHang dh
+    WHERE (@fromDate IS NULL OR dh.ngayDatHang >= @fromDate)
+      AND (@toDate IS NULL OR dh.ngayDatHang < DATEADD(DAY, 1, @toDate))
+      AND ISNULL(dh.trangThai, N'') NOT IN (N'Da huy', N'Huy', N'Canceled', N'Cancelled')
+    GROUP BY CAST(dh.ngayDatHang AS DATE)
+    ORDER BY CAST(dh.ngayDatHang AS DATE) DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_BaoCao_SanPhamBanChay', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_BaoCao_SanPhamBanChay;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_BaoCao_SanPhamBanChay
+    @topN INT = 10,
+    @fromDate DATETIME = NULL,
+    @toDate DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @topN <= 0
+    BEGIN
+        SET @topN = 10;
+    END
+
+    SELECT TOP (@topN)
+        ctdh.idSanPham,
+        sp.tenSanPham,
+        SUM(ctdh.soLuong) AS soLuongBan,
+        SUM(ctdh.soLuong * ctdh.gia) AS doanhThu
+    FROM dbo.ChiTietDonHang ctdh
+    INNER JOIN dbo.DonHang dh ON dh.id = ctdh.idDonHang
+    INNER JOIN dbo.SanPham sp ON sp.id = ctdh.idSanPham
+    WHERE (@fromDate IS NULL OR dh.ngayDatHang >= @fromDate)
+      AND (@toDate IS NULL OR dh.ngayDatHang < DATEADD(DAY, 1, @toDate))
+      AND ISNULL(dh.trangThai, N'') NOT IN (N'Da huy', N'Huy', N'Canceled', N'Cancelled')
+    GROUP BY ctdh.idSanPham, sp.tenSanPham
+    ORDER BY SUM(ctdh.soLuong) DESC, SUM(ctdh.soLuong * ctdh.gia) DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_LayTheoTaiKhoan', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_LayTheoTaiKhoan;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_LayTheoTaiKhoan
+    @idTaiKhoan INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        gh.id,
+        gh.idTaiKhoan,
+        gh.idSanPham,
+        gh.idBienThe,
+        gh.soLuong,
+        sp.tenSanPham,
+        sp.slug,
+        bv.mauSac,
+        bv.dungTich,
+        bv.congSuat,
+        COALESCE(bv.giaBan, sp.giaBan) AS giaBan,
+        sp.hinhAnh,
+        sp.trangThai
+    FROM dbo.GioHang gh
+    INNER JOIN dbo.SanPham sp ON sp.id = gh.idSanPham
+    LEFT JOIN dbo.BienTheSanPham bv ON bv.id = gh.idBienThe
+    WHERE gh.idTaiKhoan = @idTaiKhoan
+    ORDER BY gh.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_ThemCapNhat', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_ThemCapNhat;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_ThemCapNhat
+    @idTaiKhoan INT,
+    @idSanPham INT,
+    @soLuong INT,
+    @idBienThe INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @soLuong <= 0
+    BEGIN
+        RAISERROR(N'soLuong phai lon hon 0', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.SanPham WHERE id = @idSanPham AND trangThai = 1)
+    BEGIN
+        RAISERROR(N'San pham khong ton tai hoac da ngung kinh doanh', 16, 1);
+        RETURN;
+    END
+
+    IF @idBienThe IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM dbo.BienTheSanPham WHERE id = @idBienThe AND idSanPham = @idSanPham)
+    BEGIN
+        RAISERROR(N'Bien the khong hop le', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.GioHang
+        WHERE idTaiKhoan = @idTaiKhoan
+          AND idSanPham = @idSanPham
+          AND ((idBienThe IS NULL AND @idBienThe IS NULL) OR idBienThe = @idBienThe)
+    )
+    BEGIN
+        UPDATE dbo.GioHang
+        SET soLuong = soLuong + @soLuong
+        WHERE idTaiKhoan = @idTaiKhoan
+          AND idSanPham = @idSanPham
+          AND ((idBienThe IS NULL AND @idBienThe IS NULL) OR idBienThe = @idBienThe);
+    END
+    ELSE
+    BEGIN
+        INSERT INTO dbo.GioHang (idTaiKhoan, idSanPham, idBienThe, soLuong)
+        VALUES (@idTaiKhoan, @idSanPham, @idBienThe, @soLuong);
+    END
+
+    EXEC dbo.sp_GioHang_LayTheoTaiKhoan @idTaiKhoan = @idTaiKhoan;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_CapNhatSoLuong', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_CapNhatSoLuong;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_CapNhatSoLuong
+    @idTaiKhoan INT,
+    @idGioHang INT,
+    @soLuong INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @soLuong < 0
+    BEGIN
+        RAISERROR(N'soLuong khong duoc am', 16, 1);
+        RETURN;
+    END
+
+    IF @soLuong = 0
+    BEGIN
+        DELETE FROM dbo.GioHang
+        WHERE idTaiKhoan = @idTaiKhoan AND id = @idGioHang;
+    END
+    ELSE
+    BEGIN
+        UPDATE dbo.GioHang
+        SET soLuong = @soLuong
+        WHERE idTaiKhoan = @idTaiKhoan AND id = @idGioHang;
+    END
+
+    EXEC dbo.sp_GioHang_LayTheoTaiKhoan @idTaiKhoan = @idTaiKhoan;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_XoaSanPham', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_XoaSanPham;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_XoaSanPham
+    @idTaiKhoan INT,
+    @idGioHang INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.GioHang
+    WHERE idTaiKhoan = @idTaiKhoan
+      AND id = @idGioHang;
 END
 GO

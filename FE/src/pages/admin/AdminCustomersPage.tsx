@@ -189,7 +189,7 @@ const AdminCustomersPage: React.FC = () => {
         <table className="admin-table">
           <thead>
             <tr className="admin-table-head-row">
-              {['Khách hàng', 'Username', 'Email', 'SĐT', 'Trạng thái', 'Thao tác'].map((h) => (
+              {['Khách hàng', 'Username', 'Email', 'SĐT', 'Trạng thái', ...(isAdmin ? ['Thao tác'] : [])].map((h) => (
                 <th key={h} className="admin-table-th">
                   {h}
                 </th>
@@ -216,29 +216,31 @@ const AdminCustomersPage: React.FC = () => {
                     {account.isActive === false ? 'Đã khóa' : 'Hoạt động'}
                   </Badge>
                 </td>
-                <td className="admin-table-cell admin-table-actions">
-                  <Button
-                    size="sm"
-                    onClick={() => handleEdit(account)}
-                    disabled={!isAdmin || account.isActive === false}
-                  >
-                    Sửa
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => void handleDelete(account)}
-                    disabled={!isAdmin || account.isActive === false}
-                    loading={deletingId === account.id}
-                  >
-                    Xóa
-                  </Button>
-                </td>
+                {isAdmin && (
+                  <td className="admin-table-cell admin-table-actions">
+                    <Button
+                      size="sm"
+                      onClick={() => handleEdit(account)}
+                      disabled={account.isActive === false}
+                    >
+                      Sửa
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => void handleDelete(account)}
+                      disabled={account.isActive === false}
+                      loading={deletingId === account.id}
+                    >
+                      Xóa
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="admin-empty-state">
+                <td colSpan={isAdmin ? 6 : 5} className="admin-empty-state">
                   Không tìm thấy khách hàng
                 </td>
               </tr>
