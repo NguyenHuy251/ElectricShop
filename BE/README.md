@@ -19,15 +19,15 @@ Da co trong source:
 - Cart API
 - Report API
 - Review API
+- Voucher API
+- Employees API
+- Orders API
 
 
 Dang tiep tuc:
 
-- Voucher
-- Employees
-- Order
 - Invoice
-- Customer
+- Customer(khach hang)
 - News
 
 ## Base URL
@@ -96,7 +96,31 @@ http://localhost:5000
 - PATCH /api/reviews/:id
 - DELETE /api/reviews/:id
 
+### Voucher
+
+- GET /api/vouchers
+- GET /api/vouchers/:id
+- POST /api/vouchers
+- PUT /api/vouchers/:id
+- DELETE /api/vouchers/:id
+
+### Employees
+
+- GET /api/employees
+- GET /api/employees/:id
+- POST /api/employees
+- PUT /api/employees/:id
+- DELETE /api/employees/:id
+
+### Orders
+
+- GET /api/orders
+- GET /api/orders/my
+- POST /api/orders
+- PATCH /api/orders/:id/status
+
 ## Ghi chu
 
 - Project BE hien tai doc bien moi truong tu file .env trong thu muc BE.
 - Dong bo database bang file database/WebElectricShop.sql truoc khi test API.
+- Can chay script proc moi trong database/WebElectricShop.sql de su dung Voucher/Employees/Orders API.

@@ -1,37 +1,89 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { authAtom } from '../recoil/atoms/authAtom';
+import { createOrder, getMyOrders, getOrders, updateOrderStatus } from '../services';
 import { Order, OrderStatus } from '../types';
-import { orders as mockOrders } from '../data/mockData';
 
 export const useOrders = (userId?: number) => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const currentUser = useRecoilValue(authAtom);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  const canViewAll = currentUser?.role === 'admin' || currentUser?.isEmployee;
+
+  const loadOrders = useCallback(async () => {
+    if (!currentUser) {
+      setOrders([]);
+      setInitialized(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = userId || !canViewAll ? await getMyOrders() : await getOrders();
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Khong the tai don hang:', error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+      setInitialized(true);
+    }
+  }, [canViewAll, currentUser, userId]);
+
+  useEffect(() => {
+    void loadOrders();
+  }, [loadOrders]);
 
   const userOrders = userId
     ? orders.filter((o) => o.userId === userId)
     : orders;
 
   const addOrder = useCallback(
-    (order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Order => {
-      const newOrder: Order = {
-        ...order,
-        id: Date.now(),
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-      };
+    async (order: {
+      items: Array<{
+        productId: number;
+        quantity: number;
+      }>;
+      address: string;
+      phone?: string;
+      note?: string;
+      paymentMethod?: string;
+    }): Promise<Order> => {
+      const response = await createOrder(order);
+      const newOrder = response.data;
       setOrders((prev) => [newOrder, ...prev]);
       return newOrder;
     },
     []
   );
 
-  const updateOrderStatus = useCallback((orderId: number, status: OrderStatus) => {
+  const updateOrderStatusById = useCallback(async (orderId: number, status: OrderStatus, confirmedBy?: string) => {
+    await updateOrderStatus(orderId, status);
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
-          ? { ...o, status, updatedAt: new Date().toISOString().split('T')[0] }
-          : o
-      )
+          ? {
+              ...o,
+              status,
+              confirmedBy: confirmedBy ?? o.confirmedBy,
+            }
+          : o,
+      ),
     );
   }, []);
 
-  return { orders, userOrders, addOrder, updateOrderStatus };
+  const recentOrders = useMemo(() => orders.slice(0, 5), [orders]);
+
+  return {
+    orders,
+    userOrders,
+    addOrder,
+    updateOrderStatus: updateOrderStatusById,
+    recentOrders,
+    loading,
+    initialized,
+    reloadOrders: loadOrders,
+  };
 };

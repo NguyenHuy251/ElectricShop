@@ -1,11 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CopyOutlined, GiftOutlined, TagOutlined } from '@ant-design/icons';
-import { vouchers } from '../../data/mockData';
+import { getVouchers } from '../../services';
+import { Voucher } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import '../../assets/styles/pages/content.css';
 
 const VouchersPage: React.FC = () => {
   const today = new Date();
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadVouchers = async () => {
+      setLoading(true);
+      try {
+        const response = await getVouchers();
+        if (isMounted) {
+          setVouchers(response.data);
+        }
+      } catch (error) {
+        console.error('Khong the tai voucher:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadVouchers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="vouchers-page">
@@ -19,6 +48,7 @@ const VouchersPage: React.FC = () => {
       </div>
 
       <div className="vouchers-list">
+        {loading && <p>Dang tai voucher...</p>}
         {vouchers.map((voucher) => {
           const expired = !voucher.isActive || new Date(voucher.expiredAt) < today;
           const discountLabel =

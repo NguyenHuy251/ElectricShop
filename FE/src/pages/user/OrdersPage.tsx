@@ -12,8 +12,16 @@ const getOrderStatusClass = (status: Order['status']) => `order-status order-sta
 
 const OrdersPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const { userOrders } = useOrders(currentUser?.id);
+  const { userOrders, loading } = useOrders(currentUser?.id);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  if (loading) {
+    return (
+      <div className="orders-empty">
+        <h2 className="orders-empty__title">Dang tai don hang...</h2>
+      </div>
+    );
+  }
 
   if (userOrders.length === 0) {
     return (

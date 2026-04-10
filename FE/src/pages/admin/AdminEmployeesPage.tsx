@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { formatDate, formatCurrency } from '../../utils/helpers';
+import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 export interface Employee {
@@ -94,7 +95,8 @@ const initialEmployees: Employee[] = [
 ];
 
 const AdminEmployeesPage: React.FC = () => {
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [formData, setFormData] = useState({
@@ -109,6 +111,32 @@ const AdminEmployeesPage: React.FC = () => {
     luongCoBan: '',
     trangThai: true,
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadEmployees = async () => {
+      setLoading(true);
+      try {
+        const response = await getEmployees();
+        if (isMounted) {
+          setEmployees(response.data);
+        }
+      } catch (error) {
+        console.error('Khong the tai nhan vien:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadEmployees();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleOpenModal = (employee?: Employee) => {
     if (employee) {
@@ -156,7 +184,7 @@ const AdminEmployeesPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.maNhanVien || !formData.hoTen || !formData.email || !formData.chucVu || !formData.boPhan) {
@@ -164,41 +192,52 @@ const AdminEmployeesPage: React.FC = () => {
       return;
     }
 
-    if (editingEmployee) {
-      setEmployees((prev) =>
-        prev.map((emp) =>
-          emp.id === editingEmployee.id
-            ? {
-                ...emp,
-                ...formData,
-                luongCoBan: parseFloat(formData.luongCoBan),
-              }
-            : emp
-        )
-      );
-    } else {
-      const newEmployee: Employee = {
-        id: Math.max(...employees.map((e) => e.id), 0) + 1,
-        idTaiKhoan: Math.max(...employees.map((e) => e.idTaiKhoan), 0) + 1,
-        ...formData,
-        luongCoBan: parseFloat(formData.luongCoBan),
+    try {
+      const payload = {
+        maNhanVien: formData.maNhanVien,
+        hoTen: formData.hoTen,
+        sdt: formData.sdt,
+        email: formData.email,
+        diaChi: formData.diaChi,
+        chucVu: formData.chucVu,
+        boPhan: formData.boPhan,
+        ngayVaoLam: formData.ngayVaoLam,
+        luongCoBan: formData.luongCoBan ? parseFloat(formData.luongCoBan) : 0,
+        trangThai: formData.trangThai,
       };
-      setEmployees((prev) => [...prev, newEmployee]);
-    }
 
-    handleCloseModal();
+      if (editingEmployee) {
+        const response = await updateEmployee(editingEmployee.id, payload);
+        setEmployees((prev) => prev.map((emp) => (emp.id === editingEmployee.id ? response.data : emp)));
+      } else {
+        const response = await createEmployee(payload);
+        setEmployees((prev) => [response.data, ...prev]);
+      }
+
+      handleCloseModal();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the luu nhan vien');
+    }
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
-      setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+      try {
+        await deleteEmployee(id);
+        setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : 'Khong the xoa nhan vien');
+      }
     }
   };
 
-  const handleStatusChange = (id: number, newStatus: boolean) => {
-    setEmployees((prev) =>
-      prev.map((emp) => (emp.id === id ? { ...emp, trangThai: newStatus } : emp))
-    );
+  const handleStatusChange = async (id: number, newStatus: boolean) => {
+    try {
+      const response = await updateEmployee(id, { trangThai: newStatus });
+      setEmployees((prev) => prev.map((emp) => (emp.id === id ? response.data : emp)));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the cap nhat trang thai');
+    }
   };
 
   return (
@@ -211,6 +250,8 @@ const AdminEmployeesPage: React.FC = () => {
           <PlusOutlined /> Thêm nhân viên
         </button>
       </div>
+
+      {loading && <div className="admin-info-box">Dang tai nhan vien...</div>}
 
       <div className="admin-import-table-wrap">
         <table className="admin-table">

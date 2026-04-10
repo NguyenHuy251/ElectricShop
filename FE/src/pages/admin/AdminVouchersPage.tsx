@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, GiftOutlined, PlusOutlined, TagOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
-import { vouchers as initialVouchers } from '../../data/mockData';
 import { useAuth } from '../../hooks/useAuth';
 import { Voucher } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
+import { createVoucher, deleteVoucher, getVouchers, updateVoucher } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 type VoucherFormState = {
@@ -35,10 +35,37 @@ const AdminVouchersPage: React.FC = () => {
   const { currentUser } = useAuth();
   const isReadOnly = currentUser?.isEmployee ?? false;
 
-  const [voucherList, setVoucherList] = useState<Voucher[]>(initialVouchers);
+  const [voucherList, setVoucherList] = useState<Voucher[]>([]);
+  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const [form, setForm] = useState<VoucherFormState>(emptyForm);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadVouchers = async () => {
+      setLoading(true);
+      try {
+        const response = await getVouchers();
+        if (isMounted) {
+          setVoucherList(response.data);
+        }
+      } catch (error) {
+        console.error('Khong the tai voucher:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadVouchers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const totalActive = useMemo(
     () => voucherList.filter((v) => v.isActive && new Date(v.expiredAt) >= new Date()).length,
@@ -72,13 +99,19 @@ const AdminVouchersPage: React.FC = () => {
     setEditingVoucher(null);
   };
 
-  const handleDeleteVoucher = (id: number) => {
+  const handleDeleteVoucher = async (id: number) => {
     const shouldDelete = window.confirm('Bạn có chắc muốn xóa voucher này không?');
     if (!shouldDelete) return;
-    setVoucherList((prev) => prev.filter((item) => item.id !== id));
+
+    try {
+      await deleteVoucher(id);
+      setVoucherList((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the xoa voucher');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.code.trim() || !form.title.trim() || !form.discountValue.trim() || !form.minOrderValue.trim() || !form.expiredAt) {
@@ -95,30 +128,27 @@ const AdminVouchersPage: React.FC = () => {
       return;
     }
 
-    const payload: Omit<Voucher, 'id'> = {
-      code: form.code.trim().toUpperCase(),
-      title: form.title.trim(),
-      description: form.description.trim(),
-      discountType: form.discountType,
-      discountValue,
-      minOrderValue,
-      maxDiscountValue,
-      expiredAt: form.expiredAt,
-      isActive: form.isActive,
-    };
+    try {
+      const requestPayload = {
+        maVoucher: form.code.trim().toUpperCase(),
+        loaiGiam: form.discountType,
+        giaTri: discountValue,
+        ngayKetThuc: form.expiredAt,
+        soLuong: form.isActive ? 999 : 0,
+      };
 
-    if (editingVoucher) {
-      setVoucherList((prev) =>
-        prev.map((voucher) => (voucher.id === editingVoucher.id ? { ...voucher, ...payload } : voucher)),
-      );
-    } else {
-      setVoucherList((prev) => {
-        const nextId = prev.length > 0 ? Math.max(...prev.map((v) => v.id)) + 1 : 1;
-        return [...prev, { id: nextId, ...payload }];
-      });
+      if (editingVoucher) {
+        const updated = await updateVoucher(editingVoucher.id, requestPayload);
+        setVoucherList((prev) => prev.map((voucher) => (voucher.id === editingVoucher.id ? updated.data : voucher)));
+      } else {
+        const created = await createVoucher(requestPayload);
+        setVoucherList((prev) => [created.data, ...prev]);
+      }
+
+      closeModal();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the luu voucher');
     }
-
-    closeModal();
   };
 
   return (
@@ -136,6 +166,8 @@ const AdminVouchersPage: React.FC = () => {
           <PlusOutlined />Thêm voucher
         </button>}
       </div>
+
+      {loading && <div className="admin-info-box">Dang tai voucher...</div>}
 
       <div className="admin-news-wrap">
         <table className="admin-table">

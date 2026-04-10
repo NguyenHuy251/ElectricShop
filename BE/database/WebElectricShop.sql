@@ -2136,3 +2136,472 @@ BEGIN
       AND id = @idGioHang;
 END
 GO
+
+IF OBJECT_ID('dbo.sp_Voucher_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_Voucher_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_Voucher_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        id,
+        maVoucher,
+        loaiGiam,
+        giaTri,
+        ngayBatDau,
+        ngayKetThuc,
+        soLuong
+    FROM dbo.Voucher
+    ORDER BY id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_Voucher_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_Voucher_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_Voucher_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        id,
+        maVoucher,
+        loaiGiam,
+        giaTri,
+        ngayBatDau,
+        ngayKetThuc,
+        soLuong
+    FROM dbo.Voucher
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_Voucher_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_Voucher_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_Voucher_Them
+    @maVoucher NVARCHAR(50),
+    @loaiGiam NVARCHAR(50),
+    @giaTri FLOAT,
+    @ngayBatDau DATETIME = NULL,
+    @ngayKetThuc DATETIME,
+    @soLuong INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.Voucher (maVoucher, loaiGiam, giaTri, ngayBatDau, ngayKetThuc, soLuong)
+    VALUES (@maVoucher, @loaiGiam, @giaTri, ISNULL(@ngayBatDau, GETDATE()), @ngayKetThuc, @soLuong);
+
+    SELECT TOP 1
+        id,
+        maVoucher,
+        loaiGiam,
+        giaTri,
+        ngayBatDau,
+        ngayKetThuc,
+        soLuong
+    FROM dbo.Voucher
+    WHERE id = SCOPE_IDENTITY();
+END
+GO
+
+IF OBJECT_ID('dbo.sp_Voucher_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_Voucher_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_Voucher_Sua
+    @id INT,
+    @maVoucher NVARCHAR(50) = NULL,
+    @loaiGiam NVARCHAR(50) = NULL,
+    @giaTri FLOAT = NULL,
+    @ngayBatDau DATETIME = NULL,
+    @ngayKetThuc DATETIME = NULL,
+    @soLuong INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Voucher
+    SET
+        maVoucher = ISNULL(@maVoucher, maVoucher),
+        loaiGiam = ISNULL(@loaiGiam, loaiGiam),
+        giaTri = ISNULL(@giaTri, giaTri),
+        ngayBatDau = ISNULL(@ngayBatDau, ngayBatDau),
+        ngayKetThuc = ISNULL(@ngayKetThuc, ngayKetThuc),
+        soLuong = ISNULL(@soLuong, soLuong)
+    WHERE id = @id;
+
+    SELECT TOP 1
+        id,
+        maVoucher,
+        loaiGiam,
+        giaTri,
+        ngayBatDau,
+        ngayKetThuc,
+        soLuong
+    FROM dbo.Voucher
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_Voucher_Xoa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_Voucher_Xoa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_Voucher_Xoa
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.Voucher
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhanVien_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhanVien_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhanVien_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        nv.id,
+        nv.idTaiKhoan,
+        nv.maNhanVien,
+        nv.hoTen,
+        nv.sdt,
+        nv.email,
+        nv.diaChi,
+        nv.chucVu,
+        nv.boPhan,
+        nv.ngayVaoLam,
+        nv.luongCoBan,
+        nv.trangThai
+    FROM dbo.NhanVien nv
+    ORDER BY nv.id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhanVien_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhanVien_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhanVien_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        nv.id,
+        nv.idTaiKhoan,
+        nv.maNhanVien,
+        nv.hoTen,
+        nv.sdt,
+        nv.email,
+        nv.diaChi,
+        nv.chucVu,
+        nv.boPhan,
+        nv.ngayVaoLam,
+        nv.luongCoBan,
+        nv.trangThai
+    FROM dbo.NhanVien nv
+    WHERE nv.id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhanVien_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhanVien_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhanVien_Them
+    @idTaiKhoan INT = NULL,
+    @maNhanVien NVARCHAR(50),
+    @hoTen NVARCHAR(100),
+    @sdt NVARCHAR(20) = NULL,
+    @email NVARCHAR(100) = NULL,
+    @diaChi NVARCHAR(255) = NULL,
+    @chucVu NVARCHAR(100) = NULL,
+    @boPhan NVARCHAR(100) = NULL,
+    @ngayVaoLam DATE = NULL,
+    @luongCoBan FLOAT = NULL,
+    @trangThai BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @idTaiKhoan IS NULL
+    BEGIN
+        DECLARE @tenDangNhap NVARCHAR(50);
+        DECLARE @baseTenDangNhap NVARCHAR(50);
+        DECLARE @index INT;
+
+        SET @baseTenDangNhap = LOWER(REPLACE(@maNhanVien, ' ', ''));
+        SET @tenDangNhap = @baseTenDangNhap;
+        SET @index = 1;
+
+        WHILE EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE tenDangNhap = @tenDangNhap)
+        BEGIN
+            SET @tenDangNhap = CONCAT(@baseTenDangNhap, @index);
+            SET @index = @index + 1;
+        END
+
+        INSERT INTO dbo.TaiKhoan (tenDangNhap, matKhau, tenHienThi, email, sdt, diaChi, vaiTro, trangThai)
+        VALUES (@tenDangNhap, '123456', @hoTen, @email, @sdt, @diaChi, 'Employee', 1);
+
+        SET @idTaiKhoan = SCOPE_IDENTITY();
+    END
+
+    INSERT INTO dbo.NhanVien
+    (
+        idTaiKhoan,
+        maNhanVien,
+        hoTen,
+        sdt,
+        email,
+        diaChi,
+        chucVu,
+        boPhan,
+        ngayVaoLam,
+        luongCoBan,
+        trangThai
+    )
+    VALUES
+    (
+        @idTaiKhoan,
+        @maNhanVien,
+        @hoTen,
+        @sdt,
+        @email,
+        @diaChi,
+        @chucVu,
+        @boPhan,
+        ISNULL(@ngayVaoLam, CAST(GETDATE() AS DATE)),
+        @luongCoBan,
+        @trangThai
+    );
+
+    SELECT TOP 1
+        nv.id,
+        nv.idTaiKhoan,
+        nv.maNhanVien,
+        nv.hoTen,
+        nv.sdt,
+        nv.email,
+        nv.diaChi,
+        nv.chucVu,
+        nv.boPhan,
+        nv.ngayVaoLam,
+        nv.luongCoBan,
+        nv.trangThai
+    FROM dbo.NhanVien nv
+    WHERE nv.id = SCOPE_IDENTITY();
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhanVien_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhanVien_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhanVien_Sua
+    @id INT,
+    @maNhanVien NVARCHAR(50) = NULL,
+    @hoTen NVARCHAR(100) = NULL,
+    @sdt NVARCHAR(20) = NULL,
+    @email NVARCHAR(100) = NULL,
+    @diaChi NVARCHAR(255) = NULL,
+    @chucVu NVARCHAR(100) = NULL,
+    @boPhan NVARCHAR(100) = NULL,
+    @ngayVaoLam DATE = NULL,
+    @luongCoBan FLOAT = NULL,
+    @trangThai BIT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.NhanVien
+    SET
+        maNhanVien = ISNULL(@maNhanVien, maNhanVien),
+        hoTen = ISNULL(@hoTen, hoTen),
+        sdt = ISNULL(@sdt, sdt),
+        email = ISNULL(@email, email),
+        diaChi = ISNULL(@diaChi, diaChi),
+        chucVu = ISNULL(@chucVu, chucVu),
+        boPhan = ISNULL(@boPhan, boPhan),
+        ngayVaoLam = ISNULL(@ngayVaoLam, ngayVaoLam),
+        luongCoBan = ISNULL(@luongCoBan, luongCoBan),
+        trangThai = ISNULL(@trangThai, trangThai)
+    WHERE id = @id;
+
+    SELECT TOP 1
+        nv.id,
+        nv.idTaiKhoan,
+        nv.maNhanVien,
+        nv.hoTen,
+        nv.sdt,
+        nv.email,
+        nv.diaChi,
+        nv.chucVu,
+        nv.boPhan,
+        nv.ngayVaoLam,
+        nv.luongCoBan,
+        nv.trangThai
+    FROM dbo.NhanVien nv
+    WHERE nv.id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_NhanVien_Xoa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_NhanVien_Xoa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_NhanVien_Xoa
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.NhanVien
+    SET trangThai = 0
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DonHang_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DonHang_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DonHang_LayDanhSach
+    @idTaiKhoan INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        dh.id,
+        dh.maDonHang,
+        dh.idTaiKhoan,
+        dh.idNhanVienXuly,
+        dh.tongTien,
+        dh.trangThai,
+        dh.diaChi,
+        dh.phuongThucThanhToan,
+        dh.ngayDatHang,
+        tk.sdt AS soDienThoai,
+        nv.hoTen AS tenNguoiXacNhan,
+        ctdh.idSanPham,
+        sp.tenSanPham,
+        sp.hinhAnh,
+        ctdh.gia,
+        ctdh.soLuong
+    FROM dbo.DonHang dh
+    INNER JOIN dbo.TaiKhoan tk ON tk.id = dh.idTaiKhoan
+    LEFT JOIN dbo.NhanVien nv ON nv.id = dh.idNhanVienXuly
+    LEFT JOIN dbo.ChiTietDonHang ctdh ON ctdh.idDonHang = dh.id
+    LEFT JOIN dbo.SanPham sp ON sp.id = ctdh.idSanPham
+    WHERE @idTaiKhoan IS NULL OR dh.idTaiKhoan = @idTaiKhoan
+    ORDER BY dh.id DESC, ctdh.id ASC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DonHang_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DonHang_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DonHang_Them
+    @idTaiKhoan INT,
+    @diaChi NVARCHAR(MAX),
+    @phuongThucThanhToan NVARCHAR(50),
+    @tongTien FLOAT,
+    @trangThai NVARCHAR(50) = 'pending'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @maDonHang NVARCHAR(50);
+    SET @maDonHang = CONCAT('DH', RIGHT(CONCAT('000000', CAST(ABS(CHECKSUM(NEWID())) % 1000000 AS NVARCHAR(10))), 6));
+
+    INSERT INTO dbo.DonHang (maDonHang, idTaiKhoan, tongTien, trangThai, diaChi, phuongThucThanhToan, ngayDatHang)
+    VALUES (@maDonHang, @idTaiKhoan, @tongTien, @trangThai, @diaChi, @phuongThucThanhToan, GETDATE());
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT) AS id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DonHang_ThemChiTiet', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DonHang_ThemChiTiet;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DonHang_ThemChiTiet
+    @idDonHang INT,
+    @idSanPham INT,
+    @gia FLOAT,
+    @soLuong INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.ChiTietDonHang (idDonHang, idSanPham, gia, soLuong)
+    VALUES (@idDonHang, @idSanPham, @gia, @soLuong);
+END
+GO
+
+IF OBJECT_ID('dbo.sp_DonHang_CapNhatTrangThai', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_DonHang_CapNhatTrangThai;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_DonHang_CapNhatTrangThai
+    @id INT,
+    @trangThai NVARCHAR(50),
+    @idNhanVienXuly INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.DonHang
+    SET
+        trangThai = @trangThai,
+        idNhanVienXuly = ISNULL(@idNhanVienXuly, idNhanVienXuly)
+    WHERE id = @id;
+END
+GO

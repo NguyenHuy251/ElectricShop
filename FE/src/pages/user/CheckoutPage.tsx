@@ -46,24 +46,19 @@ const CheckoutPage: React.FC = () => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      const order = addOrder({
-        userId: currentUser!.id,
+    try {
+      const order = await addOrder({
         items: checkoutItems.map((item) => ({
           productId: item.productId,
-          productName: item.product.name,
-          price: item.product.price,
           quantity: item.quantity,
-          image: item.product.images[0],
         })),
-        total,
-        status: 'pending',
         address: form.address,
         phone: form.phone,
         note: form.note,
+        paymentMethod: form.payment,
       });
       setOrderId(order.id);
 
@@ -74,8 +69,11 @@ const CheckoutPage: React.FC = () => {
       }
 
       setSuccess(true);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the tao don hang');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   if (success) {

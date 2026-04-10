@@ -63,6 +63,7 @@ export interface Order {
   note: string;
   createdAt: string;
   updatedAt: string;
+  confirmedBy?: string;
 }
 
 export interface AuthUser {

@@ -14,7 +14,7 @@ const ALL_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'shipping', 'delive
 const AdminOrdersPage: React.FC = () => {
   const { currentUser } = useAuth();
 
-  const { orders, updateOrderStatus } = useOrders();
+  const { orders, updateOrderStatus, loading } = useOrders();
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -61,11 +61,14 @@ const AdminOrdersPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={8} className="admin-orders-empty">
+                  Dang tai don hang...
+                </td>
+              </tr>
+            )}
             {filtered.map((order) => {
-              // Mock data for confirmed by employee
-              const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
-              const confirmedBy = employees[order.id % employees.length];
-
               return (
                 <tr key={order.id} className="admin-table-row">
                   <td className="admin-orders-id">#{order.id}</td>
@@ -85,7 +88,7 @@ const AdminOrdersPage: React.FC = () => {
                     {formatCurrency(order.total)}
                   </td>
                   <td className="admin-orders-confirmed-by">
-                    {order.status !== 'pending' ? confirmedBy : '-'}
+                    {order.status !== 'pending' ? (order.confirmedBy || '-') : '-'}
                   </td>
                   <td className="admin-orders-status">
                     <Badge
@@ -131,9 +134,9 @@ const AdminOrdersPage: React.FC = () => {
                 {ALL_STATUSES.map((s) => (
                   <button
                     key={s}
-                    onClick={() => {
-                      updateOrderStatus(selectedOrder.id, s);
-                      setSelectedOrder((prev) => prev ? { ...prev, status: s } : prev);
+                    onClick={async () => {
+                      await updateOrderStatus(selectedOrder.id, s, currentUser?.name || '');
+                      setSelectedOrder((prev) => prev ? { ...prev, status: s, confirmedBy: currentUser?.name || prev.confirmedBy } : prev);
                     }}
                     style={statusButtonStyle(selectedOrder.status === s, s)}
                     className="admin-orders-status-btn"
