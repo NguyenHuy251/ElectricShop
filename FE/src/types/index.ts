@@ -45,25 +45,38 @@ export interface User {
 export type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
 export interface OrderItem {
-  productId: number;
-  productName: string;
-  price: number;
-  quantity: number;
-  image: string;
+  idSanPham: number;
+  tenSanPham: string;
+  gia: number;
+  soLuong: number;
+  hinhAnh: string;
 }
 
 export interface Order {
   id: number;
-  userId: number;
-  items: OrderItem[];
-  total: number;
-  status: OrderStatus;
-  address: string;
-  phone: string;
-  note: string;
-  createdAt: string;
-  updatedAt: string;
-  confirmedBy?: string;
+  idTaiKhoan: number;
+  chiTiet: OrderItem[];
+  tongTien: number;
+  trangThai: OrderStatus;
+  diaChi: string;
+  soDienThoai: string;
+  ghiChu: string;
+  ngayDatHang: string;
+  ngayCapNhat: string;
+  tenNguoiXacNhan?: string;
+}
+
+export interface Invoice {
+  idDonHang: number;
+  maDonHang: string;
+  maHoaDon: string;
+  idTaiKhoan: number;
+  tongTien: number;
+  trangThai: string;
+  diaChi: string;
+  phuongThucThanhToan: string;
+  ngayDatHang: string;
+  soDienThoai: string;
 }
 
 export interface AuthUser {
@@ -119,13 +132,28 @@ export interface Employee {
 
 export interface NewsArticle {
   id: number;
-  title: string;
+  tieuDe: string;
   slug: string;
-  content: string;
-  image: string;
-  publishedAt: string;
+  noiDung: string;
+  hinhAnh: string;
+  ngayDang: string;
   idNhanVienDang?: number;
   tenNhanVienDang?: string;
+}
+
+export interface Customer {
+  id: number;
+  idTaiKhoan: number;
+  maKhachHang: string;
+  hoTen: string;
+  ngaySinh: string;
+  gioiTinh: string;
+  ghiChu: string;
+  trangThai: boolean;
+  tenDangNhap: string;
+  email: string;
+  sdt: string;
+  diaChi: string;
 }
 
 export interface ContactMessage {

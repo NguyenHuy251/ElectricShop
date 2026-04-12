@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
+import { useCategories } from '../../hooks/useCategories';
 import { useAuth } from '../../hooks/useAuth';
-import { categories } from '../../data/mockData';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
@@ -30,6 +30,7 @@ const AdminProductsPage: React.FC = () => {
   const isReadOnly = currentUser?.isEmployee ?? false;
 
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { categories } = useCategories();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);

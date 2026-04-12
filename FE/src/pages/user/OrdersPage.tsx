@@ -5,15 +5,17 @@ import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency, formatDate, getOrderStatusLabel } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
-import { Order } from '../../types';
+import { Invoice, Order } from '../../types';
+import { getInvoiceByOrder } from '../../services';
 import '../../assets/styles/pages/user-pages.css';
 
-const getOrderStatusClass = (status: Order['status']) => `order-status order-status--${status}`;
+const getOrderStatusClass = (status: Order['trangThai']) => `order-status order-status--${status}`;
 
 const OrdersPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { userOrders, loading } = useOrders(currentUser?.id);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   if (loading) {
     return (
@@ -47,30 +49,42 @@ const OrdersPage: React.FC = () => {
             <div className="orders-card__header">
               <div>
                 <div className="orders-card__id">Đơn hàng #{order.id}</div>
-                <div className="orders-card__date">{formatDate(order.createdAt)}</div>
+                <div className="orders-card__date">{formatDate(order.ngayDatHang)}</div>
               </div>
-              <span className={getOrderStatusClass(order.status)}>{getOrderStatusLabel(order.status)}</span>
+              <span className={getOrderStatusClass(order.trangThai)}>{getOrderStatusLabel(order.trangThai)}</span>
             </div>
 
             <div className="orders-card__preview">
-              {order.items.map((item) => (
-                <div key={item.productId} className="orders-card__item">
+              {order.chiTiet.map((item) => (
+                <div key={item.idSanPham} className="orders-card__item">
                   <img
-                    src={item.image}
-                    alt={item.productName}
+                    src={item.hinhAnh}
+                    alt={item.tenSanPham}
                     className="orders-card__thumb"
                   />
                   <div>
-                    <div className="orders-card__item-name">{item.productName}</div>
-                    <div className="orders-card__item-qty">x{item.quantity}</div>
+                    <div className="orders-card__item-name">{item.tenSanPham}</div>
+                    <div className="orders-card__item-qty">x{item.soLuong}</div>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="orders-card__footer">
-              <div className="orders-card__total">Tổng: {formatCurrency(order.total)}</div>
-              <Button variant="outline" size="sm" onClick={() => setSelectedOrder(order)}>
+              <div className="orders-card__total">Tổng: {formatCurrency(order.tongTien)}</div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  setSelectedOrder(order);
+                  try {
+                    const invoiceResponse = await getInvoiceByOrder(order.id);
+                    setSelectedInvoice(invoiceResponse.data);
+                  } catch {
+                    setSelectedInvoice(null);
+                  }
+                }}
+              >
                 Xem chi tiết
               </Button>
             </div>
@@ -89,37 +103,37 @@ const OrdersPage: React.FC = () => {
             <div className="order-detail__summary-grid">
               <div>
                 <div className="order-detail__label">Ngày đặt hàng</div>
-                <div className="order-detail__value">{formatDate(selectedOrder.createdAt)}</div>
+                <div className="order-detail__value">{formatDate(selectedOrder.ngayDatHang)}</div>
               </div>
               <div>
                 <div className="order-detail__label">Trạng thái</div>
-                <span className={`${getOrderStatusClass(selectedOrder.status)} order-detail__status`}>
-                  {getOrderStatusLabel(selectedOrder.status)}
+                <span className={`${getOrderStatusClass(selectedOrder.trangThai)} order-detail__status`}>
+                  {getOrderStatusLabel(selectedOrder.trangThai)}
                 </span>
               </div>
               <div>
                 <div className="order-detail__label">Thanh toán</div>
-                <div className="order-detail__value">Tiền mặt (COD)</div>
+                <div className="order-detail__value">{selectedInvoice?.phuongThucThanhToan || 'Tien mat (COD)'}</div>
               </div>
               <div>
                 <div className="order-detail__label">Địa chỉ giao hàng</div>
-                <div className="order-detail__value">{selectedOrder.address}</div>
+                <div className="order-detail__value">{selectedOrder.diaChi}</div>
               </div>
             </div>
 
             <h4 className="order-detail__section-title">Sản phẩm đặt mua</h4>
             <div className="order-detail__items">
-              {selectedOrder.items.map((item) => (
-                <div key={item.productId} className="order-detail__item">
-                  <img src={item.image} alt={item.productName} className="order-detail__thumb" />
+              {selectedOrder.chiTiet.map((item) => (
+                <div key={item.idSanPham} className="order-detail__item">
+                  <img src={item.hinhAnh} alt={item.tenSanPham} className="order-detail__thumb" />
                   <div className="order-detail__item-body">
-                    <div className="order-detail__item-name">{item.productName}</div>
+                    <div className="order-detail__item-name">{item.tenSanPham}</div>
                     <div className="order-detail__item-meta">
-                      {formatCurrency(item.price)} x {item.quantity}
+                      {formatCurrency(item.gia)} x {item.soLuong}
                     </div>
                   </div>
                   <div className="order-detail__item-total">
-                    {formatCurrency(item.price * item.quantity)}
+                    {formatCurrency(item.gia * item.soLuong)}
                   </div>
                 </div>
               ))}
@@ -128,24 +142,37 @@ const OrdersPage: React.FC = () => {
             <div className="order-detail__summary">
               <div>
                 <div className="order-detail__label">Địa chỉ giao hàng</div>
-                <div className="order-detail__value">{selectedOrder.address}</div>
+                <div className="order-detail__value">{selectedOrder.diaChi}</div>
               </div>
               <div>
                 <div className="order-detail__label">Số điện thoại</div>
                 <div className="order-detail__value">
-                  <PhoneOutlined className="order-detail__note-icon" />{selectedOrder.phone}
+                  <PhoneOutlined className="order-detail__note-icon" />{selectedOrder.soDienThoai}
                 </div>
               </div>
               <div>
                 <div className="order-detail__label">Ghi chú</div>
-                <div className="order-detail__value">{selectedOrder.note || 'Không có'}</div>
+                <div className="order-detail__value">{selectedOrder.ghiChu || 'Không có'}</div>
               </div>
             </div>
 
             <div className="order-detail__total-row">
               <span className="order-detail__total-label">Tổng cộng</span>
-              <span className="order-detail__total-value">{formatCurrency(selectedOrder.total)}</span>
+              <span className="order-detail__total-value">{formatCurrency(selectedOrder.tongTien)}</span>
             </div>
+
+            {selectedInvoice && (
+              <div className="order-detail__summary">
+                <div>
+                  <div className="order-detail__label">Ma hoa don</div>
+                  <div className="order-detail__value">{selectedInvoice.maHoaDon}</div>
+                </div>
+                <div>
+                  <div className="order-detail__label">Ma don hang</div>
+                  <div className="order-detail__value">{selectedInvoice.maDonHang}</div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>

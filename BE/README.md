@@ -5,7 +5,7 @@
 Xay dung cac API:
 
 - API Authentication, Inventory, Supplier
-- API Cart, Product, Report, Review, Voucher
+- API Cart, Product, Report, Review, Voucher, Category
 - API Employees, Order, Invoice, Customer, News
 
 ## Trang thai hien tai
@@ -20,15 +20,19 @@ Da co trong source:
 - Report API
 - Review API
 - Voucher API
+- Category API
 - Employees API
 - Orders API
+- Invoice API
+- Customer API
+- News API
 
 
 Dang tiep tuc:
 
-- Invoice
-- Customer(khach hang)
-- News
+- Invoice (mo rong nghiep vu)
+- Customer(khach hang) (mo rong nghiep vu)
+- News (mo rong nghiep vu)
 
 ## Base URL
 
@@ -104,6 +108,14 @@ http://localhost:5000
 - PUT /api/vouchers/:id
 - DELETE /api/vouchers/:id
 
+### Category
+
+- GET /api/categories
+- GET /api/categories/:id
+- POST /api/categories
+- PUT /api/categories/:id
+- DELETE /api/categories/:id
+
 ### Employees
 
 - GET /api/employees
@@ -119,8 +131,28 @@ http://localhost:5000
 - POST /api/orders
 - PATCH /api/orders/:id/status
 
+### Invoice
+
+- GET /api/invoices
+- GET /api/invoices/order/:orderId
+
+### Customer
+
+- GET /api/customers
+- GET /api/customers/:id
+- PUT /api/customers/:id
+- DELETE /api/customers/:id
+
+### News
+
+- GET /api/news
+- GET /api/news/slug/:slug
+- POST /api/news
+- PUT /api/news/:id
+- DELETE /api/news/:id
+
 ## Ghi chu
 
 - Project BE hien tai doc bien moi truong tu file .env trong thu muc BE.
 - Dong bo database bang file database/WebElectricShop.sql truoc khi test API.
-- Can chay script proc moi trong database/WebElectricShop.sql de su dung Voucher/Employees/Orders API.
+- Can chay script proc moi trong database/WebElectricShop.sql de su dung Voucher/Category/Employees/Orders/Invoice/Customer/News API.

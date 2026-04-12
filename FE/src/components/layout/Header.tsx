@@ -21,13 +21,14 @@ import {
 import { cartCountSelector } from '../../recoil/selectors/cartSelectors';
 import { useAuth } from '../../hooks/useAuth';
 import { useProducts } from '../../hooks/useProducts';
-import { categories } from '../../data/mockData';
+import { useCategories } from '../../hooks/useCategories';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import '../../assets/styles/layout/header.css';
 
 const Header: React.FC = () => {
   const { currentUser, logout, isLoggedIn } = useAuth();
   const { searchQuery, setSearchQuery } = useProducts();
+  const { categories } = useCategories();
   const cartCount = useRecoilValue(cartCountSelector);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);

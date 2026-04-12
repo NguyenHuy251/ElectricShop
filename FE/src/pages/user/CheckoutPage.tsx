@@ -52,13 +52,13 @@ const CheckoutPage: React.FC = () => {
     try {
       const order = await addOrder({
         items: checkoutItems.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
+          idSanPham: item.productId,
+          soLuong: item.quantity,
         })),
-        address: form.address,
-        phone: form.phone,
-        note: form.note,
-        paymentMethod: form.payment,
+        diaChi: form.address,
+        soDienThoai: form.phone,
+        ghiChu: form.note,
+        phuongThucThanhToan: form.payment,
       });
       setOrderId(order.id);
 

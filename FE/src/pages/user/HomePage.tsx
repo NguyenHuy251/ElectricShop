@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { featuredProductsSelector, newProductsSelector } from '../../recoil/selectors/productSelectors';
 import ProductCard from '../../components/ui/ProductCard';
-import { categories, newsArticles } from '../../data/mockData';
+import { NewsArticle } from '../../types';
+import { useCategories } from '../../hooks/useCategories';
 import {
   CalendarOutlined,
   FireFilled,
@@ -17,12 +18,36 @@ import {
 } from '@ant-design/icons';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import { formatDate, truncate } from '../../utils/helpers';
+import { getNews } from '../../services';
 import '../../assets/styles/pages/user-pages.css';
 
 const HomePage: React.FC = () => {
   const featured = useRecoilValue(featuredProductsSelector);
   const newProducts = useRecoilValue(newProductsSelector);
+  const { categories } = useCategories();
   const navigate = useNavigate();
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadNews = async () => {
+      try {
+        const response = await getNews();
+        if (isMounted) {
+          setNewsArticles(response.data);
+        }
+      } catch (error) {
+        console.error('Khong the tai tin tuc:', error);
+      }
+    };
+
+    void loadNews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="user-home-page">
@@ -129,14 +154,14 @@ const HomePage: React.FC = () => {
                 <div className="user-home-news-card__cover">
                   <img
                     src={`https://picsum.photos/seed/${article.slug}-home/800/500`}
-                    alt={article.title}
+                    alt={article.tieuDe}
                   />
                 </div>
                 <div className="user-home-news-card__body">
-                  <h3 className="user-home-news-card__title">{article.title}</h3>
-                  <p className="user-home-news-card__desc">{truncate(article.content, 110)}</p>
+                  <h3 className="user-home-news-card__title">{article.tieuDe}</h3>
+                  <p className="user-home-news-card__desc">{truncate(article.noiDung, 110)}</p>
                   <div className="user-home-news-card__meta">
-                    <CalendarOutlined /> {formatDate(article.publishedAt)}
+                    <CalendarOutlined /> {formatDate(article.ngayDang)}
                   </div>
                   <Link to={`/news/${article.slug}`} className="user-home-news-card__link">
                     Đọc chi tiết →

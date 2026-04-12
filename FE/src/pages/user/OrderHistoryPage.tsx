@@ -9,7 +9,7 @@ import Modal from '../../components/ui/Modal';
 import { Order } from '../../types';
 import '../../assets/styles/pages/user-pages.css';
 
-const getOrderStatusClass = (status: Order['status']) => `order-status order-status--${status}`;
+const getOrderStatusClass = (status: Order['trangThai']) => `order-status order-status--${status}`;
 
 const OrderHistoryPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -46,15 +46,15 @@ const OrderHistoryPage: React.FC = () => {
               <div className="orders-card__header">
                 <div className="orders-card__meta">
                   <span className="orders-card__id">#{order.id}</span>
-                  <span className="orders-card__date">{formatDate(order.createdAt)}</span>
-                  <span className={getOrderStatusClass(order.status)}>{getOrderStatusLabel(order.status)}</span>
+                  <span className="orders-card__date">{formatDate(order.ngayDatHang)}</span>
+                  <span className={getOrderStatusClass(order.trangThai)}>{getOrderStatusLabel(order.trangThai)}</span>
                 </div>
                 <div className="orders-card__actions">
-                  <span className="orders-card__total">{formatCurrency(order.total)}</span>
+                  <span className="orders-card__total">{formatCurrency(order.tongTien)}</span>
                   <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
                     Chi tiết
                   </Button>
-                  {order.status === 'pending' && (
+                  {order.trangThai === 'pending' && (
                     <Button size="sm" variant="danger" onClick={() => updateOrderStatus(order.id, 'cancelled')}>
                       Hủy
                     </Button>
@@ -63,23 +63,23 @@ const OrderHistoryPage: React.FC = () => {
               </div>
 
               <div className="orders-card__preview">
-                {order.items.slice(0, 3).map((item) => (
-                  <div key={item.productId} className="orders-card__item">
+                {order.chiTiet.slice(0, 3).map((item) => (
+                  <div key={item.idSanPham} className="orders-card__item">
                     <img
-                      src={item.image}
-                      alt={item.productName}
+                      src={item.hinhAnh}
+                      alt={item.tenSanPham}
                       className="orders-card__thumb"
                       onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/e5e7eb/9ca3af?text=img'; }}
                     />
                     <div>
-                      <p className="orders-card__item-name">{item.productName}</p>
-                      <p className="orders-card__item-qty">{formatCurrency(item.price)} × {item.quantity}</p>
+                      <p className="orders-card__item-name">{item.tenSanPham}</p>
+                      <p className="orders-card__item-qty">{formatCurrency(item.gia)} × {item.soLuong}</p>
                     </div>
                   </div>
                 ))}
-                {order.items.length > 3 && (
+                {order.chiTiet.length > 3 && (
                   <span className="orders-card__item-qty orders-card__more">
-                    +{order.items.length - 3} sản phẩm khác
+                    +{order.chiTiet.length - 3} sản phẩm khác
                   </span>
                 )}
               </div>
@@ -99,17 +99,17 @@ const OrderHistoryPage: React.FC = () => {
             <div className="order-detail__summary-grid">
               <div>
                 <p className="order-detail__label">Ngày đặt</p>
-                <p className="order-detail__value">{formatDate(selectedOrder.createdAt)}</p>
+                <p className="order-detail__value">{formatDate(selectedOrder.ngayDatHang)}</p>
               </div>
               <div>
                 <p className="order-detail__label">Trạng thái</p>
-                <span className={`${getOrderStatusClass(selectedOrder.status)} order-detail__status`}>
-                  {getOrderStatusLabel(selectedOrder.status)}
+                <span className={`${getOrderStatusClass(selectedOrder.trangThai)} order-detail__status`}>
+                  {getOrderStatusLabel(selectedOrder.trangThai)}
                 </span>
               </div>
               <div>
                 <p className="order-detail__label">Địa chỉ giao hàng</p>
-                <p className="order-detail__value">{selectedOrder.address}</p>
+                <p className="order-detail__value">{selectedOrder.diaChi}</p>
               </div>
               <div>
                 <p className="order-detail__label">Phương thức thanh toán</p>
@@ -119,22 +119,22 @@ const OrderHistoryPage: React.FC = () => {
 
             <h4 className="order-detail__section-title">Sản phẩm đã đặt</h4>
             <div className="order-detail__items">
-              {selectedOrder.items.map((item) => (
-                <div key={item.productId} className="order-detail__item">
+              {selectedOrder.chiTiet.map((item) => (
+                <div key={item.idSanPham} className="order-detail__item">
                   <img
-                    src={item.image}
-                    alt={item.productName}
+                    src={item.hinhAnh}
+                    alt={item.tenSanPham}
                     className="order-detail__thumb"
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/56x56/e5e7eb/9ca3af?text=img'; }}
                   />
                   <div className="order-detail__item-body">
-                    <p className="order-detail__item-name">{item.productName}</p>
+                    <p className="order-detail__item-name">{item.tenSanPham}</p>
                     <p className="order-detail__item-meta">
-                      {formatCurrency(item.price)} × {item.quantity}
+                      {formatCurrency(item.gia)} × {item.soLuong}
                     </p>
                   </div>
                   <span className="order-detail__item-total">
-                    {formatCurrency(item.price * item.quantity)}
+                    {formatCurrency(item.gia * item.soLuong)}
                   </span>
                 </div>
               ))}
@@ -142,12 +142,12 @@ const OrderHistoryPage: React.FC = () => {
 
             <div className="order-detail__total-row">
               <span className="order-detail__total-label">Tổng cộng</span>
-              <span className="order-detail__total-value">{formatCurrency(selectedOrder.total)}</span>
+              <span className="order-detail__total-value">{formatCurrency(selectedOrder.tongTien)}</span>
             </div>
 
-            {selectedOrder.note && (
+            {selectedOrder.ghiChu && (
               <div className="order-detail__note">
-                <HeartOutlined className="order-detail__note-icon" />Ghi chú: {selectedOrder.note}
+                <HeartOutlined className="order-detail__note-icon" />Ghi chú: {selectedOrder.ghiChu}
               </div>
             )}
           </div>

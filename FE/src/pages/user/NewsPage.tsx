@@ -1,11 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CalendarOutlined, ReadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { newsArticles } from '../../data/mockData';
+import { NewsArticle } from '../../types';
 import { formatDate, truncate } from '../../utils/helpers';
+import { getNews } from '../../services';
 import '../../assets/styles/pages/content.css';
 
 const NewsPage: React.FC = () => {
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadNews = async () => {
+      setLoading(true);
+      try {
+        const response = await getNews();
+        if (isMounted) {
+          setNewsArticles(response.data);
+        }
+      } catch (error) {
+        console.error('Khong the tai tin tuc:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadNews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="news-page">
       <div className="news-hero">
@@ -18,21 +48,22 @@ const NewsPage: React.FC = () => {
       </div>
 
       <div className="news-grid">
+        {loading && <p>Dang tai tin tuc...</p>}
         {newsArticles.map((article) => (
           <article key={article.id} className="news-card">
             <div className="news-card-cover">
               <img
                 src={`https://picsum.photos/seed/${article.slug}/800/500`}
-                alt={article.title}
+                alt={article.tieuDe}
               />
             </div>
             <div className="news-card-body">
-              <h3 className="news-card-title">{article.title}</h3>
+              <h3 className="news-card-title">{article.tieuDe}</h3>
               <p className="news-card-desc">
-                {truncate(article.content, 120)}
+                {truncate(article.noiDung, 120)}
               </p>
               <div className="news-card-date">
-                <CalendarOutlined /> {formatDate(article.publishedAt)}
+                <CalendarOutlined /> {formatDate(article.ngayDang)}
               </div>
               {article.tenNhanVienDang && (
                 <div className="news-card-author">

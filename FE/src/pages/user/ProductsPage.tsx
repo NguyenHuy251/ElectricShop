@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchOutlined } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
+import { useCategories } from '../../hooks/useCategories';
 import ProductCard from '../../components/ui/ProductCard';
 import Pagination from '../../components/ui/Pagination';
-import { categories } from '../../data/mockData';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import '../../assets/styles/pages/user-pages.css';
 
@@ -12,6 +12,7 @@ const PAGE_SIZE = 8;
 
 const ProductsPage: React.FC = () => {
   const { filteredProducts, searchQuery, setSearchQuery, selectedCategory, setSelectedCategory } = useProducts();
+  const { categories } = useCategories();
   const [searchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<'default' | 'price_asc' | 'price_desc' | 'rating'>('default');

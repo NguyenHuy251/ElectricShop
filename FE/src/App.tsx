@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthInitialize } from './hooks/useAuthInitialize';
 import { useCartInitialize } from './hooks/useCartInitialize';
 import { useProductsInitialize } from './hooks/useProductsInitialize';
+import { useCategoriesInitialize } from './hooks/useCategoriesInitialize';
 import Loading from './components/common/Loading';
 
 // Layouts
@@ -48,8 +49,9 @@ function App() {
   const authInitialized = useAuthInitialize();
   const cartInitialized = useCartInitialize();
   const productsInitialized = useProductsInitialize();
+  const categoriesInitialized = useCategoriesInitialize();
 
-  if (!authInitialized || !cartInitialized || !productsInitialized) {
+  if (!authInitialized || !cartInitialized || !productsInitialized || !categoriesInitialized) {
     return <Loading fullScreen text="Đang tải dữ liệu..." />;
   }
 

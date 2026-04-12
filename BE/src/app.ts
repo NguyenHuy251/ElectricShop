@@ -11,8 +11,12 @@ import cartRouter from './routes/cartRoutes.js';
 import reportRouter from './routes/reportRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
 import voucherRouter from './routes/voucherRoutes.js';
+import categoryRouter from './routes/categoryRoutes.js';
 import employeeRouter from './routes/employeeRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
+import customerRouter from './routes/customerRoutes.js';
+import newsRouter from './routes/newsRoutes.js';
+import invoiceRouter from './routes/invoiceRoutes.js';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -43,8 +47,12 @@ app.use('/api/cart', cartRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/vouchers', voucherRouter);
+app.use('/api/categories', categoryRouter);
 app.use('/api/employees', employeeRouter);
 app.use('/api/orders', orderRouter);
+app.use('/api/customers', customerRouter);
+app.use('/api/news', newsRouter);
+app.use('/api/invoices', invoiceRouter);
 
 app.get('/test-db', async (_req, res) => {
   try {

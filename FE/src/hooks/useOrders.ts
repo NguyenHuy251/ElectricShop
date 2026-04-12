@@ -37,19 +37,19 @@ export const useOrders = (userId?: number) => {
   }, [loadOrders]);
 
   const userOrders = userId
-    ? orders.filter((o) => o.userId === userId)
+    ? orders.filter((o) => o.idTaiKhoan === userId)
     : orders;
 
   const addOrder = useCallback(
     async (order: {
       items: Array<{
-        productId: number;
-        quantity: number;
+        idSanPham: number;
+        soLuong: number;
       }>;
-      address: string;
-      phone?: string;
-      note?: string;
-      paymentMethod?: string;
+      diaChi: string;
+      soDienThoai?: string;
+      ghiChu?: string;
+      phuongThucThanhToan?: string;
     }): Promise<Order> => {
       const response = await createOrder(order);
       const newOrder = response.data;
@@ -59,15 +59,15 @@ export const useOrders = (userId?: number) => {
     []
   );
 
-  const updateOrderStatusById = useCallback(async (orderId: number, status: OrderStatus, confirmedBy?: string) => {
-    await updateOrderStatus(orderId, status);
+  const updateOrderStatusById = useCallback(async (orderId: number, trangThai: OrderStatus, tenNguoiXacNhan?: string) => {
+    await updateOrderStatus(orderId, trangThai);
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
           ? {
               ...o,
-              status,
-              confirmedBy: confirmedBy ?? o.confirmedBy,
+              trangThai,
+              tenNguoiXacNhan: tenNguoiXacNhan ?? o.tenNguoiXacNhan,
             }
           : o,
       ),

@@ -18,7 +18,7 @@ const AdminOrdersPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const filtered = filterStatus === 'all' ? orders : orders.filter((o) => o.status === filterStatus);
+  const filtered = filterStatus === 'all' ? orders : orders.filter((o) => o.trangThai === filterStatus);
 
   return (
     <div>
@@ -44,7 +44,7 @@ const AdminOrdersPage: React.FC = () => {
             style={filterTabStyle(filterStatus === s)}
             className={`admin-orders-filter-btn${filterStatus === s ? ' active' : ''}`}
           >
-            {getOrderStatusLabel(s)} ({orders.filter((o) => o.status === s).length})
+            {getOrderStatusLabel(s)} ({orders.filter((o) => o.trangThai === s).length})
           </button>
         ))}
       </div>
@@ -73,29 +73,29 @@ const AdminOrdersPage: React.FC = () => {
                 <tr key={order.id} className="admin-table-row">
                   <td className="admin-orders-id">#{order.id}</td>
                   <td className="admin-orders-date">
-                    {formatDate(order.createdAt)}
+                    {formatDate(order.ngayDatHang)}
                   </td>
                   <td className="admin-orders-customer">
-                    <div>{order.phone}</div>
+                    <div>{order.soDienThoai}</div>
                     <div className="admin-orders-address-short">
-                      {order.address}
+                      {order.diaChi}
                     </div>
                   </td>
                   <td className="admin-orders-items">
-                    {order.items.length} sản phẩm
+                    {order.chiTiet.length} sản phẩm
                   </td>
                   <td className="admin-orders-total">
-                    {formatCurrency(order.total)}
+                    {formatCurrency(order.tongTien)}
                   </td>
                   <td className="admin-orders-confirmed-by">
-                    {order.status !== 'pending' ? (order.confirmedBy || '-') : '-'}
+                    {order.trangThai !== 'pending' ? (order.tenNguoiXacNhan || '-') : '-'}
                   </td>
                   <td className="admin-orders-status">
                     <Badge
-                      bg={`${getOrderStatusColor(order.status)}22`}
-                      color={getOrderStatusColor(order.status)}
+                      bg={`${getOrderStatusColor(order.trangThai)}22`}
+                      color={getOrderStatusColor(order.trangThai)}
                     >
-                      {getOrderStatusLabel(order.status)}
+                      {getOrderStatusLabel(order.trangThai)}
                     </Badge>
                   </td>
                   <td className="admin-orders-action">
@@ -136,9 +136,9 @@ const AdminOrdersPage: React.FC = () => {
                     key={s}
                     onClick={async () => {
                       await updateOrderStatus(selectedOrder.id, s, currentUser?.name || '');
-                      setSelectedOrder((prev) => prev ? { ...prev, status: s, confirmedBy: currentUser?.name || prev.confirmedBy } : prev);
+                      setSelectedOrder((prev) => prev ? { ...prev, trangThai: s, tenNguoiXacNhan: currentUser?.name || prev.tenNguoiXacNhan } : prev);
                     }}
-                    style={statusButtonStyle(selectedOrder.status === s, s)}
+                    style={statusButtonStyle(selectedOrder.trangThai === s, s)}
                     className="admin-orders-status-btn"
                   >
                     {getOrderStatusLabel(s)}
@@ -149,28 +149,28 @@ const AdminOrdersPage: React.FC = () => {
 
             <div className="admin-table-cell">
               <h4 className="admin-orders-items-title">Sản phẩm</h4>
-              {selectedOrder.items.map((item) => (
-                <div key={item.productId} className="admin-orders-item-card">
-                  <img src={item.image} alt={item.productName} className="admin-orders-item-image" />
+              {selectedOrder.chiTiet.map((item) => (
+                <div key={item.idSanPham} className="admin-orders-item-card">
+                  <img src={item.hinhAnh} alt={item.tenSanPham} className="admin-orders-item-image" />
                   <div className="admin-orders-item-info">
-                    <div className="admin-orders-item-name">{item.productName}</div>
-                    <div className="admin-orders-item-meta">{formatCurrency(item.price)} × {item.quantity}</div>
+                    <div className="admin-orders-item-name">{item.tenSanPham}</div>
+                    <div className="admin-orders-item-meta">{formatCurrency(item.gia)} × {item.soLuong}</div>
                   </div>
-                  <div className="admin-orders-item-total">{formatCurrency(item.price * item.quantity)}</div>
+                  <div className="admin-orders-item-total">{formatCurrency(item.gia * item.soLuong)}</div>
                 </div>
               ))}
             </div>
 
             <div className="admin-orders-shipping">
               <div className="admin-orders-shipping-title">Thông tin giao hàng</div>
-              <div className="admin-orders-shipping-line main"><EnvironmentOutlined className="admin-orders-icon" />{selectedOrder.address}</div>
-              <div className="admin-orders-shipping-line"><PhoneOutlined className="admin-orders-icon" />{selectedOrder.phone}</div>
-              {selectedOrder.note && <div className="admin-orders-shipping-note"><FileTextOutlined className="admin-orders-icon" />{selectedOrder.note}</div>}
+              <div className="admin-orders-shipping-line main"><EnvironmentOutlined className="admin-orders-icon" />{selectedOrder.diaChi}</div>
+              <div className="admin-orders-shipping-line"><PhoneOutlined className="admin-orders-icon" />{selectedOrder.soDienThoai}</div>
+              {selectedOrder.ghiChu && <div className="admin-orders-shipping-note"><FileTextOutlined className="admin-orders-icon" />{selectedOrder.ghiChu}</div>}
             </div>
 
             <div className="admin-orders-summary">
               <span>Tổng cộng</span>
-              <span className="admin-orders-summary-total">{formatCurrency(selectedOrder.total)}</span>
+              <span className="admin-orders-summary-total">{formatCurrency(selectedOrder.tongTien)}</span>
             </div>
           </div>
         )}

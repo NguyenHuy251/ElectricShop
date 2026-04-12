@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { productsAtom } from '../recoil/atoms/productAtom';
-import { products as mockProducts } from '../data/mockData';
 import { getProducts, mapBackendProductListToProducts } from '../services';
 
 export const useProductsInitialize = () => {
@@ -20,7 +19,7 @@ export const useProductsInitialize = () => {
       } catch (error) {
         console.error('Không thể tải danh sách sản phẩm từ API:', error);
         if (isMounted) {
-          setProducts(mockProducts);
+          setProducts([]);
         }
       } finally {
         if (isMounted) {

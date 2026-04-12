@@ -32,7 +32,6 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string; 
 const DashboardPage: React.FC = () => {
   const products = useRecoilValue(productsAtom);
   const { orders } = useOrders();
-  const employees = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Hoàng Tú D', 'Vũ Hải E'];
   const [reportSummary, setReportSummary] = useState({
     tongDonHang: 0,
     tongDoanhThu: 0,
@@ -67,7 +66,7 @@ const DashboardPage: React.FC = () => {
     };
   }, []);
 
-  const pendingOrders = orders.filter((o) => o.status === 'pending').length;
+  const pendingOrders = orders.filter((o) => o.trangThai === 'pending').length;
 
   const recentOrders = orders.slice(0, 5);
 
@@ -102,20 +101,19 @@ const DashboardPage: React.FC = () => {
             </thead>
             <tbody>
               {recentOrders.map((order) => {
-                const confirmedBy = employees[order.id % employees.length];
                 return (
                   <tr key={order.id} className="dashboard-table-row">
                     <td className="dashboard-table-cell dashboard-cell-id">#{order.id}</td>
-                    <td className="dashboard-cell-muted">{formatDate(order.createdAt)}</td>
-                    <td className="dashboard-table-cell dashboard-cell-total">{formatCurrency(order.total)}</td>
+                    <td className="dashboard-cell-muted">{formatDate(order.ngayDatHang)}</td>
+                    <td className="dashboard-table-cell dashboard-cell-total">{formatCurrency(order.tongTien)}</td>
                     <td className="dashboard-cell-muted">
-                      {order.status !== 'pending' ? confirmedBy : '-'}
+                      {order.trangThai !== 'pending' ? (order.tenNguoiXacNhan || '-') : '-'}
                     </td>
                     <td className="dashboard-table-cell">
                       <span
-                        className={`dashboard-status-badge ${order.status}`}
+                        className={`dashboard-status-badge ${order.trangThai}`}
                       >
-                        {getOrderStatusLabel(order.status)}
+                        {getOrderStatusLabel(order.trangThai)}
                       </span>
                     </td>
                   </tr>
@@ -135,7 +133,7 @@ const DashboardPage: React.FC = () => {
               { status: 'delivered', label: 'Đã giao' },
               { status: 'cancelled', label: 'Đã hủy' },
             ].map(({ status, label }) => {
-              const count = orders.filter((o) => o.status === status).length;
+              const count = orders.filter((o) => o.trangThai === status).length;
               const pct = orders.length > 0 ? (count / orders.length) * 100 : 0;
               return (
                 <div key={status} className="dashboard-progress-item">

@@ -1,36 +1,65 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
-import { newsArticles as initialNewsArticles, employees as initialEmployees } from '../../data/mockData';
-import { NewsArticle } from '../../types';
+import { Employee, NewsArticle } from '../../types';
 import { formatDate, truncate } from '../../utils/helpers';
+import { createNews, deleteNews, getEmployees, getNews, updateNews } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 type NewsFormState = {
-  title: string;
+  tieuDe: string;
   slug: string;
-  content: string;
-  image: string;
-  publishedAt: string;
+  noiDung: string;
+  hinhAnh: string;
+  ngayDang: string;
   idNhanVienDang?: number;
   tenNhanVienDang?: string;
 };
 
 const emptyForm: NewsFormState = {
-  title: '',
+  tieuDe: '',
   slug: '',
-  content: '',
-  image: '',
-  publishedAt: '',
+  noiDung: '',
+  hinhAnh: '',
+  ngayDang: '',
   idNhanVienDang: undefined,
   tenNhanVienDang: '',
 };
 
 const AdminNewsPage: React.FC = () => {
-  const [newsList, setNewsList] = useState<NewsArticle[]>(initialNewsArticles);
+  const [newsList, setNewsList] = useState<NewsArticle[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [form, setForm] = useState<NewsFormState>(emptyForm);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [newsResponse, employeeResponse] = await Promise.all([getNews(), getEmployees()]);
+        if (isMounted) {
+          setNewsList(newsResponse.data);
+          setEmployees(employeeResponse.data);
+        }
+      } catch (error) {
+        console.error('Khong the tai du lieu tin tuc:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const openCreateModal = () => {
     setEditingNews(null);
@@ -41,11 +70,11 @@ const AdminNewsPage: React.FC = () => {
   const openEditModal = (news: NewsArticle) => {
     setEditingNews(news);
     setForm({
-      title: news.title,
+      tieuDe: news.tieuDe,
       slug: news.slug,
-      content: news.content,
-      image: news.image,
-      publishedAt: news.publishedAt,
+      noiDung: news.noiDung,
+      hinhAnh: news.hinhAnh,
+      ngayDang: news.ngayDang,
       idNhanVienDang: news.idNhanVienDang,
       tenNhanVienDang: news.tenNhanVienDang,
     });
@@ -57,48 +86,56 @@ const AdminNewsPage: React.FC = () => {
     setEditingNews(null);
   };
 
-  const handleDeleteNews = (id: number) => {
+  const handleDeleteNews = async (id: number) => {
     const shouldDelete = window.confirm('Bạn có chắc muốn xóa tin tức này không?');
     if (!shouldDelete) return;
-    setNewsList((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await deleteNews(id);
+      setNewsList((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the xoa tin tuc');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.title.trim() || !form.slug.trim() || !form.content.trim() || !form.publishedAt) {
+    if (!form.tieuDe.trim() || !form.slug.trim() || !form.noiDung.trim() || !form.ngayDang) {
       window.alert('Vui lòng nhập đầy đủ các trường bắt buộc.');
       return;
     }
 
     let tenNhanVienDang = form.tenNhanVienDang;
     if (form.idNhanVienDang) {
-      const employee = initialEmployees.find((e) => e.id === form.idNhanVienDang);
+      const employee = employees.find((e) => e.id === form.idNhanVienDang);
       if (employee) {
         tenNhanVienDang = employee.hoTen;
       }
     }
 
     const payload: Omit<NewsArticle, 'id'> = {
-      title: form.title.trim(),
+      tieuDe: form.tieuDe.trim(),
       slug: form.slug.trim(),
-      content: form.content.trim(),
-      image: form.image.trim() || 'news-default.jpg',
-      publishedAt: form.publishedAt,
+      noiDung: form.noiDung.trim(),
+      hinhAnh: form.hinhAnh.trim() || 'news-default.jpg',
+      ngayDang: form.ngayDang,
       idNhanVienDang: form.idNhanVienDang,
       tenNhanVienDang,
     };
 
-    if (editingNews) {
-      setNewsList((prev) => prev.map((news) => (news.id === editingNews.id ? { ...news, ...payload } : news)));
-    } else {
-      setNewsList((prev) => {
-        const nextId = prev.length > 0 ? Math.max(...prev.map((n) => n.id)) + 1 : 1;
-        return [...prev, { id: nextId, ...payload }];
-      });
-    }
+    try {
+      if (editingNews) {
+        const response = await updateNews(editingNews.id, payload);
+        setNewsList((prev) => prev.map((news) => (news.id === editingNews.id ? response.data : news)));
+      } else {
+        const response = await createNews(payload);
+        setNewsList((prev) => [response.data, ...prev]);
+      }
 
-    closeModal();
+      closeModal();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Khong the luu tin tuc');
+    }
   };
 
   return (
@@ -118,6 +155,7 @@ const AdminNewsPage: React.FC = () => {
       </div>
 
       <div className="admin-news-wrap">
+        {loading && <div className="admin-info-box">Dang tai tin tuc...</div>}
         <table className="admin-table">
           <thead>
             <tr className="dashboard-table-head-row">
@@ -131,11 +169,11 @@ const AdminNewsPage: React.FC = () => {
           <tbody>
             {newsList.map((news) => (
               <tr key={news.id} className="dashboard-table-row">
-                <td className="admin-news-cell-title">{news.title}</td>
+                <td className="admin-news-cell-title">{news.tieuDe}</td>
                 <td className="admin-news-cell-muted">{news.slug}</td>
-                <td className="admin-news-cell-content">{truncate(news.content, 70)}</td>
+                <td className="admin-news-cell-content">{truncate(news.noiDung, 70)}</td>
                 <td className="admin-news-cell-muted">{news.tenNhanVienDang || 'N/A'}</td>
-                <td className="admin-news-cell-date">{formatDate(news.publishedAt)}</td>
+                <td className="admin-news-cell-date">{formatDate(news.ngayDang)}</td>
                 <td className="admin-news-cell-date">
                   <div className="admin-news-actions">
                     <button onClick={() => openEditModal(news)} className="admin-news-action-btn edit">
@@ -157,7 +195,7 @@ const AdminNewsPage: React.FC = () => {
           <div className="admin-news-form-grid">
             <div className="admin-form-full">
               <label className="admin-form-label">Tiêu đề *</label>
-              <input value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} className="admin-form-input" />
+              <input value={form.tieuDe} onChange={(e) => setForm((prev) => ({ ...prev, tieuDe: e.target.value }))} className="admin-form-input" />
             </div>
             <div>
               <label className="admin-form-label">Slug *</label>
@@ -165,7 +203,7 @@ const AdminNewsPage: React.FC = () => {
             </div>
             <div>
               <label className="admin-form-label">Ngày đăng *</label>
-              <input type="date" value={form.publishedAt} onChange={(e) => setForm((prev) => ({ ...prev, publishedAt: e.target.value }))} className="admin-form-input" />
+              <input type="date" value={form.ngayDang} onChange={(e) => setForm((prev) => ({ ...prev, ngayDang: e.target.value }))} className="admin-form-input" />
             </div>
             <div>
               <label className="admin-form-label">Tác giả</label>
@@ -173,7 +211,7 @@ const AdminNewsPage: React.FC = () => {
                 value={form.idNhanVienDang || ''}
                 onChange={(e) => {
                   const id = e.target.value ? parseInt(e.target.value) : undefined;
-                  const selected = initialEmployees.find((emp) => emp.id === id);
+                  const selected = employees.find((emp) => emp.id === id);
                   setForm((prev) => ({
                     ...prev,
                     idNhanVienDang: id,
@@ -183,7 +221,7 @@ const AdminNewsPage: React.FC = () => {
                 className="admin-form-select"
               >
                 <option value="">Chọn tác giả</option>
-                {initialEmployees.map((emp) => (
+                {employees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
                     {emp.hoTen}
                   </option>
@@ -192,13 +230,13 @@ const AdminNewsPage: React.FC = () => {
             </div>
             <div className="admin-form-full">
               <label className="admin-form-label">Hình ảnh</label>
-              <input value={form.image} onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))} className="admin-form-input" placeholder="news1.jpg" />
+              <input value={form.hinhAnh} onChange={(e) => setForm((prev) => ({ ...prev, hinhAnh: e.target.value }))} className="admin-form-input" placeholder="news1.jpg" />
             </div>
             <div className="admin-form-full">
               <label className="admin-form-label">Nội dung *</label>
               <textarea
-                value={form.content}
-                onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+                value={form.noiDung}
+                onChange={(e) => setForm((prev) => ({ ...prev, noiDung: e.target.value }))}
                 className="admin-form-textarea"
               />
             </div>

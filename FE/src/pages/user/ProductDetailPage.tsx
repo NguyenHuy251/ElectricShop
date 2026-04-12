@@ -14,7 +14,7 @@ import {
 import { useProducts } from '../../hooks/useProducts';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
-import { categories } from '../../data/mockData';
+import { useCategories } from '../../hooks/useCategories';
 import { formatDate, formatCurrency, calcDiscountPercent } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ui/ProductCard';
@@ -37,6 +37,7 @@ interface Review {
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getProductById, products } = useProducts();
+  const { categories } = useCategories();
   const { addToCart, isInCart } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();

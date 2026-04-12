@@ -5,17 +5,18 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
-import { AuthUser } from '../../types';
+import { Customer } from '../../types';
+import { deleteCustomer, getCustomers, updateCustomer } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 const AdminCustomersPage: React.FC = () => {
-  const { currentUser, getAccounts, deleteAccount, updateAccount } = useAuth();
-  const [customers, setCustomers] = useState<AuthUser[]>([]);
+  const { currentUser } = useAuth();
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [editingCustomer, setEditingCustomer] = useState<AuthUser | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
   const [editLoading, setEditLoading] = useState(false);
@@ -31,16 +32,14 @@ const AdminCustomersPage: React.FC = () => {
   const loadCustomers = async () => {
     setLoading(true);
     setError('');
-    const result = await getAccounts();
-    setLoading(false);
-
-    if (!result.success) {
-      setError(result.message);
-      return;
+    try {
+      const result = await getCustomers();
+      setCustomers(result.data);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Khong the tai danh sach khach hang');
+    } finally {
+      setLoading(false);
     }
-
-    const customerAccounts = result.data.filter((account) => account.role !== 'admin' && !account.isEmployee);
-    setCustomers(customerAccounts);
   };
 
   useEffect(() => {
@@ -55,24 +54,24 @@ const AdminCustomersPage: React.FC = () => {
 
     return customers.filter((u) => {
       return (
-        u.name.toLowerCase().includes(q) ||
+        u.hoTen.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
-        (u.username || '').toLowerCase().includes(q)
+        (u.tenDangNhap || '').toLowerCase().includes(q)
       );
     });
   }, [customers, search]);
 
-  const handleEdit = (account: AuthUser) => {
+  const handleEdit = (account: Customer) => {
     if (!isAdmin) {
       return;
     }
 
     setEditingCustomer(account);
     setEditForm({
-      tenHienThi: account.name || '',
+      tenHienThi: account.hoTen || '',
       email: account.email || '',
-      sdt: account.phone || '',
-      diaChi: account.address || '',
+      sdt: account.sdt || '',
+      diaChi: account.diaChi || '',
     });
     setEditError('');
     setEditSuccess('');
@@ -86,50 +85,46 @@ const AdminCustomersPage: React.FC = () => {
     setEditSuccess('');
     setEditLoading(true);
 
-    const result = await updateAccount({
-      id: editingCustomer.id,
-      tenHienThi: editForm.tenHienThi.trim(),
-      email: editForm.email.trim(),
-      sdt: editForm.sdt.trim(),
-      diaChi: editForm.diaChi.trim(),
-      vaiTro: 'User',
-    });
-    setEditLoading(false);
-
-    if (!result.success) {
-      setEditError(result.message);
-      return;
+    try {
+      await updateCustomer(editingCustomer.id, {
+        hoTen: editForm.tenHienThi.trim(),
+        email: editForm.email.trim(),
+        sdt: editForm.sdt.trim(),
+        diaChi: editForm.diaChi.trim(),
+      });
+      setEditSuccess('Cap nhat khach hang thanh cong');
+      await loadCustomers();
+      setTimeout(() => setEditingCustomer(null), 1000);
+    } catch (error) {
+      setEditError(error instanceof Error ? error.message : 'Khong the cap nhat khach hang');
+    } finally {
+      setEditLoading(false);
     }
-
-    setEditSuccess(result.message);
-    await loadCustomers();
-    setTimeout(() => setEditingCustomer(null), 1000);
   };
 
-  const handleDelete = async (account: AuthUser) => {
+  const handleDelete = async (account: Customer) => {
     if (!isAdmin) {
       return;
     }
 
-    const ok = window.confirm(`Xóa khách hàng ${account.name} (ID: ${account.id})?`);
+    const ok = window.confirm(`Xóa khách hàng ${account.hoTen} (ID: ${account.id})?`);
     if (!ok) {
       return;
     }
 
     setDeletingId(account.id);
-    const result = await deleteAccount(account.id);
-    setDeletingId(null);
-
-    if (!result.success) {
-      setError(result.message);
-      return;
+    try {
+      await deleteCustomer(account.id);
+      await loadCustomers();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Khong the xoa khach hang');
+    } finally {
+      setDeletingId(null);
     }
-
-    await loadCustomers();
   };
 
-  const totalActive = customers.filter((u) => u.isActive !== false).length;
-  const totalInactive = customers.filter((u) => u.isActive === false).length;
+  const totalActive = customers.filter((u) => u.trangThai !== false).length;
+  const totalInactive = customers.filter((u) => u.trangThai === false).length;
 
   return (
     <div>
@@ -201,19 +196,19 @@ const AdminCustomersPage: React.FC = () => {
               <tr key={account.id} className="admin-table-row">
                 <td className="admin-table-cell">
                   <div>
-                    <div className="admin-table-title">{account.name}</div>
+                    <div className="admin-table-title">{account.hoTen}</div>
                     <div className="admin-table-meta">ID: {account.id}</div>
                   </div>
                 </td>
-                <td className="admin-table-cell-text">{account.username || '—'}</td>
+                <td className="admin-table-cell-text">{account.tenDangNhap || '—'}</td>
                 <td className="admin-table-cell-text">{account.email || '—'}</td>
-                <td className="admin-table-cell-text">{account.phone || '—'}</td>
+                <td className="admin-table-cell-text">{account.sdt || '—'}</td>
                 <td className="admin-table-cell">
                   <Badge
-                    bg={account.isActive === false ? '#fef2f2' : '#ecfdf5'}
-                    color={account.isActive === false ? '#dc2626' : '#059669'}
+                    bg={account.trangThai === false ? '#fef2f2' : '#ecfdf5'}
+                    color={account.trangThai === false ? '#dc2626' : '#059669'}
                   >
-                    {account.isActive === false ? 'Đã khóa' : 'Hoạt động'}
+                    {account.trangThai === false ? 'Đã khóa' : 'Hoạt động'}
                   </Badge>
                 </td>
                 {isAdmin && (
@@ -221,7 +216,7 @@ const AdminCustomersPage: React.FC = () => {
                     <Button
                       size="sm"
                       onClick={() => handleEdit(account)}
-                      disabled={account.isActive === false}
+                      disabled={account.trangThai === false}
                     >
                       Sửa
                     </Button>
@@ -229,7 +224,7 @@ const AdminCustomersPage: React.FC = () => {
                       size="sm"
                       variant="danger"
                       onClick={() => void handleDelete(account)}
-                      disabled={account.isActive === false}
+                      disabled={account.trangThai === false}
                       loading={deletingId === account.id}
                     >
                       Xóa
@@ -249,7 +244,7 @@ const AdminCustomersPage: React.FC = () => {
         </table>
       </div>
 
-      <Modal isOpen={!!editingCustomer} onClose={() => setEditingCustomer(null)} title={`Chỉnh sửa: ${editingCustomer?.name}`} size="md">
+      <Modal isOpen={!!editingCustomer} onClose={() => setEditingCustomer(null)} title={`Chỉnh sửa: ${editingCustomer?.hoTen}`} size="md">
         <form onSubmit={handleSubmitEdit} className="admin-form-column">
           <Input
             label="Họ và tên"
