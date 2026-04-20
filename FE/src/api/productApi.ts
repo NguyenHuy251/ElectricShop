@@ -29,6 +29,14 @@ const looksLikeDomainUrl = (value: string): boolean => {
   return /^[a-z0-9-]+(\.[a-z0-9-]+)+([/:?#].*)?$/i.test(value);
 };
 
+const slugify = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
 export const normalizeImageInputUrl = (value: string): string => {
   const normalized = value.trim();
 
@@ -113,11 +121,12 @@ export const mapBackendProductToProduct = (product: BackendProduct): Product => 
 const mapProductPayload = (product: Omit<Product, 'id'>) => {
   const [primaryImage] = product.images;
   const normalizedPrimaryImage = normalizeImageInputUrl(primaryImage || '');
+  const resolvedSlug = product.slug?.trim() || slugify(product.name || 'san-pham');
 
   return {
-    maSanPham: product.slug.toUpperCase(),
+    maSanPham: resolvedSlug.toUpperCase(),
     tenSanPham: product.name,
-    slug: product.slug,
+    slug: resolvedSlug,
     idDanhMuc: product.categoryId || null,
     moTa: product.description || product.shortDescription || '',
     giaBan: product.price,

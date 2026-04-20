@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { createSupplier, deleteSupplier, getSuppliers, updateSupplier } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
@@ -15,7 +16,7 @@ export interface Supplier {
 
 const AdminSuppliersPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const isReadOnly = currentUser?.isEmployee ?? false;
+  const isReadOnly = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,11 +98,12 @@ const AdminSuppliersPage: React.FC = () => {
       } else {
         const response = await createSupplier(formData);
         setSuppliers((prev) => [response.data, ...prev]);
+        window.alert('Them nha cung cap thanh cong');
       }
 
       handleCloseModal();
-    } catch (_error: unknown) {
-      alert('Khong the luu nha cung cap');
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Khong the luu nha cung cap'));
     }
   };
 
@@ -113,8 +115,9 @@ const AdminSuppliersPage: React.FC = () => {
     try {
       await deleteSupplier(id);
       setSuppliers((prev) => prev.filter((s) => s.id !== id));
-    } catch (_error: unknown) {
-      alert('Khong the xoa nha cung cap. Co the nha cung cap da phat sinh phieu nhap.');
+      window.alert('Xoa nha cung cap thanh cong');
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Khong the xoa nha cung cap. Co the nha cung cap da phat sinh phieu nhap.'));
     }
   };
 

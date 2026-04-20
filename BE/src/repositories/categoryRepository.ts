@@ -47,6 +47,13 @@ export const updateCategory = async (id: number, payload: UpdateCategoryRequestB
 
 export const deleteCategory = async (id: number): Promise<number> => {
   const pool = await connectToDatabase();
-  const result = await pool.request().input('id', sql.Int, id).execute('sp_DanhMuc_Xoa');
-  return result.rowsAffected[0] ?? 0;
+
+  // sp_DanhMuc_Xoa uses SET NOCOUNT ON, so rowsAffected is unreliable.
+  const existing = await pool.request().input('id', sql.Int, id).execute('sp_DanhMuc_LayTheoId');
+  if (!existing.recordset[0]) {
+    return 0;
+  }
+
+  await pool.request().input('id', sql.Int, id).execute('sp_DanhMuc_Xoa');
+  return 1;
 };

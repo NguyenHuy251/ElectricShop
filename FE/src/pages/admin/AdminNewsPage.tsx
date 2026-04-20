@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { Employee, NewsArticle } from '../../types';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { formatDate, truncate } from '../../utils/helpers';
 import { createNews, deleteNews, getEmployees, getNews, updateNews } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
@@ -92,8 +93,9 @@ const AdminNewsPage: React.FC = () => {
     try {
       await deleteNews(id);
       setNewsList((prev) => prev.filter((item) => item.id !== id));
+      window.alert('Xoa tin tuc thanh cong');
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the xoa tin tuc');
+      window.alert(getApiErrorMessage(error, 'Khong the xoa tin tuc'));
     }
   };
 
@@ -130,11 +132,12 @@ const AdminNewsPage: React.FC = () => {
       } else {
         const response = await createNews(payload);
         setNewsList((prev) => [response.data, ...prev]);
+        window.alert('Them tin tuc thanh cong');
       }
 
       closeModal();
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the luu tin tuc');
+      window.alert(getApiErrorMessage(error, 'Khong the luu tin tuc'));
     }
   };
 

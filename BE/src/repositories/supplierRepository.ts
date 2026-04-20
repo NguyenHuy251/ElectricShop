@@ -47,6 +47,13 @@ export const updateSupplier = async (id: number, payload: UpdateSupplierRequestB
 
 export const deleteSupplier = async (id: number): Promise<number> => {
   const pool = await connectToDatabase();
-  const result = await pool.request().input('id', sql.Int, id).execute('sp_NhaCungCap_Xoa');
-  return result.rowsAffected[0] ?? 0;
+
+  // sp_NhaCungCap_Xoa uses SET NOCOUNT ON, so rowsAffected is unreliable.
+  const existing = await pool.request().input('id', sql.Int, id).execute('sp_NhaCungCap_LayTheoId');
+  if (!existing.recordset[0]) {
+    return 0;
+  }
+
+  await pool.request().input('id', sql.Int, id).execute('sp_NhaCungCap_Xoa');
+  return 1;
 };

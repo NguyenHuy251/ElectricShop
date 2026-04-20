@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { formatDate, formatCurrency } from '../../utils/helpers';
 import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
@@ -212,11 +213,12 @@ const AdminEmployeesPage: React.FC = () => {
       } else {
         const response = await createEmployee(payload);
         setEmployees((prev) => [response.data, ...prev]);
+        window.alert('Them nhan vien thanh cong');
       }
 
       handleCloseModal();
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the luu nhan vien');
+      window.alert(getApiErrorMessage(error, 'Khong the luu nhan vien'));
     }
   };
 
@@ -225,8 +227,9 @@ const AdminEmployeesPage: React.FC = () => {
       try {
         await deleteEmployee(id);
         setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+        window.alert('Xoa nhan vien thanh cong');
       } catch (error) {
-        window.alert(error instanceof Error ? error.message : 'Khong the xoa nhan vien');
+        window.alert(getApiErrorMessage(error, 'Khong the xoa nhan vien'));
       }
     }
   };
@@ -236,7 +239,7 @@ const AdminEmployeesPage: React.FC = () => {
       const response = await updateEmployee(id, { trangThai: newStatus });
       setEmployees((prev) => prev.map((emp) => (emp.id === id ? response.data : emp)));
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the cap nhat trang thai');
+      window.alert(getApiErrorMessage(error, 'Khong the cap nhat trang thai'));
     }
   };
 

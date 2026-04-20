@@ -14,7 +14,8 @@ import {
 } from '../services';
 
 const isAdminRole = (vaiTro: string | null): boolean => {
-  return vaiTro?.toLowerCase() === 'admin';
+  const normalized = (vaiTro || '').trim().toLowerCase();
+  return normalized === 'admin' || normalized === 'administrator';
 };
 
 const mapBackendUser = (user: {
@@ -30,9 +31,9 @@ const mapBackendUser = (user: {
   employeeRole?: 'staff' | 'supervisor' | 'manager';
 }): AuthUser => {
   const displayName = user.tenHienThi || user.tenDangNhap;
-  const normalizedRole = (user.vaiTro || '').toLowerCase();
-  const isEmployee = user.isEmployee ?? normalizedRole === 'employee';
+  const normalizedRole = (user.vaiTro || '').trim().toLowerCase();
   const isAdmin = isAdminRole(user.vaiTro);
+  const isEmployee = !isAdmin && (user.isEmployee ?? normalizedRole === 'employee');
 
   return {
     id: user.id,

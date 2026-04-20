@@ -84,12 +84,18 @@ export const updatePasswordById = async (id: number, matKhauMoi: string): Promis
 export const softDeleteAccountById = async (id: number): Promise<number> => {
   const pool = await connectToDatabase();
 
-  const result = await pool
+  // sp_TaiKhoan_XoaMem uses SET NOCOUNT ON, so rowsAffected is unreliable.
+  const existing = await pool
     .request()
     .input('id', sql.Int, id)
-    .execute('sp_TaiKhoan_XoaMem');
+    .query('SELECT TOP 1 id FROM dbo.TaiKhoan WHERE id = @id AND trangThai = 1');
 
-  return result.rowsAffected[0] ?? 0;
+  if (!existing.recordset[0]) {
+    return 0;
+  }
+
+  await pool.request().input('id', sql.Int, id).execute('sp_TaiKhoan_XoaMem');
+  return 1;
 };
 
 export const updateAccount = async (params: {

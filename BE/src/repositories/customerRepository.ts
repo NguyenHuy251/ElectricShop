@@ -34,6 +34,17 @@ export const updateCustomer = async (id: number, payload: UpdateCustomerRequestB
 
 export const deleteCustomer = async (id: number): Promise<number> => {
   const pool = await connectToDatabase();
-  const result = await pool.request().input('id', sql.Int, id).execute('sp_KhachHang_XoaMem');
-  return result.rowsAffected[0] ?? 0;
+
+  // sp_KhachHang_XoaMem uses SET NOCOUNT ON, so rowsAffected is unreliable.
+  const existing = await pool
+    .request()
+    .input('id', sql.Int, id)
+    .query('SELECT TOP 1 id FROM dbo.KhachHang WHERE id = @id AND trangThai = 1');
+
+  if (!existing.recordset[0]) {
+    return 0;
+  }
+
+  await pool.request().input('id', sql.Int, id).execute('sp_KhachHang_XoaMem');
+  return 1;
 };

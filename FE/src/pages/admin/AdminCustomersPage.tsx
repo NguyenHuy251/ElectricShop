@@ -116,6 +116,7 @@ const AdminCustomersPage: React.FC = () => {
     try {
       await deleteCustomer(account.id);
       await loadCustomers();
+      window.alert('Xoa khach hang thanh cong');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Khong the xoa khach hang');
     } finally {

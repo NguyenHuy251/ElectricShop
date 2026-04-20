@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { Product } from '../../types';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import { deleteProductImage, getProductImages, normalizeImageInputUrl } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
@@ -25,9 +26,17 @@ interface SavedImageItem {
   imageUrl: string;
 }
 
+const slugify = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
 const AdminProductsPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const isReadOnly = currentUser?.isEmployee ?? false;
+  const isReadOnly = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
 
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
   const { categories } = useCategories();
@@ -93,17 +102,43 @@ const AdminProductsPage: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (editProduct) {
-      await updateProduct({ ...form, id: editProduct.id });
-    } else {
-      await addProduct({ ...form, id: Date.now() });
+    if (!form.name.trim()) {
+      window.alert('Vui long nhap ten san pham');
+      return;
     }
-    setModalOpen(false);
+
+    if (!Number.isFinite(form.price) || form.price <= 0) {
+      window.alert('Gia ban khong hop le');
+      return;
+    }
+
+    const payload = {
+      ...form,
+      slug: form.slug?.trim() || slugify(form.name),
+    };
+
+    try {
+      if (editProduct) {
+        await updateProduct({ ...payload, id: editProduct.id });
+      } else {
+        await addProduct({ ...payload, id: Date.now() });
+        window.alert('Them san pham thanh cong');
+      }
+
+      setModalOpen(false);
+    } catch (error) {
+      window.alert(getApiErrorMessage(error, 'Khong the luu san pham'));
+    }
   };
 
   const handleDelete = async (id: number) => {
-    await deleteProduct(id);
-    setDeleteConfirm(null);
+    try {
+      await deleteProduct(id);
+      setDeleteConfirm(null);
+      window.alert('Xoa san pham thanh cong');
+    } catch (error) {
+      window.alert(getApiErrorMessage(error, 'Khong the xoa san pham'));
+    }
   };
 
   const f = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

@@ -6,12 +6,13 @@ import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { getCategoryIcon } from '../../utils/categoryIcons';
 import '../../assets/styles/pages/admin-pages.css';
 
 const AdminCategoriesPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const isReadOnly = currentUser?.isEmployee ?? false;
+  const isReadOnly = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
 
   const { categories, addCategory, editCategory, removeCategory } = useCategories();
   const { products } = useProducts();
@@ -63,11 +64,12 @@ const AdminCategoriesPage: React.FC = () => {
           slug: form.slug.trim() || undefined,
           trangThai: true,
         });
+        window.alert('Them danh muc thanh cong');
       }
 
       closeModal();
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the luu danh muc');
+      window.alert(getApiErrorMessage(error, 'Khong the luu danh muc'));
     }
   };
 
@@ -79,8 +81,9 @@ const AdminCategoriesPage: React.FC = () => {
 
     try {
       await removeCategory(id);
+      window.alert('Xoa danh muc thanh cong');
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the xoa danh muc');
+      window.alert(getApiErrorMessage(error, 'Khong the xoa danh muc'));
     }
   };
 

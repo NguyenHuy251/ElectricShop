@@ -47,6 +47,13 @@ export const updateNews = async (id: number, payload: UpdateNewsRequestBody): Pr
 
 export const deleteNews = async (id: number): Promise<number> => {
   const pool = await connectToDatabase();
-  const result = await pool.request().input('id', sql.Int, id).execute('sp_TinTuc_Xoa');
-  return result.rowsAffected[0] ?? 0;
+
+  // sp_TinTuc_Xoa uses SET NOCOUNT ON, so rowsAffected is unreliable.
+  const existing = await pool.request().input('id', sql.Int, id).query('SELECT TOP 1 id FROM dbo.TinTuc WHERE id = @id');
+  if (!existing.recordset[0]) {
+    return 0;
+  }
+
+  await pool.request().input('id', sql.Int, id).execute('sp_TinTuc_Xoa');
+  return 1;
 };

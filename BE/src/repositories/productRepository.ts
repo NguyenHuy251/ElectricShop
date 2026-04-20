@@ -71,8 +71,26 @@ export const updateProduct = async (id: number, payload: UpdateProductRequestBod
 
 export const softDeleteProduct = async (id: number): Promise<number> => {
   const pool = await connectToDatabase();
-  const result = await pool.request().input('id', sql.Int, id).execute('sp_SanPham_XoaMem');
-  return result.rowsAffected[0] ?? 0;
+
+  // sp_SanPham_XoaMem uses SET NOCOUNT ON, so rowsAffected from driver is unreliable.
+  // Check current active state first, then execute soft delete.
+  const existing = await pool
+    .request()
+    .input('id', sql.Int, id)
+    .query(`
+      SELECT TOP 1 id
+      FROM dbo.SanPham
+      WHERE id = @id
+        AND trangThai = 1
+    `);
+
+  const hasActiveProduct = ((existing.recordset[0] as { id: number } | undefined)?.id ?? 0) > 0;
+  if (!hasActiveProduct) {
+    return 0;
+  }
+
+  await pool.request().input('id', sql.Int, id).execute('sp_SanPham_XoaMem');
+  return 1;
 };
 
 export const updateProductStatus = async (id: number, trangThai: boolean): Promise<ProductRow | null> => {

@@ -44,7 +44,7 @@ const AdminSidebar: React.FC = () => {
   const { logout, currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isEmployee = currentUser?.isEmployee ?? false;
+  const isEmployee = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
   const visibleNavItems = isEmployee ? employeeNavItems : navItems;
   const isUserManagementActive =
     location.pathname === '/admin/accounts' ||

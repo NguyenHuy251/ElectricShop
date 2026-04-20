@@ -3,6 +3,7 @@ import { DeleteOutlined, EditOutlined, GiftOutlined, PlusOutlined, TagOutlined }
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
 import { Voucher } from '../../types';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { createVoucher, deleteVoucher, getVouchers, updateVoucher } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
@@ -33,7 +34,7 @@ const emptyForm: VoucherFormState = {
 
 const AdminVouchersPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const isReadOnly = currentUser?.isEmployee ?? false;
+  const isReadOnly = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
 
   const [voucherList, setVoucherList] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(false);
@@ -106,8 +107,9 @@ const AdminVouchersPage: React.FC = () => {
     try {
       await deleteVoucher(id);
       setVoucherList((prev) => prev.filter((item) => item.id !== id));
+      window.alert('Xoa voucher thanh cong');
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the xoa voucher');
+      window.alert(getApiErrorMessage(error, 'Khong the xoa voucher'));
     }
   };
 
@@ -143,11 +145,12 @@ const AdminVouchersPage: React.FC = () => {
       } else {
         const created = await createVoucher(requestPayload);
         setVoucherList((prev) => [created.data, ...prev]);
+        window.alert('Them voucher thanh cong');
       }
 
       closeModal();
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the luu voucher');
+      window.alert(getApiErrorMessage(error, 'Khong the luu voucher'));
     }
   };
 

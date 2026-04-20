@@ -59,7 +59,7 @@ const initialBrands: Brand[] = [
 
 const AdminBrandsPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const isReadOnly = currentUser?.isEmployee ?? false;
+  const isReadOnly = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
 
   const [brands, setBrands] = useState<Brand[]>(initialBrands);
   const [isModalOpen, setIsModalOpen] = useState(false);

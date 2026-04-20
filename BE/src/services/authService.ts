@@ -27,8 +27,17 @@ export class AuthError extends Error {
   }
 }
 
+const normalizeRole = (value: string | null | undefined): string => (value || '').trim().toLowerCase();
+
+const isAdminRole = (value: string | null | undefined): boolean => {
+  const role = normalizeRole(value);
+  return role === 'admin' || role === 'administrator';
+};
+
 const mapTaiKhoan = (row: TaiKhoanRow): TaiKhoanPublic => {
-  const isEmployee = row.isEmployee ?? row.vaiTro === 'Employee';
+  const isAdmin = isAdminRole(row.vaiTro);
+  const isEmployeeByRole = normalizeRole(row.vaiTro) === 'employee';
+  const isEmployee = !isAdmin && (row.isEmployee ?? isEmployeeByRole);
   const employeeRole = isEmployee ? 'staff' : undefined;
 
   return {

@@ -3,6 +3,7 @@ import { CloseOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-d
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
 import { useProducts } from '../../hooks/useProducts';
+import { getApiErrorMessage } from '../../utils/apiError';
 import {
   createImportReceipt,
   deleteImportReceipt,
@@ -181,9 +182,10 @@ const AdminImportReceiptsPage: React.FC = () => {
         },
         ...prev,
       ]);
+      window.alert('Tao phieu nhap thanh cong');
       handleCloseModal();
-    } catch (_error: unknown) {
-      alert('Khong the tao phieu nhap');
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Khong the tao phieu nhap'));
     }
   };
 
@@ -195,8 +197,9 @@ const AdminImportReceiptsPage: React.FC = () => {
     try {
       await deleteImportReceipt(id);
       setReceipts((prev) => prev.filter((r) => r.id !== id));
-    } catch (_error: unknown) {
-      alert('Khong the xoa phieu nhap');
+      window.alert('Xoa phieu nhap thanh cong');
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Khong the xoa phieu nhap'));
     }
   };
 
