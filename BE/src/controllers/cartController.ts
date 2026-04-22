@@ -20,7 +20,7 @@ const handleError = (error: unknown, res: Response): void => {
   res.status(500).json({ message: 'Loi he thong' });
 };
 
-const getAuthUserId = (req: Request): number | null => {
+const getAuthUserId = (req: Request<any, any, any, any>): number | null => {
   const authReq = req as AuthenticatedRequest;
   return authReq.user?.userId ?? null;
 };

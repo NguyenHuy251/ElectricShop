@@ -3,6 +3,7 @@ import { EnvironmentOutlined, FileTextOutlined, PhoneOutlined } from '@ant-desig
 import { useOrders } from '../../hooks/useOrders';
 import { useAuth } from '../../hooks/useAuth';
 import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
+import { getApiErrorMessage } from '../../utils/apiError';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
@@ -135,8 +136,13 @@ const AdminOrdersPage: React.FC = () => {
                   <button
                     key={s}
                     onClick={async () => {
-                      await updateOrderStatus(selectedOrder.id, s, currentUser?.name || '');
-                      setSelectedOrder((prev) => prev ? { ...prev, trangThai: s, tenNguoiXacNhan: currentUser?.name || prev.tenNguoiXacNhan } : prev);
+                      try {
+                        await updateOrderStatus(selectedOrder.id, s, currentUser?.name || '');
+                        setSelectedOrder((prev) => prev ? { ...prev, trangThai: s, tenNguoiXacNhan: currentUser?.name || prev.tenNguoiXacNhan } : prev);
+                        window.alert('Cap nhat trang thai don hang thanh cong');
+                      } catch (error: unknown) {
+                        window.alert(getApiErrorMessage(error, 'Khong the cap nhat trang thai don hang'));
+                      }
                     }}
                     style={statusButtonStyle(selectedOrder.trangThai === s, s)}
                     className="admin-orders-status-btn"

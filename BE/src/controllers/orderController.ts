@@ -100,7 +100,7 @@ export const updateOrderStatusController = async (
   }
 
   try {
-    await updateOrderStatusService(id, req.body.status, authUser.userId);
+    await updateOrderStatusService(id, req.body.status, authUser.userId, authUser.vaiTro ?? undefined);
     res.status(200).json({ message: 'Cap nhat trang thai don hang thanh cong' });
   } catch (error: unknown) {
     handleError(error, res);

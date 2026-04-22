@@ -1,4 +1,4 @@
-import { getProductById } from '../repositories/productRepository.js';
+import { getProductByIdForOrder } from '../repositories/productRepository.js';
 import { createOrder, getOrders, updateOrderStatus } from '../repositories/orderRepository.js';
 import { getEmployeeByAccountId } from '../repositories/employeeRepository.js';
 import type {
@@ -106,7 +106,7 @@ export const createOrderService = async (
       throw new OrderError('Du lieu san pham khong hop le', 400);
     }
 
-    const product = await getProductById(item.productId);
+    const product = await getProductByIdForOrder(item.productId);
     if (!product) {
       throw new OrderError(`Khong tim thay san pham id ${item.productId}`, 404);
     }
@@ -137,17 +137,26 @@ export const updateOrderStatusService = async (
   id: number,
   status: OrderStatus,
   idTaiKhoanThucHien?: number,
+  _vaiTroThucHien?: string,
 ): Promise<void> => {
   let idNhanVienXuly: number | undefined;
 
   if (idTaiKhoanThucHien !== undefined) {
     const employee = await getEmployeeByAccountId(idTaiKhoanThucHien);
-    if (!employee) {
-      throw new OrderError('Tai khoan dang nhap chua duoc gan ho so nhan vien', 403);
-    }
-
-    idNhanVienXuly = employee.id;
+    idNhanVienXuly = employee?.id;
   }
 
-  await updateOrderStatus(id, mapStatusToDb(status), idNhanVienXuly);
+  try {
+    await updateOrderStatus(id, mapStatusToDb(status), idNhanVienXuly);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (
+      message.includes('So luong ton kho khong du') ||
+      message.includes('Khong tim thay don hang')
+    ) {
+      throw new OrderError(message, 400);
+    }
+
+    throw error;
+  }
 };

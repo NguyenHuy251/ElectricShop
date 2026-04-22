@@ -19,6 +19,39 @@ export const getProductById = async (id: number): Promise<ProductRow | null> => 
   return (result.recordset[0] as ProductRow | undefined) ?? null;
 };
 
+export const getProductByIdForOrder = async (id: number): Promise<ProductRow | null> => {
+  const pool = await connectToDatabase();
+  const result = await pool
+    .request()
+    .input('id', sql.Int, id)
+    .query(`
+      SELECT TOP 1
+        sp.id,
+        sp.maSanPham,
+        sp.tenSanPham,
+        sp.slug,
+        sp.idDanhMuc,
+        dm.tenDanhMuc,
+        sp.idThuongHieu,
+        th.tenThuongHieu,
+        sp.moTa,
+        sp.giaBan,
+        sp.giaGoc,
+        sp.baoHanhThang,
+        sp.hinhAnh,
+        sp.soLuongBan,
+        sp.danhGia,
+        sp.trangThai,
+        sp.ngayTao
+      FROM dbo.SanPham sp
+      LEFT JOIN dbo.DanhMuc dm ON dm.id = sp.idDanhMuc
+      LEFT JOIN dbo.ThuongHieu th ON th.id = sp.idThuongHieu
+      WHERE sp.id = @id
+    `);
+
+  return (result.recordset[0] as ProductRow | undefined) ?? null;
+};
+
 export const getProductBySlug = async (slug: string): Promise<ProductRow | null> => {
   const pool = await connectToDatabase();
   const result = await pool.request().input('slug', sql.NVarChar(200), slug).execute('sp_SanPham_LayTheoSlug');

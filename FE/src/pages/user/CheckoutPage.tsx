@@ -5,6 +5,7 @@ import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/helpers';
+import { getApiErrorMessage } from '../../utils/apiError';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import '../../assets/styles/pages/user-pages.css';
@@ -70,7 +71,7 @@ const CheckoutPage: React.FC = () => {
 
       setSuccess(true);
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Khong the tao don hang');
+      window.alert(getApiErrorMessage(error, 'Khong the tao don hang'));
     } finally {
       setLoading(false);
     }

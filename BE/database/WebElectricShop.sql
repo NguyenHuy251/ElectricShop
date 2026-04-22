@@ -2597,12 +2597,131 @@ CREATE PROCEDURE dbo.sp_DonHang_CapNhatTrangThai
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @trangThaiHienTai NVARCHAR(50);
+
+    SELECT @trangThaiHienTai = dh.trangThai
+    FROM dbo.DonHang dh
+    WHERE dh.id = @id;
+
+    IF @trangThaiHienTai IS NULL
+    BEGIN
+        RAISERROR(N'Khong tim thay don hang', 16, 1);
+        RETURN;
+    END
+
+    BEGIN TRANSACTION;
+
+    IF LOWER(ISNULL(@trangThai, '')) = 'confirmed'
+       AND LOWER(ISNULL(@trangThaiHienTai, '')) <> 'confirmed'
+    BEGIN
+        DECLARE @idSanPham INT;
+        DECLARE @soLuongDat INT;
+        DECLARE @tongTon INT;
+        DECLARE @soBienThe INT;
+        DECLARE @remaining INT;
+        DECLARE @idBienThe INT;
+        DECLARE @soLuongTonBienThe INT;
+        DECLARE @soLuongTru INT;
+        DECLARE @tenSanPham NVARCHAR(200);
+        DECLARE @tenSanPhamSafe NVARCHAR(200);
+        DECLARE @tongTonSafe INT;
+        DECLARE @soLuongDatSafe INT;
+
+        DECLARE order_items CURSOR LOCAL FAST_FORWARD FOR
+        SELECT ctdh.idSanPham, SUM(ctdh.soLuong) AS soLuongDat
+        FROM dbo.ChiTietDonHang ctdh
+        WHERE ctdh.idDonHang = @id
+        GROUP BY ctdh.idSanPham;
+
+        OPEN order_items;
+        FETCH NEXT FROM order_items INTO @idSanPham, @soLuongDat;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SELECT
+                @tongTon = ISNULL(SUM(COALESCE(btv.soLuongTon, 0)), 0),
+                @soBienThe = COUNT(1)
+            FROM dbo.BienTheSanPham btv
+            WHERE btv.idSanPham = @idSanPham;
+
+            IF ISNULL(@soBienThe, 0) = 0
+            BEGIN
+                FETCH NEXT FROM order_items INTO @idSanPham, @soLuongDat;
+                CONTINUE;
+            END
+
+            IF ISNULL(@tongTon, 0) < @soLuongDat
+            BEGIN
+                SELECT @tenSanPham = sp.tenSanPham
+                FROM dbo.SanPham sp
+                WHERE sp.id = @idSanPham;
+
+                SET @tenSanPhamSafe = ISNULL(@tenSanPham, N'');
+                SET @tongTonSafe = ISNULL(@tongTon, 0);
+                SET @soLuongDatSafe = ISNULL(@soLuongDat, 0);
+
+                CLOSE order_items;
+                DEALLOCATE order_items;
+                ROLLBACK TRANSACTION;
+                RAISERROR(
+                    N'So luong ton kho khong du de xac nhan don hang (idSanPham=%d, tenSanPham=%s, ton=%d, dat=%d)',
+                    16,
+                    1,
+                    @idSanPham,
+                    @tenSanPhamSafe,
+                    @tongTonSafe,
+                    @soLuongDatSafe
+                );
+                RETURN;
+            END
+
+            SET @remaining = @soLuongDat;
+
+            DECLARE product_variants CURSOR LOCAL FAST_FORWARD FOR
+            SELECT btv.id, COALESCE(btv.soLuongTon, 0) AS soLuongTon
+            FROM dbo.BienTheSanPham btv
+            WHERE btv.idSanPham = @idSanPham
+              AND COALESCE(btv.soLuongTon, 0) > 0
+            ORDER BY btv.id ASC;
+
+            OPEN product_variants;
+            FETCH NEXT FROM product_variants INTO @idBienThe, @soLuongTonBienThe;
+
+            WHILE @@FETCH_STATUS = 0 AND @remaining > 0
+            BEGIN
+                SET @soLuongTru = CASE
+                    WHEN @soLuongTonBienThe >= @remaining THEN @remaining
+                    ELSE @soLuongTonBienThe
+                END;
+
+                UPDATE dbo.BienTheSanPham
+                SET soLuongTon = COALESCE(soLuongTon, 0) - @soLuongTru
+                WHERE id = @idBienThe;
+
+                SET @remaining = @remaining - @soLuongTru;
+
+                FETCH NEXT FROM product_variants INTO @idBienThe, @soLuongTonBienThe;
+            END
+
+            CLOSE product_variants;
+            DEALLOCATE product_variants;
+
+            FETCH NEXT FROM order_items INTO @idSanPham, @soLuongDat;
+        END
+
+        CLOSE order_items;
+        DEALLOCATE order_items;
+    END
 
     UPDATE dbo.DonHang
     SET
         trangThai = @trangThai,
         idNhanVienXuly = ISNULL(@idNhanVienXuly, idNhanVienXuly)
     WHERE id = @id;
+
+    COMMIT TRANSACTION;
 END
 GO
 
