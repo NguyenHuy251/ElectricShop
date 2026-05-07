@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { productsAtom, searchQueryAtom, selectedCategoryAtom } from '../recoil/atoms/productAtom';
 import { filteredProductsSelector } from '../recoil/selectors/productSelectors';
@@ -6,7 +7,9 @@ import {
   createProduct as createProductService,
   deleteProduct as deleteProductService,
   mapBackendProductToProduct,
+  mapBackendProductListToProducts,
   updateProduct as updateProductService,
+  getProducts,
 } from '../services';
 
 export const useProducts = () => {
@@ -35,6 +38,15 @@ export const useProducts = () => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const reloadProducts = useCallback(async () => {
+    try {
+      const response = await getProducts();
+      setProducts(mapBackendProductListToProducts(response.data));
+    } catch (error) {
+      console.error('Không thể tải lại danh sách sản phẩm:', error);
+    }
+  }, [setProducts]);
+
   return {
     products,
     filteredProducts,
@@ -46,5 +58,6 @@ export const useProducts = () => {
     addProduct,
     updateProduct,
     deleteProduct,
+    reloadProducts,
   };
 };

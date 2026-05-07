@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { EnvironmentOutlined, FileTextOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useOrders } from '../../hooks/useOrders';
 import { useAuth } from '../../hooks/useAuth';
+import { useProducts } from '../../hooks/useProducts';
 import { formatCurrency, formatDate, getOrderStatusLabel, getOrderStatusColor } from '../../utils/helpers';
 import { getApiErrorMessage } from '../../utils/apiError';
 import Badge from '../../components/ui/Badge';
@@ -16,6 +17,7 @@ const AdminOrdersPage: React.FC = () => {
   const { currentUser } = useAuth();
 
   const { orders, updateOrderStatus, loading } = useOrders();
+  const { reloadProducts } = useProducts();
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -139,6 +141,9 @@ const AdminOrdersPage: React.FC = () => {
                       try {
                         await updateOrderStatus(selectedOrder.id, s, currentUser?.name || '');
                         setSelectedOrder((prev) => prev ? { ...prev, trangThai: s, tenNguoiXacNhan: currentUser?.name || prev.tenNguoiXacNhan } : prev);
+                        if (s === 'confirmed') {
+                          await reloadProducts();
+                        }
                         window.alert('Cap nhat trang thai don hang thanh cong');
                       } catch (error: unknown) {
                         window.alert(getApiErrorMessage(error, 'Khong the cap nhat trang thai don hang'));

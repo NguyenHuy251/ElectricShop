@@ -10,7 +10,8 @@ export interface ProductRow {
   giaGoc: number | null;
   baoHanhThang: number | null;
   hinhAnh: string | null;
-  soLuongBan: number;
+  soLuongTon: number;
+  soLuongDaBan: number;
   danhGia: number;
   trangThai: boolean;
   ngayTao: Date;
@@ -42,7 +43,8 @@ export interface ProductPublic {
   giaGoc: number | null;
   baoHanhThang: number | null;
   hinhAnh: string | null;
-  soLuongBan: number;
+  soLuongTon: number;
+  soLuongDaBan: number;
   danhGia: number;
   trangThai: boolean;
   ngayTao: Date;
@@ -61,7 +63,8 @@ export interface CreateProductRequestBody {
   giaGoc?: number | null;
   baoHanhThang?: number | null;
   hinhAnh?: string;
-  soLuongBan?: number;
+  soLuongTon?: number;
+  soLuongDaBan?: number;
   danhGia?: number;
   trangThai?: boolean;
 }
@@ -77,7 +80,8 @@ export interface UpdateProductRequestBody {
   giaGoc?: number | null;
   baoHanhThang?: number | null;
   hinhAnh?: string;
-  soLuongBan?: number;
+  soLuongTon?: number;
+  soLuongDaBan?: number;
   danhGia?: number;
 }
 

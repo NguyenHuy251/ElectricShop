@@ -12,6 +12,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     ? calcDiscountPercent(product.originalPrice, product.price)
     : 0;
 
+  const rating = Math.round(product.rating);
+  const reviewCount = product.reviewCount || 0;
+  const stock = product.stock || 0;
+
   return (
     <Link to={`/products/${product.id}`} className="product-card">
       {/* Image */}
@@ -45,10 +49,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Rating */}
         <div className="product-card__rating">
           <span className="product-card__rating-stars">
-            {'★'.repeat(Math.round(product.rating))}
-            {'☆'.repeat(5 - Math.round(product.rating))}
+            {'★'.repeat(rating)}
+            {'☆'.repeat(5 - rating)}
           </span>
-          <span className="product-card__rating-count">({product.reviewCount})</span>
+          <span className="product-card__rating-count">({reviewCount})</span>
+        </div>
+
+        {/* Stock Info */}
+        <div className="product-card__stock-info">
+          <div className="product-card__stock-line">
+            Đã bán: <span className="product-card__stock-value">{reviewCount}</span>
+          </div>
+          <div className={`product-card__stock-badge ${stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+            {stock > 0 ? `Còn hàng (${stock} sản phẩm)` : 'Hết hàng'}
+          </div>
         </div>
 
         {/* Price */}

@@ -74,7 +74,8 @@ CREATE TABLE SanPham(
     giaGoc FLOAT,
     baoHanhThang INT,
     hinhAnh NVARCHAR(MAX),
-    soLuongBan INT DEFAULT 0,
+    soLuongTon INT,
+    soLuongDaBan INT DEFAULT 0,
     danhGia FLOAT DEFAULT 0,
     trangThai BIT DEFAULT 1,
     ngayTao DATETIME DEFAULT GETDATE(),
@@ -104,18 +105,6 @@ CREATE TABLE GiaTriThuocTinh(
 
     FOREIGN KEY (idSanPham) REFERENCES SanPham(id),
     FOREIGN KEY (idThuocTinh) REFERENCES ThuocTinh(id)
-);
-
-CREATE TABLE BienTheSanPham(
-    id INT IDENTITY PRIMARY KEY,
-    idSanPham INT,
-    sku NVARCHAR(100),
-    mauSac NVARCHAR(50),
-    dungTich NVARCHAR(50),
-    giaBan FLOAT,
-    soLuongTon INT,
-
-    FOREIGN KEY (idSanPham) REFERENCES SanPham(id)
 );
 
 CREATE TABLE GioHang(
@@ -284,12 +273,12 @@ INSERT INTO NhanVien (idTaiKhoan, maNhanVien, hoTen, sdt, email, diaChi, chucVu,
 -- =====================================
 -- SAN PHAM
 -- =====================================
-INSERT INTO SanPham (maSanPham, tenSanPham, slug, idDanhMuc, idThuongHieu, moTa, giaBan, giaGoc, baoHanhThang, hinhAnh, soLuongBan, danhGia, trangThai, ngayTao) VALUES
-('SP001',N'Quạt Panasonic 5 cánh','quat-panasonic-5-canh',1,1,N'Quạt chạy êm',1500000,1800000,24,'fan.jpg',10,4.5,1,GETDATE()),
-('SP002',N'Nồi cơm Panasonic 1.8L','noi-com-panasonic',2,1,N'Nấu cơm ngon',1200000,1400000,24,'rice.jpg',8,4.3,1,GETDATE()),
-('SP003',N'Máy xay Philips','may-xay-philips',3,2,N'Xay mạnh',900000,1100000,24,'blender.jpg',6,4.7,1,GETDATE()),
-('SP004',N'Ấm Sunhouse','am-sunhouse',4,4,N'Đun nhanh',350000,450000,12,'kettle.jpg',12,4.2,1,GETDATE()),
-('SP005',N'Máy hút bụi Electrolux','may-hut-bui',5,5,N'Hút mạnh',2500000,3000000,24,'vacuum.jpg',5,4.8,1,GETDATE());
+INSERT INTO SanPham (maSanPham, tenSanPham, slug, idDanhMuc, idThuongHieu, moTa, giaBan, giaGoc, baoHanhThang, hinhAnh, soLuongTon, soLuongDaBan, danhGia, trangThai, ngayTao) VALUES
+('SP001',N'Quạt Panasonic 5 cánh','quat-panasonic-5-canh',1,1,N'Quạt chạy êm',1500000,1800000,24,'fan.jpg',10,10,4.5,1,GETDATE()),
+('SP002',N'Nồi cơm Panasonic 1.8L','noi-com-panasonic',2,1,N'Nấu cơm ngon',1200000,1400000,24,'rice.jpg',8,8,4.3,1,GETDATE()),
+('SP003',N'Máy xay Philips','may-xay-philips',3,2,N'Xay mạnh',900000,1100000,24,'blender.jpg',6,6,4.7,1,GETDATE()),
+('SP004',N'Ấm Sunhouse','am-sunhouse',4,4,N'Đun nhanh',350000,450000,12,'kettle.jpg',12,12,4.2,1,GETDATE()),
+('SP005',N'Máy hút bụi Electrolux','may-hut-bui',5,5,N'Hút mạnh',2500000,3000000,24,'vacuum.jpg',5,5,4.8,1,GETDATE());
 
 -- =====================================
 -- ANH SAN PHAM
@@ -313,16 +302,6 @@ INSERT INTO ThuocTinh (tenThuocTinh) VALUES
 INSERT INTO GiaTriThuocTinh (idSanPham, idThuocTinh, giaTri) VALUES
 (1,5,'5 cánh'),(1,1,'60W'),
 (2,2,'1.8L'),(3,1,'700W'),(4,2,'1.5L');
-
--- =====================================
--- BIEN THE
--- =====================================
-INSERT INTO BienTheSanPham (idSanPham, sku, mauSac, dungTich, giaBan, soLuongTon) VALUES
-(2,'RICE-12',N'Trắng','1.2L',1100000,20),
-(2,'RICE-18',N'Trắng','1.8L',1200000,15),
-(3,'BL-RED',N'Đỏ',NULL,900000,10),
-(3,'BL-BLACK',N'Đen',NULL,900000,8),
-(1,'FAN-WH',N'Trắng',NULL,1500000,12);
 
 -- =====================================
 -- GIO HANG
@@ -812,7 +791,8 @@ BEGIN
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongTon,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao,
@@ -850,7 +830,8 @@ BEGIN
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongTon,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao,
@@ -888,7 +869,8 @@ BEGIN
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongTon,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao,
@@ -919,7 +901,8 @@ CREATE PROCEDURE dbo.sp_SanPham_Them
     @giaGoc FLOAT = NULL,
     @baoHanhThang INT = NULL,
     @hinhAnh NVARCHAR(MAX) = NULL,
-    @soLuongBan INT = 0,
+    @soLuongTon INT = 0,
+    @soLuongDaBan INT = 0,
     @danhGia FLOAT = 0,
     @trangThai BIT = 1
 AS
@@ -938,7 +921,8 @@ BEGIN
         giaGoc,
         baoHanhThang,
         hinhAnh,
-        soLuongBan,
+        soLuongTon,
+        soLuongDaBan,
         danhGia,
         trangThai,
         ngayTao
@@ -955,7 +939,8 @@ BEGIN
         @giaGoc,
         @baoHanhThang,
         @hinhAnh,
-        @soLuongBan,
+        @soLuongTon,
+        @soLuongDaBan,
         @danhGia,
         @trangThai,
         GETDATE()
@@ -989,7 +974,8 @@ BEGIN
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongTon,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao,
@@ -1020,7 +1006,8 @@ CREATE PROCEDURE dbo.sp_SanPham_Sua
     @giaGoc FLOAT = NULL,
     @baoHanhThang INT = NULL,
     @hinhAnh NVARCHAR(MAX) = NULL,
-    @soLuongBan INT = NULL,
+    @soLuongTon INT = NULL,
+    @soLuongDaBan INT = NULL,
     @danhGia FLOAT = NULL
 AS
 BEGIN
@@ -1038,7 +1025,8 @@ BEGIN
         giaGoc = ISNULL(@giaGoc, giaGoc),
         baoHanhThang = ISNULL(@baoHanhThang, baoHanhThang),
         hinhAnh = ISNULL(@hinhAnh, hinhAnh),
-        soLuongBan = ISNULL(@soLuongBan, soLuongBan),
+        soLuongTon = ISNULL(@soLuongTon, soLuongTon),
+        soLuongDaBan = ISNULL(@soLuongDaBan, soLuongDaBan),
         danhGia = ISNULL(@danhGia, danhGia)
     WHERE id = @id;
 
@@ -1068,7 +1056,8 @@ BEGIN
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongTon,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao,
@@ -1153,7 +1142,7 @@ BEGIN
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao,
@@ -1295,10 +1284,8 @@ BEGIN
         sp.id AS idSanPham,
         sp.tenSanPham,
         sp.slug,
-        ISNULL(SUM(COALESCE(btv.soLuongTon, 0)), 0) AS soLuongTon
+        sp.soLuongTon
     FROM dbo.SanPham sp
-    LEFT JOIN dbo.BienTheSanPham btv ON btv.idSanPham = sp.id
-    GROUP BY sp.id, sp.tenSanPham, sp.slug
     ORDER BY sp.id DESC;
 END
 GO
@@ -1423,42 +1410,10 @@ BEGIN
     )
     WHERE id = @newId;
 
-    ;WITH firstVariant AS (
-        SELECT
-            btv.id,
-            btv.idSanPham,
-            ROW_NUMBER() OVER (PARTITION BY btv.idSanPham ORDER BY btv.id) AS rn
-        FROM dbo.BienTheSanPham btv
-    )
-    UPDATE btv
-    SET btv.soLuongTon = COALESCE(btv.soLuongTon, 0) + agg.soLuongNhap
-    FROM dbo.BienTheSanPham btv
-    INNER JOIN firstVariant fv ON fv.id = btv.id AND fv.rn = 1
-    INNER JOIN (
-        SELECT idSanPham, SUM(soLuong) AS soLuongNhap
-        FROM @items
-        GROUP BY idSanPham
-    ) agg ON agg.idSanPham = fv.idSanPham;
-
-    INSERT INTO dbo.BienTheSanPham (idSanPham, sku, mauSac, dungTich, giaBan, soLuongTon)
-    SELECT
-        agg.idSanPham,
-        CONCAT('AUTO-', agg.idSanPham, '-', @newId),
-        N'Mac dinh',
-        N'Mac dinh',
-        sp.giaBan,
-        agg.soLuongNhap
-    FROM (
-        SELECT idSanPham, SUM(soLuong) AS soLuongNhap
-        FROM @items
-        GROUP BY idSanPham
-    ) agg
-    INNER JOIN dbo.SanPham sp ON sp.id = agg.idSanPham
-    WHERE NOT EXISTS (
-        SELECT 1
-        FROM dbo.BienTheSanPham btv
-        WHERE btv.idSanPham = agg.idSanPham
-    );
+    UPDATE dbo.SanPham
+    SET soLuongTon = soLuongTon + i.soLuong
+    FROM dbo.SanPham sp
+    INNER JOIN @items i ON i.idSanPham = sp.id;
 
     COMMIT TRANSACTION;
 
@@ -1488,26 +1443,18 @@ BEGIN
         RETURN;
     END
 
-    ;WITH firstVariant AS (
-        SELECT
-            btv.id,
-            btv.idSanPham,
-            ROW_NUMBER() OVER (PARTITION BY btv.idSanPham ORDER BY btv.id) AS rn
-        FROM dbo.BienTheSanPham btv
-    )
-    UPDATE btv
-    SET btv.soLuongTon = CASE
-        WHEN COALESCE(btv.soLuongTon, 0) - agg.soLuongNhap < 0 THEN 0
-        ELSE COALESCE(btv.soLuongTon, 0) - agg.soLuongNhap
+    UPDATE dbo.SanPham
+    SET soLuongTon = CASE
+        WHEN soLuongTon - ctpn_agg.soLuong < 0 THEN 0
+        ELSE soLuongTon - ctpn_agg.soLuong
     END
-    FROM dbo.BienTheSanPham btv
-    INNER JOIN firstVariant fv ON fv.id = btv.id AND fv.rn = 1
+    FROM dbo.SanPham sp
     INNER JOIN (
-        SELECT idSanPham, SUM(soLuong) AS soLuongNhap
+        SELECT idSanPham, SUM(soLuong) AS soLuong
         FROM dbo.ChiTietPhieuNhap
         WHERE idPhieuNhap = @id
         GROUP BY idSanPham
-    ) agg ON agg.idSanPham = fv.idSanPham;
+    ) ctpn_agg ON ctpn_agg.idSanPham = sp.id;
 
     DELETE FROM dbo.ChiTietPhieuNhap
     WHERE idPhieuNhap = @id;
@@ -2006,19 +1953,14 @@ BEGIN
         gh.id,
         gh.idTaiKhoan,
         gh.idSanPham,
-        gh.idBienThe,
         gh.soLuong,
         sp.tenSanPham,
         sp.slug,
-        bv.mauSac,
-        bv.dungTich,
-        bv.congSuat,
-        COALESCE(bv.giaBan, sp.giaBan) AS giaBan,
+        sp.giaBan,
         sp.hinhAnh,
         sp.trangThai
     FROM dbo.GioHang gh
     INNER JOIN dbo.SanPham sp ON sp.id = gh.idSanPham
-    LEFT JOIN dbo.BienTheSanPham bv ON bv.id = gh.idBienThe
     WHERE gh.idTaiKhoan = @idTaiKhoan
     ORDER BY gh.id DESC;
 END
@@ -2033,8 +1975,7 @@ GO
 CREATE PROCEDURE dbo.sp_GioHang_ThemCapNhat
     @idTaiKhoan INT,
     @idSanPham INT,
-    @soLuong INT,
-    @idBienThe INT = NULL
+    @soLuong INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -2051,31 +1992,16 @@ BEGIN
         RETURN;
     END
 
-    IF @idBienThe IS NOT NULL
-       AND NOT EXISTS (SELECT 1 FROM dbo.BienTheSanPham WHERE id = @idBienThe AND idSanPham = @idSanPham)
-    BEGIN
-        RAISERROR(N'Bien the khong hop le', 16, 1);
-        RETURN;
-    END
-
-    IF EXISTS (
-        SELECT 1
-        FROM dbo.GioHang
-        WHERE idTaiKhoan = @idTaiKhoan
-          AND idSanPham = @idSanPham
-          AND ((idBienThe IS NULL AND @idBienThe IS NULL) OR idBienThe = @idBienThe)
-    )
+    IF EXISTS (SELECT 1 FROM dbo.GioHang WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham)
     BEGIN
         UPDATE dbo.GioHang
         SET soLuong = soLuong + @soLuong
-        WHERE idTaiKhoan = @idTaiKhoan
-          AND idSanPham = @idSanPham
-          AND ((idBienThe IS NULL AND @idBienThe IS NULL) OR idBienThe = @idBienThe);
+        WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham;
     END
     ELSE
     BEGIN
-        INSERT INTO dbo.GioHang (idTaiKhoan, idSanPham, idBienThe, soLuong)
-        VALUES (@idTaiKhoan, @idSanPham, @idBienThe, @soLuong);
+        INSERT INTO dbo.GioHang (idTaiKhoan, idSanPham, soLuong)
+        VALUES (@idTaiKhoan, @idSanPham, @soLuong);
     END
 
     EXEC dbo.sp_GioHang_LayTheoTaiKhoan @idTaiKhoan = @idTaiKhoan;
@@ -2090,7 +2016,7 @@ GO
 
 CREATE PROCEDURE dbo.sp_GioHang_CapNhatSoLuong
     @idTaiKhoan INT,
-    @idGioHang INT,
+    @idSanPham INT,
     @soLuong INT
 AS
 BEGIN
@@ -2105,13 +2031,13 @@ BEGIN
     IF @soLuong = 0
     BEGIN
         DELETE FROM dbo.GioHang
-        WHERE idTaiKhoan = @idTaiKhoan AND id = @idGioHang;
+        WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham;
     END
     ELSE
     BEGIN
         UPDATE dbo.GioHang
         SET soLuong = @soLuong
-        WHERE idTaiKhoan = @idTaiKhoan AND id = @idGioHang;
+        WHERE idTaiKhoan = @idTaiKhoan AND idSanPham = @idSanPham;
     END
 
     EXEC dbo.sp_GioHang_LayTheoTaiKhoan @idTaiKhoan = @idTaiKhoan;
@@ -2126,14 +2052,31 @@ GO
 
 CREATE PROCEDURE dbo.sp_GioHang_XoaSanPham
     @idTaiKhoan INT,
-    @idGioHang INT
+    @idSanPham INT
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DELETE FROM dbo.GioHang
     WHERE idTaiKhoan = @idTaiKhoan
-      AND id = @idGioHang;
+      AND idSanPham = @idSanPham;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_GioHang_XoaTatCa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_GioHang_XoaTatCa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_GioHang_XoaTatCa
+    @idTaiKhoan INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.GioHang
+    WHERE idTaiKhoan = @idTaiKhoan;
 END
 GO
 
@@ -2618,15 +2561,10 @@ BEGIN
     BEGIN
         DECLARE @idSanPham INT;
         DECLARE @soLuongDat INT;
-        DECLARE @tongTon INT;
-        DECLARE @soBienThe INT;
-        DECLARE @remaining INT;
-        DECLARE @idBienThe INT;
-        DECLARE @soLuongTonBienThe INT;
-        DECLARE @soLuongTru INT;
+        DECLARE @soLuongTon INT;
         DECLARE @tenSanPham NVARCHAR(200);
         DECLARE @tenSanPhamSafe NVARCHAR(200);
-        DECLARE @tongTonSafe INT;
+        DECLARE @soLuongTonSafe INT;
         DECLARE @soLuongDatSafe INT;
 
         DECLARE order_items CURSOR LOCAL FAST_FORWARD FOR
@@ -2640,26 +2578,18 @@ BEGIN
 
         WHILE @@FETCH_STATUS = 0
         BEGIN
-            SELECT
-                @tongTon = ISNULL(SUM(COALESCE(btv.soLuongTon, 0)), 0),
-                @soBienThe = COUNT(1)
-            FROM dbo.BienTheSanPham btv
-            WHERE btv.idSanPham = @idSanPham;
+            SELECT @soLuongTon = sp.soLuongTon
+            FROM dbo.SanPham sp
+            WHERE sp.id = @idSanPham;
 
-            IF ISNULL(@soBienThe, 0) = 0
-            BEGIN
-                FETCH NEXT FROM order_items INTO @idSanPham, @soLuongDat;
-                CONTINUE;
-            END
-
-            IF ISNULL(@tongTon, 0) < @soLuongDat
+            IF ISNULL(@soLuongTon, 0) < @soLuongDat
             BEGIN
                 SELECT @tenSanPham = sp.tenSanPham
                 FROM dbo.SanPham sp
                 WHERE sp.id = @idSanPham;
 
                 SET @tenSanPhamSafe = ISNULL(@tenSanPham, N'');
-                SET @tongTonSafe = ISNULL(@tongTon, 0);
+                SET @soLuongTonSafe = ISNULL(@soLuongTon, 0);
                 SET @soLuongDatSafe = ISNULL(@soLuongDat, 0);
 
                 CLOSE order_items;
@@ -2671,42 +2601,16 @@ BEGIN
                     1,
                     @idSanPham,
                     @tenSanPhamSafe,
-                    @tongTonSafe,
+                    @soLuongTonSafe,
                     @soLuongDatSafe
                 );
                 RETURN;
             END
 
-            SET @remaining = @soLuongDat;
-
-            DECLARE product_variants CURSOR LOCAL FAST_FORWARD FOR
-            SELECT btv.id, COALESCE(btv.soLuongTon, 0) AS soLuongTon
-            FROM dbo.BienTheSanPham btv
-            WHERE btv.idSanPham = @idSanPham
-              AND COALESCE(btv.soLuongTon, 0) > 0
-            ORDER BY btv.id ASC;
-
-            OPEN product_variants;
-            FETCH NEXT FROM product_variants INTO @idBienThe, @soLuongTonBienThe;
-
-            WHILE @@FETCH_STATUS = 0 AND @remaining > 0
-            BEGIN
-                SET @soLuongTru = CASE
-                    WHEN @soLuongTonBienThe >= @remaining THEN @remaining
-                    ELSE @soLuongTonBienThe
-                END;
-
-                UPDATE dbo.BienTheSanPham
-                SET soLuongTon = COALESCE(soLuongTon, 0) - @soLuongTru
-                WHERE id = @idBienThe;
-
-                SET @remaining = @remaining - @soLuongTru;
-
-                FETCH NEXT FROM product_variants INTO @idBienThe, @soLuongTonBienThe;
-            END
-
-            CLOSE product_variants;
-            DEALLOCATE product_variants;
+            UPDATE dbo.SanPham
+            SET soLuongTon = soLuongTon - @soLuongDat,
+                soLuongDaBan = soLuongDaBan + @soLuongDat
+            WHERE id = @idSanPham;
 
             FETCH NEXT FROM order_items INTO @idSanPham, @soLuongDat;
         END

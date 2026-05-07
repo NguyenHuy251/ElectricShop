@@ -13,7 +13,8 @@ export interface BackendProduct {
   giaGoc: number | null;
   baoHanhThang: number | null;
   hinhAnh: string | null;
-  soLuongBan: number;
+  soLuongTon: number;
+  soLuongDaBan: number;
   danhGia: number;
   trangThai: boolean;
   ngayTao: string;
@@ -99,7 +100,7 @@ const buildSpecs = (product: BackendProduct): Record<string, string> => {
     'Danh mục': product.tenDanhMuc || '-',
     'Thương hiệu': product.tenThuongHieu || '-',
     'Bảo hành': product.baoHanhThang ? `${product.baoHanhThang} tháng` : 'Chưa cập nhật',
-    'Lượt bán': String(product.soLuongBan ?? 0),
+    'Lượt bán': String(product.soLuongDaBan ?? 0),
     'Trạng thái': product.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh',
   };
 };
@@ -119,6 +120,9 @@ const mapBackendProductToProduct = (product: BackendProduct): Product => {
     ? Number.POSITIVE_INFINITY
     : Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
 
+  const soLuongTon = product.soLuongTon ?? 0;
+  const soLuongDaBan = product.soLuongDaBan ?? 0;
+
   return {
     id: product.id,
     name: product.tenSanPham,
@@ -130,11 +134,11 @@ const mapBackendProductToProduct = (product: BackendProduct): Product => {
     shortDescription: buildShortDescription(product.moTa),
     images: [buildImageUrl(product.hinhAnh, product.tenSanPham)],
     rating: product.danhGia || 0,
-    reviewCount: Math.max(0, Math.round(product.soLuongBan / 2)),
-    stock: product.trangThai ? Math.max(1, 20 - Math.min(product.soLuongBan, 15)) : 0,
+    reviewCount: soLuongDaBan,
+    stock: product.trangThai ? soLuongTon : 0,
     brand: product.tenThuongHieu || '',
     specs: buildSpecs(product),
-    isFeatured: product.danhGia >= 4.5 || product.soLuongBan >= 20,
+    isFeatured: product.danhGia >= 4.5 || soLuongDaBan >= 20,
     isNew: daysSinceCreated <= 30,
   };
 };
@@ -153,7 +157,8 @@ const mapProductPayload = (product: Omit<Product, 'id'>) => {
     giaGoc: product.originalPrice ?? null,
     baoHanhThang: Number(product.specs['Bảo hành']?.replace(/[^0-9]/g, '')) || null,
     hinhAnh: normalizedPrimaryImage || null,
-    soLuongBan: Number(product.specs['Lượt bán']) || 0,
+    soLuongTon: product.stock || 0,
+    soLuongDaBan: Number(product.specs['Lượt bán']) || 0,
     danhGia: product.rating || 0,
     trangThai: true,
   };

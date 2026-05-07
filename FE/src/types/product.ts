@@ -10,7 +10,8 @@ export interface BackendProduct {
   giaGoc: number | null;
   baoHanhThang: number | null;
   hinhAnh: string | null;
-  soLuongBan: number;
+  soLuongTon: number;
+  soLuongDaBan: number;
   danhGia: number;
   trangThai: boolean;
   ngayTao: string;

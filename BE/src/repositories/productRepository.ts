@@ -39,7 +39,8 @@ export const getProductByIdForOrder = async (id: number): Promise<ProductRow | n
         sp.giaGoc,
         sp.baoHanhThang,
         sp.hinhAnh,
-        sp.soLuongBan,
+        sp.soLuongTon,
+        sp.soLuongDaBan,
         sp.danhGia,
         sp.trangThai,
         sp.ngayTao
@@ -72,7 +73,8 @@ export const createProduct = async (payload: CreateProductRequestBody): Promise<
     .input('giaGoc', sql.Float, payload.giaGoc ?? null)
     .input('baoHanhThang', sql.Int, payload.baoHanhThang ?? null)
     .input('hinhAnh', sql.NVarChar(sql.MAX), payload.hinhAnh ?? null)
-    .input('soLuongBan', sql.Int, payload.soLuongBan ?? 0)
+    .input('soLuongTon', sql.Int, payload.soLuongTon ?? 0)
+    .input('soLuongDaBan', sql.Int, payload.soLuongDaBan ?? 0)
     .input('danhGia', sql.Float, payload.danhGia ?? 0)
     .input('trangThai', sql.Bit, payload.trangThai ?? true)
     .execute('sp_SanPham_Them');
@@ -95,7 +97,8 @@ export const updateProduct = async (id: number, payload: UpdateProductRequestBod
     .input('giaGoc', sql.Float, payload.giaGoc ?? null)
     .input('baoHanhThang', sql.Int, payload.baoHanhThang ?? null)
     .input('hinhAnh', sql.NVarChar(sql.MAX), payload.hinhAnh ?? null)
-    .input('soLuongBan', sql.Int, payload.soLuongBan ?? null)
+    .input('soLuongTon', sql.Int, payload.soLuongTon ?? null)
+    .input('soLuongDaBan', sql.Int, payload.soLuongDaBan ?? null)
     .input('danhGia', sql.Float, payload.danhGia ?? null)
     .execute('sp_SanPham_Sua');
 

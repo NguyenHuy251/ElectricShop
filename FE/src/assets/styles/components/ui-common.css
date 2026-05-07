@@ -580,6 +580,44 @@
   color: #6b7280;
 }
 
+.product-card__stock-info {
+  font-size: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-card__stock-line {
+  color: #6b7280;
+}
+
+.product-card__stock-value {
+  font-weight: 600;
+  color: #374151;
+}
+
+.product-card__stock-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.product-card__stock-badge.in-stock {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.product-card__stock-badge.out-of-stock {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
 .product-card__price,
 .common-product-card__price {
   margin-bottom: 12px;
