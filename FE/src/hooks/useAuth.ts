@@ -29,6 +29,10 @@ const mapBackendUser = (user: {
   trangThai?: boolean;
   isEmployee?: boolean;
   employeeRole?: 'staff' | 'supervisor' | 'manager';
+  ngaySinh?: string | null;
+  gioiTinh?: string | null;
+  ngayVaoLam?: string | null;
+  boPhan?: string | null;
 }): AuthUser => {
   const displayName = user.tenHienThi || user.tenDangNhap;
   const normalizedRole = (user.vaiTro || '').trim().toLowerCase();
@@ -48,6 +52,10 @@ const mapBackendUser = (user: {
     isEmployee,
     employeeRole: isEmployee ? (user.employeeRole || 'staff') : undefined,
     vaiTro: user.vaiTro || undefined,
+    ngaySinh: user.ngaySinh ? user.ngaySinh.slice(0, 10) : null,
+    gioiTinh: user.gioiTinh ?? null,
+    ngayVaoLam: user.ngayVaoLam ? user.ngayVaoLam.slice(0, 10) : null,
+    boPhan: user.boPhan ?? null,
   };
 };
 
@@ -155,6 +163,10 @@ export const useAuth = () => {
     sdt?: string;
     diaChi?: string;
     vaiTro?: string;
+    ngaySinh?: string | null;
+    gioiTinh?: string;
+    ngayVaoLam?: string | null;
+    boPhan?: string;
   }): Promise<{ success: boolean; message: string; data?: AuthUser }> => {
     try {
       const result = await updateAccountService(payload);

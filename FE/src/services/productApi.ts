@@ -140,6 +140,7 @@ const mapBackendProductToProduct = (product: BackendProduct): Product => {
     specs: buildSpecs(product),
     isFeatured: product.danhGia >= 4.5 || soLuongDaBan >= 20,
     isNew: daysSinceCreated <= 30,
+    soldQuantity: soLuongDaBan,
   };
 };
 
@@ -158,7 +159,7 @@ const mapProductPayload = (product: Omit<Product, 'id'>) => {
     baoHanhThang: Number(product.specs['Bảo hành']?.replace(/[^0-9]/g, '')) || null,
     hinhAnh: normalizedPrimaryImage || null,
     soLuongTon: product.stock || 0,
-    soLuongDaBan: Number(product.specs['Lượt bán']) || 0,
+    soLuongDaBan: product.soldQuantity || 0,
     danhGia: product.rating || 0,
     trangThai: true,
   };

@@ -35,7 +35,7 @@ export interface ImportReceipt {
 
 const AdminImportReceiptsPage: React.FC = () => {
   const { currentUser } = useAuth();
-  const { products } = useProducts();
+  const { products, reloadProducts } = useProducts();
 
   const [receipts, setReceipts] = useState<ImportReceipt[]>([]);
   const [suppliers, setSuppliers] = useState<Array<{ id: number; tenNhaCungCap: string }>>([]);
@@ -64,7 +64,7 @@ const AdminImportReceiptsPage: React.FC = () => {
       );
       setSuppliers(supplierResponse.data);
     } catch (_error: unknown) {
-      alert('Khong the tai du lieu phieu nhap');
+      alert('Không thể tải dữ liệu phiếu nhập');
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +95,7 @@ const AdminImportReceiptsPage: React.FC = () => {
       });
       setIsDetailModalOpen(true);
     } catch (_error: unknown) {
-      alert('Khong the tai chi tiet phieu nhap');
+      alert('Không thể tải chi tiết phiếu nhập');
     }
   };
 
@@ -143,13 +143,13 @@ const AdminImportReceiptsPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.idNhaCungCap || formData.items.length === 0) {
-      alert('Vui long chon nha cung cap va them it nhat mot san pham');
+      alert('Vui lòng chọn nhà cung cấp và thêm ít nhất một sản phẩm');
       return;
     }
 
     const supplier = suppliers.find((s) => s.id === parseInt(formData.idNhaCungCap, 10));
     if (!supplier) {
-      alert('Nha cung cap khong hop le');
+      alert('Nhà cung cấp không hợp lệ');
       return;
     }
 
@@ -158,7 +158,7 @@ const AdminImportReceiptsPage: React.FC = () => {
     for (let index = 0; index < formData.items.length; index += 1) {
       const item = formData.items[index];
       if (!item.idSanPham || !item.soLuong || !item.giaNhap) {
-        alert(`Vui long nhap day du thong tin san pham thu ${index + 1}`);
+        alert(`Vui lòng nhập đầy đủ thông tin sản phẩm thứ ${index + 1}`);
         return;
       }
 
@@ -182,33 +182,34 @@ const AdminImportReceiptsPage: React.FC = () => {
         },
         ...prev,
       ]);
-      window.alert('Tao phieu nhap thanh cong');
+      await reloadProducts();
+      window.alert('Tạo phiếu nhập thành công');
       handleCloseModal();
     } catch (error: unknown) {
-      window.alert(getApiErrorMessage(error, 'Khong the tao phieu nhap'));
+      window.alert(getApiErrorMessage(error, 'Không thể tạo phiếu nhập'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Ban co chac chan muon xoa phieu nhap nay?')) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa phiếu nhập này?')) {
       return;
     }
 
     try {
       await deleteImportReceipt(id);
       setReceipts((prev) => prev.filter((r) => r.id !== id));
-      window.alert('Xoa phieu nhap thanh cong');
+      window.alert('Xóa phiếu nhập thành công');
     } catch (error: unknown) {
-      window.alert(getApiErrorMessage(error, 'Khong the xoa phieu nhap'));
+      window.alert(getApiErrorMessage(error, 'Không thể xóa phiếu nhập'));
     }
   };
 
   return (
     <div className="admin-import-page">
       <div className="admin-page-header">
-        <h1 className="admin-import-header-title">Quan ly Phieu nhap hang</h1>
+        <h1 className="admin-import-header-title">Quản lý Phiếu nhập hàng</h1>
         <button onClick={handleOpenModal} className="admin-import-create-btn">
-          <PlusOutlined /> Tao phieu nhap
+          <PlusOutlined /> Tạo phiếu nhập
         </button>
       </div>
 
@@ -217,17 +218,17 @@ const AdminImportReceiptsPage: React.FC = () => {
           <thead>
             <tr className="admin-import-head-row">
               <th className="admin-import-th">ID</th>
-              <th className="admin-import-th">Nha cung cap</th>
-              <th className="admin-import-th admin-import-th-right">Tong tien</th>
-              <th className="admin-import-th">Ngay nhap</th>
-              <th className="admin-import-th">Nguoi thuc hien</th>
-              <th className="admin-import-th admin-import-th-center">Hanh dong</th>
+              <th className="admin-import-th">Nhà cung cấp</th>
+              <th className="admin-import-th admin-import-th-right">Tổng tiền</th>
+              <th className="admin-import-th">Ngày nhập</th>
+              <th className="admin-import-th">Người thực hiện</th>
+              <th className="admin-import-th admin-import-th-center">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={6} className="admin-empty-state">Dang tai du lieu phieu nhap...</td>
+                <td colSpan={6} className="admin-empty-state">Đang tải dữ liệu phiếu nhập...</td>
               </tr>
             )}
             {!isLoading && receipts.map((receipt) => (
@@ -242,10 +243,10 @@ const AdminImportReceiptsPage: React.FC = () => {
                 <td className="admin-import-cell admin-import-cell-center">
                   <div className="admin-import-actions">
                     <button onClick={() => void handleViewDetail(receipt)} className="admin-import-action-btn view">
-                      <EyeOutlined /> Xem chi tiet
+                      <EyeOutlined /> Xem chi tiết
                     </button>
                     <button onClick={() => void handleDelete(receipt.id)} className="admin-import-action-btn delete">
-                      <DeleteOutlined /> Xoa
+                      <DeleteOutlined /> Xóa
                     </button>
                   </div>
                 </td>
@@ -253,7 +254,7 @@ const AdminImportReceiptsPage: React.FC = () => {
             ))}
             {!isLoading && receipts.length === 0 && (
               <tr>
-                <td colSpan={6} className="admin-empty-state">Chua co phieu nhap nao</td>
+                <td colSpan={6} className="admin-empty-state">Chưa có phiếu nhập nào</td>
               </tr>
             )}
           </tbody>
@@ -262,18 +263,18 @@ const AdminImportReceiptsPage: React.FC = () => {
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} size="lg">
         <div className="admin-import-modal-body">
-          <h2 className="admin-import-modal-title">Tao phieu nhap hang moi</h2>
+          <h2 className="admin-import-modal-title">Tạo phiếu nhập hàng mới</h2>
 
           <form onSubmit={handleSubmit}>
             <div className="admin-import-field">
-              <label className="admin-import-label">Chon nha cung cap <span className="admin-import-label-required">*</span></label>
+              <label className="admin-import-label">Chọn nhà cung cấp <span className="admin-import-label-required">*</span></label>
               <select
                 name="idNhaCungCap"
                 value={formData.idNhaCungCap}
                 onChange={handleInputChange}
                 className="admin-import-control"
               >
-                <option value="">-- Chon nha cung cap --</option>
+                <option value="">-- Chọn nhà cung cấp --</option>
                 {suppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>{supplier.tenNhaCungCap}</option>
                 ))}
@@ -281,16 +282,16 @@ const AdminImportReceiptsPage: React.FC = () => {
             </div>
 
             <div className="admin-import-field">
-              <label className="admin-import-label">Nguoi thuc hien</label>
+              <label className="admin-import-label">Người thực hiện</label>
               <input
-                value={currentUser?.name || currentUser?.username || 'Nhan vien phu trach'}
+                value={currentUser?.name || currentUser?.username || 'Nhân viên phụ trách'}
                 readOnly
                 className="admin-import-input readonly"
               />
             </div>
 
             <div className="admin-import-items-box">
-              <p className="admin-import-items-title">San pham nhap</p>
+              <p className="admin-import-items-title">Sản phẩm nhập</p>
 
               {formData.items.map((item, index) => (
                 <div key={index} className="admin-import-item-row">
@@ -300,7 +301,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                     onChange={(e) => handleInputChange(e, index)}
                     className="admin-import-control"
                   >
-                    <option value="">-- Chon san pham --</option>
+                    <option value="">-- Chọn sản phẩm --</option>
                     {productOptions.map((product) => (
                       <option key={product.id} value={product.id}>{product.tenSanPham}</option>
                     ))}
@@ -312,7 +313,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                     value={item.soLuong}
                     onChange={(e) => handleInputChange(e, index)}
                     className="admin-import-input"
-                    placeholder="So luong"
+                    placeholder="Số lượng"
                     min="1"
                   />
 
@@ -322,15 +323,15 @@ const AdminImportReceiptsPage: React.FC = () => {
                     value={item.giaNhap}
                     onChange={(e) => handleInputChange(e, index)}
                     className="admin-import-input"
-                    placeholder="Gia nhap"
+                    placeholder="Giá nhập"
                     min="0"
                   />
 
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(index)}
-                    aria-label="Xoa san pham"
-                    title="Xoa san pham"
+                    aria-label="Xóa sản phẩm"
+                    title="Xóa sản phẩm"
                     className="admin-import-remove-item-btn"
                   >
                     <CloseOutlined />
@@ -338,12 +339,12 @@ const AdminImportReceiptsPage: React.FC = () => {
                 </div>
               ))}
 
-              <button type="button" onClick={handleAddItem} className="admin-import-add-item-btn">+ Them san pham</button>
+              <button type="button" onClick={handleAddItem} className="admin-import-add-item-btn">+ Thêm sản phẩm</button>
             </div>
 
             <div className="admin-import-form-actions">
-              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">Huy</button>
-              <button type="submit" className="admin-import-btn primary">Tao phieu nhap</button>
+              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">Hủy</button>
+              <button type="submit" className="admin-import-btn primary">Tạo phiếu nhập</button>
             </div>
           </form>
         </div>
@@ -352,32 +353,32 @@ const AdminImportReceiptsPage: React.FC = () => {
       {selectedReceipt && (
         <Modal isOpen={isDetailModalOpen} onClose={handleCloseDetailModal}>
           <div className="admin-import-modal-body">
-            <h2 className="admin-import-modal-title">Chi tiet Phieu nhap #{selectedReceipt.id}</h2>
+            <h2 className="admin-import-modal-title">Chi tiết Phiếu nhập #{selectedReceipt.id}</h2>
 
             <div className="admin-import-summary">
               <div className="admin-import-summary-row">
-                <span className="admin-import-summary-label">Nha cung cap:</span>
+                <span className="admin-import-summary-label">Nhà cung cấp:</span>
                 <span className="admin-import-summary-value">{selectedReceipt.tenNhaCungCap}</span>
               </div>
               <div className="admin-import-summary-row">
-                <span className="admin-import-summary-label">Ngay nhap:</span>
+                <span className="admin-import-summary-label">Ngày nhập:</span>
                 <span className="admin-import-summary-value">{formatDate(selectedReceipt.ngayNhap)}</span>
               </div>
               <div>
-                <span className="admin-import-summary-label">Tong tien:</span>
+                <span className="admin-import-summary-label">Tổng tiền:</span>
                 <span className="admin-import-summary-total">{formatCurrency(selectedReceipt.tongTien)}</span>
               </div>
             </div>
 
-            <p className="admin-import-detail-title">Chi tiet san pham:</p>
+            <p className="admin-import-detail-title">Chi tiết sản phẩm:</p>
             <div className="admin-import-detail-wrap">
               <table className="admin-table">
                 <thead>
                   <tr className="admin-import-detail-head-row">
-                    <th className="admin-import-detail-th">San pham</th>
-                    <th className="admin-import-detail-th admin-import-detail-right">So luong</th>
-                    <th className="admin-import-detail-th admin-import-detail-right">Gia nhap</th>
-                    <th className="admin-import-detail-th admin-import-detail-right">Thanh tien</th>
+                    <th className="admin-import-detail-th">Sản phẩm</th>
+                    <th className="admin-import-detail-th admin-import-detail-right">Số lượng</th>
+                    <th className="admin-import-detail-th admin-import-detail-right">Giá nhập</th>
+                    <th className="admin-import-detail-th admin-import-detail-right">Thành tiền</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -396,7 +397,7 @@ const AdminImportReceiptsPage: React.FC = () => {
             </div>
 
             <div className="admin-import-detail-close-row">
-              <button onClick={handleCloseDetailModal} className="admin-import-btn primary">Dong</button>
+              <button onClick={handleCloseDetailModal} className="admin-import-btn primary">Đóng</button>
             </div>
           </div>
         </Modal>

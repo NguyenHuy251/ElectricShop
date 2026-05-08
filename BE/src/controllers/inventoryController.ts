@@ -8,6 +8,8 @@ import {
   getInventoryStockService,
 } from '../services/inventoryService.js';
 import type { CreateImportReceiptRequestBody } from '../types/inventory.js';
+import type { AuthenticatedRequest } from '../middlewares/authMiddleware.js';
+import { getEmployeeByAccountId } from '../repositories/employeeRepository.js';
 
 const handleError = (error: unknown, res: Response): void => {
   if (error instanceof InventoryError) {
@@ -64,7 +66,14 @@ export const createImportReceiptController = async (
   }
 
   try {
-    const created = await createImportReceiptService(payload);
+    const authReq = req as AuthenticatedRequest;
+    let idNhanVienLap: number | null = payload.idNhanVienLap ?? null;
+    if (idNhanVienLap == null && authReq.user?.userId) {
+      const employee = await getEmployeeByAccountId(authReq.user.userId);
+      idNhanVienLap = employee?.id ?? null;
+    }
+
+    const created = await createImportReceiptService({ ...payload, idNhanVienLap });
     res.status(201).json({ message: 'Tao phieu nhap thanh cong', data: created });
   } catch (error: unknown) {
     handleError(error, res);

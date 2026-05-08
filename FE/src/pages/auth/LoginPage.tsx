@@ -85,6 +85,12 @@ const LoginPage: React.FC = () => {
           <Button type="submit" fullWidth loading={loading} size="lg">
             Đăng nhập
           </Button>
+
+          <div style={{ textAlign: 'right', marginTop: 8 }}>
+            <Link to="/forgot-password" className="auth-link-primary">
+              Quên mật khẩu?
+            </Link>
+          </div>
         </form>
 
         <div className="auth-footer">

@@ -3,6 +3,7 @@ import type { ApiResponse } from '../types/api';
 import type {
   BackendAuthUser,
   ChangePasswordPayload,
+  ForgotPasswordPayload,
   LoginResponse,
   RegisterPayload,
   UpdateAccountPayload,
@@ -18,6 +19,13 @@ export const loginApi = async (tenDangNhap: string, matKhau: string): Promise<Lo
 
 export const registerApi = async (payload: RegisterPayload): Promise<ApiResponse<BackendAuthUser>> => {
   const response = await httpClient.post<ApiResponse<BackendAuthUser>>('/api/auth/register', payload);
+  return response.data;
+};
+
+export const forgotPasswordApi = async (
+  payload: ForgotPasswordPayload,
+): Promise<{ message: string }> => {
+  const response = await httpClient.post<{ message: string }>('/api/auth/forgot-password', payload);
   return response.data;
 };
 
@@ -47,6 +55,10 @@ export const updateAccountApi = async (
     sdt: payload.sdt,
     diaChi: payload.diaChi,
     vaiTro: payload.vaiTro,
+    ngaySinh: payload.ngaySinh,
+    gioiTinh: payload.gioiTinh,
+    ngayVaoLam: payload.ngayVaoLam,
+    boPhan: payload.boPhan,
   });
   return response.data;
 };

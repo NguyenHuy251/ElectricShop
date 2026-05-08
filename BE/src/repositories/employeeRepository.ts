@@ -26,6 +26,7 @@ export const getEmployeeByAccountId = async (idTaiKhoan: number): Promise<Employ
         maNhanVien,
         hoTen,
         sdt,
+        ngaySinh,
         email,
         diaChi,
         chucVu,
@@ -49,6 +50,8 @@ export const createEmployee = async (payload: CreateEmployeeRequestBody): Promis
     .input('maNhanVien', sql.NVarChar(50), payload.maNhanVien)
     .input('hoTen', sql.NVarChar(100), payload.hoTen)
     .input('sdt', sql.NVarChar(20), payload.sdt ?? null)
+    .input('ngaySinh', sql.Date, payload.ngaySinh ? new Date(payload.ngaySinh) : null)
+    .input('gioiTinh', sql.NVarChar(10), payload.gioiTinh ?? null)
     .input('email', sql.NVarChar(100), payload.email ?? null)
     .input('diaChi', sql.NVarChar(255), payload.diaChi ?? null)
     .input('chucVu', sql.NVarChar(100), payload.chucVu ?? null)
@@ -69,6 +72,8 @@ export const updateEmployee = async (id: number, payload: UpdateEmployeeRequestB
     .input('maNhanVien', sql.NVarChar(50), payload.maNhanVien ?? null)
     .input('hoTen', sql.NVarChar(100), payload.hoTen ?? null)
     .input('sdt', sql.NVarChar(20), payload.sdt ?? null)
+    .input('ngaySinh', sql.Date, payload.ngaySinh ? new Date(payload.ngaySinh) : null)
+    .input('gioiTinh', sql.NVarChar(10), payload.gioiTinh ?? null)
     .input('email', sql.NVarChar(100), payload.email ?? null)
     .input('diaChi', sql.NVarChar(255), payload.diaChi ?? null)
     .input('chucVu', sql.NVarChar(100), payload.chucVu ?? null)

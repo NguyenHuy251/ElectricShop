@@ -4,6 +4,8 @@ export interface EmployeeRow {
   maNhanVien: string;
   hoTen: string;
   sdt: string | null;
+  ngaySinh: Date | null;
+  gioiTinh: string | null;
   email: string | null;
   diaChi: string | null;
   chucVu: string | null;
@@ -19,6 +21,8 @@ export interface EmployeePublic {
   maNhanVien: string;
   hoTen: string;
   sdt: string;
+  ngaySinh: string;
+  gioiTinh: string;
   email: string;
   diaChi: string;
   chucVu: string;
@@ -33,6 +37,8 @@ export interface CreateEmployeeRequestBody {
   maNhanVien: string;
   hoTen: string;
   sdt?: string;
+  ngaySinh?: string;
+  gioiTinh?: string;
   email?: string;
   diaChi?: string;
   chucVu?: string;
@@ -46,6 +52,8 @@ export interface UpdateEmployeeRequestBody {
   maNhanVien?: string;
   hoTen?: string;
   sdt?: string;
+  ngaySinh?: string;
+  gioiTinh?: string;
   email?: string;
   diaChi?: string;
   chucVu?: string;

@@ -28,6 +28,7 @@ import MyContactsPage from './pages/user/MyContacts';
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
 // Admin Pages
 import DashboardPage from './pages/admin/DashboardPage';
@@ -60,6 +61,7 @@ function App() {
       {/* Auth Routes - No Layout */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* User Routes - UserLayout */}
       <Route

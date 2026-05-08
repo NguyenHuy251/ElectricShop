@@ -33,6 +33,8 @@ CREATE TABLE NhanVien(
     maNhanVien NVARCHAR(50) NOT NULL,
     hoTen NVARCHAR(100) NOT NULL,
     sdt NVARCHAR(20) NULL,
+    ngaySinh DATE NULL,
+    gioiTinh NVARCHAR(10) NULL,
     email NVARCHAR(100) NULL,
     diaChi NVARCHAR(255) NULL,
     chucVu NVARCHAR(100) NULL,
@@ -455,17 +457,23 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT TOP 1
-        id,
-        tenDangNhap,
-        matKhau,
-        tenHienThi,
-        email,
-        sdt,
-        diaChi,
-        vaiTro,
-        trangThai
-    FROM dbo.TaiKhoan
-    WHERE id = @id;
+        tk.id,
+        tk.tenDangNhap,
+        tk.matKhau,
+        tk.tenHienThi,
+        tk.email,
+        tk.sdt,
+        tk.diaChi,
+        tk.vaiTro,
+        tk.trangThai,
+        COALESCE(kh.ngaySinh, nv.ngaySinh) AS ngaySinh,
+        COALESCE(kh.gioiTinh, nv.gioiTinh) AS gioiTinh,
+        nv.ngayVaoLam,
+        nv.boPhan
+    FROM dbo.TaiKhoan tk
+    LEFT JOIN dbo.KhachHang kh ON kh.idTaiKhoan = tk.id
+    LEFT JOIN dbo.NhanVien nv ON nv.idTaiKhoan = tk.id
+    WHERE tk.id = @id;
 END
 GO
 
@@ -597,7 +605,11 @@ CREATE PROCEDURE dbo.sp_TaiKhoan_Sua
     @email NVARCHAR(100) = NULL,
     @sdt NVARCHAR(15) = NULL,
     @diaChi NVARCHAR(255) = NULL,
-    @vaiTro NVARCHAR(20) = NULL
+    @vaiTro NVARCHAR(20) = NULL,
+    @ngaySinh DATE = NULL,
+    @gioiTinh NVARCHAR(10) = NULL,
+    @ngayVaoLam DATE = NULL,
+    @boPhan NVARCHAR(100) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -617,17 +629,106 @@ BEGIN
         RETURN;
     END
 
+    DECLARE @vaiTroFinal NVARCHAR(20);
+    DECLARE @tenHienThiFinal NVARCHAR(100);
+    DECLARE @vaiTroLower NVARCHAR(20);
+    SELECT @vaiTroFinal = vaiTro, @tenHienThiFinal = tenHienThi
+    FROM dbo.TaiKhoan WHERE id = @id;
+    SET @vaiTroLower = LOWER(ISNULL(@vaiTroFinal, N''));
+
+    -- ========== KHACH HANG (Customer) ==========
+    IF EXISTS (SELECT 1 FROM dbo.KhachHang WHERE idTaiKhoan = @id)
+    BEGIN
+        UPDATE dbo.KhachHang
+        SET
+            hoTen = ISNULL(@tenHienThi, hoTen),
+            ngaySinh = ISNULL(@ngaySinh, ngaySinh),
+            gioiTinh = ISNULL(@gioiTinh, gioiTinh)
+        WHERE idTaiKhoan = @id;
+    END
+    ELSE IF @vaiTroLower = N'customer'
+        AND (@ngaySinh IS NOT NULL OR @gioiTinh IS NOT NULL OR @tenHienThiFinal IS NOT NULL)
+    BEGIN
+        DECLARE @nextKhNum INT;
+        SELECT @nextKhNum = ISNULL(MAX(
+            CASE
+                WHEN maKhachHang LIKE N'KH[0-9]%'
+                     AND ISNUMERIC(SUBSTRING(maKhachHang, 3, 50)) = 1
+                THEN CAST(SUBSTRING(maKhachHang, 3, 50) AS INT)
+                ELSE 0
+            END
+        ), 0) + 1
+        FROM dbo.KhachHang;
+
+        DECLARE @newMaKh NVARCHAR(50) = N'KH' + RIGHT(N'000' + CAST(@nextKhNum AS NVARCHAR(10)), 3);
+
+        INSERT INTO dbo.KhachHang
+            (idTaiKhoan, maKhachHang, hoTen, ngaySinh, gioiTinh, trangThai, ngayTao)
+        VALUES
+            (@id, @newMaKh, ISNULL(@tenHienThiFinal, N''), @ngaySinh, @gioiTinh, 1, GETDATE());
+    END
+
+    -- ========== NHAN VIEN (Admin / Employee) ==========
+    IF @vaiTroLower IN (N'admin', N'administrator', N'employee')
+    BEGIN
+        IF EXISTS (SELECT 1 FROM dbo.NhanVien WHERE idTaiKhoan = @id)
+        BEGIN
+            UPDATE dbo.NhanVien
+            SET
+                hoTen = ISNULL(@tenHienThi, hoTen),
+                sdt = ISNULL(@sdt, sdt),
+                email = ISNULL(@email, email),
+                diaChi = ISNULL(@diaChi, diaChi),
+                ngaySinh = ISNULL(@ngaySinh, ngaySinh),
+                gioiTinh = ISNULL(@gioiTinh, gioiTinh),
+                ngayVaoLam = ISNULL(@ngayVaoLam, ngayVaoLam),
+                boPhan = ISNULL(@boPhan, boPhan)
+            WHERE idTaiKhoan = @id;
+        END
+        ELSE IF (@ngaySinh IS NOT NULL OR @ngayVaoLam IS NOT NULL OR @boPhan IS NOT NULL OR @tenHienThiFinal IS NOT NULL)
+        BEGIN
+            DECLARE @nextNvNum INT;
+            SELECT @nextNvNum = ISNULL(MAX(
+                CASE
+                    WHEN maNhanVien LIKE N'NV[0-9]%'
+                         AND ISNUMERIC(SUBSTRING(maNhanVien, 3, 50)) = 1
+                    THEN CAST(SUBSTRING(maNhanVien, 3, 50) AS INT)
+                    ELSE 0
+                END
+            ), 0) + 1
+            FROM dbo.NhanVien;
+
+            DECLARE @newMaNv NVARCHAR(50) = N'NV' + RIGHT(N'000' + CAST(@nextNvNum AS NVARCHAR(10)), 3);
+            DECLARE @chucVuMacDinh NVARCHAR(100) = CASE
+                WHEN @vaiTroLower IN (N'admin', N'administrator') THEN N'Quản trị viên'
+                ELSE N'Nhân viên'
+            END;
+
+            INSERT INTO dbo.NhanVien
+                (idTaiKhoan, maNhanVien, hoTen, sdt, ngaySinh, gioiTinh, email, diaChi, chucVu, boPhan, ngayVaoLam, trangThai, ngayTao)
+            VALUES
+                (@id, @newMaNv, ISNULL(@tenHienThiFinal, N''), @sdt, @ngaySinh, @gioiTinh, @email, @diaChi,
+                 @chucVuMacDinh, @boPhan, ISNULL(@ngayVaoLam, CAST(GETDATE() AS DATE)), 1, GETDATE());
+        END
+    END
+
     SELECT
-        id,
-        tenDangNhap,
-        tenHienThi,
-        email,
-        sdt,
-        diaChi,
-        vaiTro,
-        trangThai
-    FROM dbo.TaiKhoan
-    WHERE id = @id;
+        tk.id,
+        tk.tenDangNhap,
+        tk.tenHienThi,
+        tk.email,
+        tk.sdt,
+        tk.diaChi,
+        tk.vaiTro,
+        tk.trangThai,
+        COALESCE(kh.ngaySinh, nv.ngaySinh) AS ngaySinh,
+        COALESCE(kh.gioiTinh, nv.gioiTinh) AS gioiTinh,
+        nv.ngayVaoLam,
+        nv.boPhan
+    FROM dbo.TaiKhoan tk
+    LEFT JOIN dbo.KhachHang kh ON kh.idTaiKhoan = tk.id
+    LEFT JOIN dbo.NhanVien nv ON nv.idTaiKhoan = tk.id
+    WHERE tk.id = @id;
 END
 GO
 
@@ -753,16 +854,22 @@ BEGIN
         tk.vaiTro,
         tk.trangThai,
         tk.ngayTao,
+        COALESCE(kh.ngaySinh, nv.ngaySinh) AS ngaySinh,
+        COALESCE(kh.gioiTinh, nv.gioiTinh) AS gioiTinh,
+        nv.ngayVaoLam,
+        nv.boPhan,
         CASE
             WHEN EXISTS (
                 SELECT 1
-                FROM dbo.NhanVien nv
-                WHERE nv.idTaiKhoan = tk.id
-                  AND nv.trangThai = 1
+                FROM dbo.NhanVien nv2
+                WHERE nv2.idTaiKhoan = tk.id
+                  AND nv2.trangThai = 1
             ) THEN CAST(1 AS BIT)
             ELSE CAST(0 AS BIT)
         END AS isEmployee
     FROM dbo.TaiKhoan tk
+    LEFT JOIN dbo.KhachHang kh ON kh.idTaiKhoan = tk.id
+    LEFT JOIN dbo.NhanVien nv ON nv.idTaiKhoan = tk.id
     WHERE tk.id = @idTaiKhoan
       AND tk.trangThai = 1;
 END
@@ -2237,6 +2344,8 @@ BEGIN
         nv.maNhanVien,
         nv.hoTen,
         nv.sdt,
+        nv.ngaySinh,
+        nv.gioiTinh,
         nv.email,
         nv.diaChi,
         nv.chucVu,
@@ -2267,6 +2376,8 @@ BEGIN
         nv.maNhanVien,
         nv.hoTen,
         nv.sdt,
+        nv.ngaySinh,
+        nv.gioiTinh,
         nv.email,
         nv.diaChi,
         nv.chucVu,
@@ -2290,6 +2401,8 @@ CREATE PROCEDURE dbo.sp_NhanVien_Them
     @maNhanVien NVARCHAR(50),
     @hoTen NVARCHAR(100),
     @sdt NVARCHAR(20) = NULL,
+    @ngaySinh DATE = NULL,
+    @gioiTinh NVARCHAR(10) = NULL,
     @email NVARCHAR(100) = NULL,
     @diaChi NVARCHAR(255) = NULL,
     @chucVu NVARCHAR(100) = NULL,
@@ -2329,6 +2442,8 @@ BEGIN
         maNhanVien,
         hoTen,
         sdt,
+        ngaySinh,
+        gioiTinh,
         email,
         diaChi,
         chucVu,
@@ -2343,6 +2458,8 @@ BEGIN
         @maNhanVien,
         @hoTen,
         @sdt,
+        @ngaySinh,
+        @gioiTinh,
         @email,
         @diaChi,
         @chucVu,
@@ -2358,6 +2475,8 @@ BEGIN
         nv.maNhanVien,
         nv.hoTen,
         nv.sdt,
+        nv.ngaySinh,
+        nv.gioiTinh,
         nv.email,
         nv.diaChi,
         nv.chucVu,
@@ -2381,6 +2500,8 @@ CREATE PROCEDURE dbo.sp_NhanVien_Sua
     @maNhanVien NVARCHAR(50) = NULL,
     @hoTen NVARCHAR(100) = NULL,
     @sdt NVARCHAR(20) = NULL,
+    @ngaySinh DATE = NULL,
+    @gioiTinh NVARCHAR(10) = NULL,
     @email NVARCHAR(100) = NULL,
     @diaChi NVARCHAR(255) = NULL,
     @chucVu NVARCHAR(100) = NULL,
@@ -2397,6 +2518,8 @@ BEGIN
         maNhanVien = ISNULL(@maNhanVien, maNhanVien),
         hoTen = ISNULL(@hoTen, hoTen),
         sdt = ISNULL(@sdt, sdt),
+        ngaySinh = ISNULL(@ngaySinh, ngaySinh),
+        gioiTinh = ISNULL(@gioiTinh, gioiTinh),
         email = ISNULL(@email, email),
         diaChi = ISNULL(@diaChi, diaChi),
         chucVu = ISNULL(@chucVu, chucVu),
@@ -2412,6 +2535,8 @@ BEGIN
         nv.maNhanVien,
         nv.hoTen,
         nv.sdt,
+        nv.ngaySinh,
+        nv.gioiTinh,
         nv.email,
         nv.diaChi,
         nv.chucVu,
@@ -3106,6 +3231,126 @@ BEGIN
     END
 
     DELETE FROM dbo.DanhMuc
+    WHERE id = @id;
+END
+GO
+
+-- =====================================
+-- THUONG HIEU PROCEDURES
+-- =====================================
+IF OBJECT_ID('dbo.sp_ThuongHieu_LayDanhSach', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_ThuongHieu_LayDanhSach;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_ThuongHieu_LayDanhSach
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT id, tenThuongHieu, slug, logo, quocGia, trangThai
+    FROM dbo.ThuongHieu
+    ORDER BY id DESC;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_ThuongHieu_LayTheoId', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_ThuongHieu_LayTheoId;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_ThuongHieu_LayTheoId
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1 id, tenThuongHieu, slug, logo, quocGia, trangThai
+    FROM dbo.ThuongHieu
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_ThuongHieu_Them', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_ThuongHieu_Them;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_ThuongHieu_Them
+    @tenThuongHieu NVARCHAR(150),
+    @slug NVARCHAR(150) = NULL,
+    @logo NVARCHAR(255) = NULL,
+    @quocGia NVARCHAR(100) = NULL,
+    @trangThai BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.ThuongHieu (tenThuongHieu, slug, logo, quocGia, trangThai)
+    VALUES (@tenThuongHieu, @slug, @logo, @quocGia, @trangThai);
+
+    DECLARE @newId INT = SCOPE_IDENTITY();
+
+    SELECT TOP 1 id, tenThuongHieu, slug, logo, quocGia, trangThai
+    FROM dbo.ThuongHieu
+    WHERE id = @newId;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_ThuongHieu_Sua', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_ThuongHieu_Sua;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_ThuongHieu_Sua
+    @id INT,
+    @tenThuongHieu NVARCHAR(150) = NULL,
+    @slug NVARCHAR(150) = NULL,
+    @logo NVARCHAR(255) = NULL,
+    @quocGia NVARCHAR(100) = NULL,
+    @trangThai BIT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.ThuongHieu
+    SET
+        tenThuongHieu = ISNULL(@tenThuongHieu, tenThuongHieu),
+        slug = ISNULL(@slug, slug),
+        logo = ISNULL(@logo, logo),
+        quocGia = ISNULL(@quocGia, quocGia),
+        trangThai = ISNULL(@trangThai, trangThai)
+    WHERE id = @id;
+
+    SELECT TOP 1 id, tenThuongHieu, slug, logo, quocGia, trangThai
+    FROM dbo.ThuongHieu
+    WHERE id = @id;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_ThuongHieu_Xoa', 'P') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_ThuongHieu_Xoa;
+END
+GO
+
+CREATE PROCEDURE dbo.sp_ThuongHieu_Xoa
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM dbo.SanPham WHERE idThuongHieu = @id)
+    BEGIN
+        RAISERROR(N'Thuong hieu dang duoc su dung boi san pham, khong the xoa', 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM dbo.ThuongHieu
     WHERE id = @id;
 END
 GO

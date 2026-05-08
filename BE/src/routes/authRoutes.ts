@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   changePasswordController,
   deleteAccountController,
+  forgotPasswordController,
   getAccountsController,
   loginController,
   registerController,
@@ -14,6 +15,7 @@ const authRouter = Router();
 
 authRouter.post('/login', loginController);
 authRouter.post('/register', registerController);
+authRouter.post('/forgot-password', forgotPasswordController);
 authRouter.get('/me', authenticateToken, getCurrentUserController);
 authRouter.get('/accounts', authenticateToken, requireRoles('Admin', 'Employee'), getAccountsController);
 authRouter.put('/change-password', authenticateToken, changePasswordController);

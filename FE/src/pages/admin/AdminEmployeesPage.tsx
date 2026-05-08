@@ -12,6 +12,8 @@ export interface Employee {
   maNhanVien: string;
   hoTen: string;
   sdt: string;
+  ngaySinh: string;
+  gioiTinh: string;
   email: string;
   diaChi: string;
   chucVu: string;
@@ -20,80 +22,6 @@ export interface Employee {
   luongCoBan: number;
   trangThai: boolean;
 }
-
-// Mock data - thay thế bằng API call
-const initialEmployees: Employee[] = [
-  {
-    id: 1,
-    idTaiKhoan: 1,
-    maNhanVien: 'NV001',
-    hoTen: 'Admin Hệ Thống',
-    sdt: '0900000000',
-    email: 'admin@gmail.com',
-    diaChi: 'Hà Nội',
-    chucVu: 'Quản trị viên',
-    boPhan: 'Vận hành',
-    ngayVaoLam: '2026-03-26',
-    luongCoBan: 15000000,
-    trangThai: true,
-  },
-  {
-    id: 2,
-    idTaiKhoan: 2,
-    maNhanVien: 'NV002',
-    hoTen: 'Nguyễn Văn Hùng',
-    sdt: '0901234567',
-    email: 'hung@gmail.com',
-    diaChi: 'HCM',
-    chucVu: 'Nhân viên bán hàng',
-    boPhan: 'Tổng hợp',
-    ngayVaoLam: '2026-03-26',
-    luongCoBan: 8000000,
-    trangThai: true,
-  },
-  {
-    id: 3,
-    idTaiKhoan: 3,
-    maNhanVien: 'NV003',
-    hoTen: 'Trần Thị Linh',
-    sdt: '0902345678',
-    email: 'linh@gmail.com',
-    diaChi: 'Đà Nẵng',
-    chucVu: 'Nhân viên kho',
-    boPhan: 'Kho hàng',
-    ngayVaoLam: '2026-03-26',
-    luongCoBan: 6500000,
-    trangThai: true,
-  },
-  {
-    id: 4,
-    idTaiKhoan: 4,
-    maNhanVien: 'NV004',
-    hoTen: 'Lê Văn Tuấn',
-    sdt: '0903456789',
-    email: 'tuan@gmail.com',
-    diaChi: 'Hải Phòng',
-    chucVu: 'Nhân viên giao hàng',
-    boPhan: 'Logistics',
-    ngayVaoLam: '2026-03-26',
-    luongCoBan: 7000000,
-    trangThai: true,
-  },
-  {
-    id: 5,
-    idTaiKhoan: 5,
-    maNhanVien: 'NV005',
-    hoTen: 'Phạm Thị Hoa',
-    sdt: '0904567890',
-    email: 'hoa@gmail.com',
-    diaChi: 'Cần Thơ',
-    chucVu: 'Nhân viên mua hàng',
-    boPhan: 'Mua hàng',
-    ngayVaoLam: '2026-03-26',
-    luongCoBan: 7500000,
-    trangThai: true,
-  },
-];
 
 const AdminEmployeesPage: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -104,6 +32,8 @@ const AdminEmployeesPage: React.FC = () => {
     maNhanVien: '',
     hoTen: '',
     sdt: '',
+    ngaySinh: '',
+    gioiTinh: '',
     email: '',
     diaChi: '',
     chucVu: '',
@@ -124,7 +54,7 @@ const AdminEmployeesPage: React.FC = () => {
           setEmployees(response.data);
         }
       } catch (error) {
-        console.error('Khong the tai nhan vien:', error);
+        console.error('Không thể tải nhân viên:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -146,6 +76,8 @@ const AdminEmployeesPage: React.FC = () => {
         maNhanVien: employee.maNhanVien,
         hoTen: employee.hoTen,
         sdt: employee.sdt,
+        ngaySinh: employee.ngaySinh || '',
+        gioiTinh: employee.gioiTinh || '',
         email: employee.email,
         diaChi: employee.diaChi,
         chucVu: employee.chucVu,
@@ -160,6 +92,8 @@ const AdminEmployeesPage: React.FC = () => {
         maNhanVien: '',
         hoTen: '',
         sdt: '',
+        ngaySinh: '',
+        gioiTinh: '',
         email: '',
         diaChi: '',
         chucVu: '',
@@ -198,6 +132,8 @@ const AdminEmployeesPage: React.FC = () => {
         maNhanVien: formData.maNhanVien,
         hoTen: formData.hoTen,
         sdt: formData.sdt,
+        ngaySinh: formData.ngaySinh || undefined,
+        gioiTinh: formData.gioiTinh || undefined,
         email: formData.email,
         diaChi: formData.diaChi,
         chucVu: formData.chucVu,
@@ -213,12 +149,12 @@ const AdminEmployeesPage: React.FC = () => {
       } else {
         const response = await createEmployee(payload);
         setEmployees((prev) => [response.data, ...prev]);
-        window.alert('Them nhan vien thanh cong');
+        window.alert('Thêm nhân viên thành công');
       }
 
       handleCloseModal();
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the luu nhan vien'));
+      window.alert(getApiErrorMessage(error, 'Không thể lưu nhân viên'));
     }
   };
 
@@ -227,9 +163,9 @@ const AdminEmployeesPage: React.FC = () => {
       try {
         await deleteEmployee(id);
         setEmployees((prev) => prev.filter((emp) => emp.id !== id));
-        window.alert('Xoa nhan vien thanh cong');
+        window.alert('Xóa nhân viên thành công');
       } catch (error) {
-        window.alert(getApiErrorMessage(error, 'Khong the xoa nhan vien'));
+        window.alert(getApiErrorMessage(error, 'Không thể xóa nhân viên'));
       }
     }
   };
@@ -239,7 +175,7 @@ const AdminEmployeesPage: React.FC = () => {
       const response = await updateEmployee(id, { trangThai: newStatus });
       setEmployees((prev) => prev.map((emp) => (emp.id === id ? response.data : emp)));
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the cap nhat trang thai'));
+      window.alert(getApiErrorMessage(error, 'Không thể cập nhật trạng thái'));
     }
   };
 
@@ -254,7 +190,7 @@ const AdminEmployeesPage: React.FC = () => {
         </button>
       </div>
 
-      {loading && <div className="admin-info-box">Dang tai nhan vien...</div>}
+      {loading && <div className="admin-info-box">Đang tải nhân viên...</div>}
 
       <div className="admin-import-table-wrap">
         <table className="admin-table">
@@ -378,6 +314,41 @@ const AdminEmployeesPage: React.FC = () => {
               </div>
               <div>
                 <label className="admin-import-label">
+                  Ngày sinh
+                </label>
+                <input
+                  type="date"
+                  name="ngaySinh"
+                  value={formData.ngaySinh}
+                  onChange={handleInputChange}
+                  className="admin-import-input"
+                />
+              </div>
+            </div>
+
+            <div className="admin-employee-grid">
+              <div>
+                <label className="admin-import-label">
+                  Giới tính
+                </label>
+                <select
+                  name="gioiTinh"
+                  value={formData.gioiTinh}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, gioiTinh: e.target.value }))}
+                  className="admin-import-input"
+                >
+                  <option value="">-- Chọn giới tính --</option>
+                  <option value="Nam">Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+              <div></div>
+            </div>
+
+            <div className="admin-employee-grid">
+              <div>
+                <label className="admin-import-label">
                   Email <span className="admin-import-label-required">*</span>
                 </label>
                 <input
@@ -388,6 +359,8 @@ const AdminEmployeesPage: React.FC = () => {
                   className="admin-import-input"
                   placeholder="email@gmail.com"
                 />
+              </div>
+              <div>
               </div>
             </div>
 

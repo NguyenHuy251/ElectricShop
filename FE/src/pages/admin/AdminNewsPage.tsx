@@ -47,7 +47,7 @@ const AdminNewsPage: React.FC = () => {
           setEmployees(employeeResponse.data);
         }
       } catch (error) {
-        console.error('Khong the tai du lieu tin tuc:', error);
+        console.error('Không thể tải dữ liệu tin tức:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -93,9 +93,9 @@ const AdminNewsPage: React.FC = () => {
     try {
       await deleteNews(id);
       setNewsList((prev) => prev.filter((item) => item.id !== id));
-      window.alert('Xoa tin tuc thanh cong');
+      window.alert('Xóa tin tức thành công');
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the xoa tin tuc'));
+      window.alert(getApiErrorMessage(error, 'Không thể xóa tin tức'));
     }
   };
 
@@ -132,12 +132,12 @@ const AdminNewsPage: React.FC = () => {
       } else {
         const response = await createNews(payload);
         setNewsList((prev) => [response.data, ...prev]);
-        window.alert('Them tin tuc thanh cong');
+        window.alert('Thêm tin tức thành công');
       }
 
       closeModal();
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the luu tin tuc'));
+      window.alert(getApiErrorMessage(error, 'Không thể lưu tin tức'));
     }
   };
 
@@ -158,7 +158,7 @@ const AdminNewsPage: React.FC = () => {
       </div>
 
       <div className="admin-news-wrap">
-        {loading && <div className="admin-info-box">Dang tai tin tuc...</div>}
+        {loading && <div className="admin-info-box">Đang tải tin tức...</div>}
         <table className="admin-table">
           <thead>
             <tr className="dashboard-table-head-row">

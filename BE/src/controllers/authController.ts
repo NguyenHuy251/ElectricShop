@@ -3,6 +3,7 @@ import {
   AuthError,
   changePassword,
   deleteAccount,
+  forgotPassword,
   getAccounts,
   login,
   register,
@@ -11,6 +12,7 @@ import {
 } from '../services/authService.js';
 import type {
   ChangePasswordRequestBody,
+  ForgotPasswordRequestBody,
   LoginRequestBody,
   RegisterRequestBody,
   UpdateAccountRequestBody,
@@ -118,6 +120,25 @@ export const changePasswordController = async (
   }
 };
 
+export const forgotPasswordController = async (
+  req: Request<unknown, unknown, ForgotPasswordRequestBody>,
+  res: Response,
+): Promise<void> => {
+  const { tenDangNhap, email, matKhauMoi } = req.body;
+
+  if (!tenDangNhap || !email || !matKhauMoi) {
+    res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin' });
+    return;
+  }
+
+  try {
+    await forgotPassword({ tenDangNhap, email, matKhauMoi });
+    res.status(200).json({ message: 'Đặt lại mật khẩu thành công' });
+  } catch (error: unknown) {
+    handleError(error, res);
+  }
+};
+
 export const deleteAccountController = async (
   req: Request<{ id: string }>,
   res: Response,
@@ -186,6 +207,18 @@ export const updateAccountController = async (
     }
     if (isAdmin && req.body.vaiTro !== undefined) {
       updates.vaiTro = req.body.vaiTro;
+    }
+    if (req.body.ngaySinh !== undefined) {
+      updates.ngaySinh = req.body.ngaySinh;
+    }
+    if (req.body.gioiTinh !== undefined) {
+      updates.gioiTinh = req.body.gioiTinh;
+    }
+    if (req.body.ngayVaoLam !== undefined) {
+      updates.ngayVaoLam = req.body.ngayVaoLam;
+    }
+    if (req.body.boPhan !== undefined) {
+      updates.boPhan = req.body.boPhan;
     }
 
     const updated = await updateAccountInfo(updates);

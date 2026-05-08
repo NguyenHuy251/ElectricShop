@@ -53,7 +53,7 @@ const AdminVouchersPage: React.FC = () => {
           setVoucherList(response.data);
         }
       } catch (error) {
-        console.error('Khong the tai voucher:', error);
+        console.error('Không thể tải voucher:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -107,9 +107,9 @@ const AdminVouchersPage: React.FC = () => {
     try {
       await deleteVoucher(id);
       setVoucherList((prev) => prev.filter((item) => item.id !== id));
-      window.alert('Xoa voucher thanh cong');
+      window.alert('Xóa voucher thành công');
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the xoa voucher'));
+      window.alert(getApiErrorMessage(error, 'Không thể xóa voucher'));
     }
   };
 
@@ -145,12 +145,12 @@ const AdminVouchersPage: React.FC = () => {
       } else {
         const created = await createVoucher(requestPayload);
         setVoucherList((prev) => [created.data, ...prev]);
-        window.alert('Them voucher thanh cong');
+        window.alert('Thêm voucher thành công');
       }
 
       closeModal();
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the luu voucher'));
+      window.alert(getApiErrorMessage(error, 'Không thể lưu voucher'));
     }
   };
 
@@ -170,7 +170,7 @@ const AdminVouchersPage: React.FC = () => {
         </button>}
       </div>
 
-      {loading && <div className="admin-info-box">Dang tai voucher...</div>}
+      {loading && <div className="admin-info-box">Đang tải voucher...</div>}
 
       <div className="admin-news-wrap">
         <table className="admin-table">

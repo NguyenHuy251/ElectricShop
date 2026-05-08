@@ -13,6 +13,10 @@ export interface TaiKhoanRow {
   trangThai: boolean;
   ngayTao?: Date;
   isEmployee?: boolean;
+  ngaySinh?: Date | null;
+  gioiTinh?: string | null;
+  ngayVaoLam?: Date | null;
+  boPhan?: string | null;
 }
 
 export const getLoginByUsername = async (tenDangNhap: string): Promise<TaiKhoanRow | null> => {
@@ -105,8 +109,15 @@ export const updateAccount = async (params: {
   sdt?: string;
   diaChi?: string;
   vaiTro?: string;
+  ngaySinh?: string | null;
+  gioiTinh?: string;
+  ngayVaoLam?: string | null;
+  boPhan?: string;
 }): Promise<TaiKhoanRow | null> => {
   const pool = await connectToDatabase();
+
+  const ngaySinhValue = params.ngaySinh ? new Date(params.ngaySinh) : null;
+  const ngayVaoLamValue = params.ngayVaoLam ? new Date(params.ngayVaoLam) : null;
 
   const result = await pool
     .request()
@@ -116,6 +127,10 @@ export const updateAccount = async (params: {
     .input('sdt', sql.NVarChar(15), params.sdt ?? null)
     .input('diaChi', sql.NVarChar(255), params.diaChi ?? null)
     .input('vaiTro', sql.NVarChar(20), params.vaiTro ?? null)
+    .input('ngaySinh', sql.Date, ngaySinhValue)
+    .input('gioiTinh', sql.NVarChar(10), params.gioiTinh ?? null)
+    .input('ngayVaoLam', sql.Date, ngayVaoLamValue)
+    .input('boPhan', sql.NVarChar(100), params.boPhan ?? null)
     .execute('sp_TaiKhoan_Sua');
 
   return (result.recordset[0] as TaiKhoanRow | undefined) ?? null;

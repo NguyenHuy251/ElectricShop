@@ -22,17 +22,25 @@ export class EmployeeError extends Error {
   }
 }
 
+const toDateStr = (value: Date | string | null | undefined): string => {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+};
+
 const mapEmployee = (row: EmployeeRow): EmployeePublic => ({
   id: row.id,
   idTaiKhoan: row.idTaiKhoan,
   maNhanVien: row.maNhanVien,
   hoTen: row.hoTen,
   sdt: row.sdt ?? '',
+  ngaySinh: toDateStr(row.ngaySinh),
+  gioiTinh: row.gioiTinh ?? '',
   email: row.email ?? '',
   diaChi: row.diaChi ?? '',
   chucVu: row.chucVu ?? '',
   boPhan: row.boPhan ?? '',
-  ngayVaoLam: row.ngayVaoLam ? row.ngayVaoLam.toISOString().slice(0, 10) : '',
+  ngayVaoLam: toDateStr(row.ngayVaoLam),
   luongCoBan: Number(row.luongCoBan ?? 0),
   trangThai: row.trangThai,
 });

@@ -36,7 +36,7 @@ const AdminCustomersPage: React.FC = () => {
       const result = await getCustomers();
       setCustomers(result.data);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Khong the tai danh sach khach hang');
+      setError(error instanceof Error ? error.message : 'Không thể tải danh sách khách hàng');
     } finally {
       setLoading(false);
     }
@@ -92,11 +92,11 @@ const AdminCustomersPage: React.FC = () => {
         sdt: editForm.sdt.trim(),
         diaChi: editForm.diaChi.trim(),
       });
-      setEditSuccess('Cap nhat khach hang thanh cong');
+      setEditSuccess('Cập nhật khách hàng thành công');
       await loadCustomers();
       setTimeout(() => setEditingCustomer(null), 1000);
     } catch (error) {
-      setEditError(error instanceof Error ? error.message : 'Khong the cap nhat khach hang');
+      setEditError(error instanceof Error ? error.message : 'Không thể cập nhật khách hàng');
     } finally {
       setEditLoading(false);
     }
@@ -116,9 +116,9 @@ const AdminCustomersPage: React.FC = () => {
     try {
       await deleteCustomer(account.id);
       await loadCustomers();
-      window.alert('Xoa khach hang thanh cong');
+      window.alert('Xóa khách hàng thành công');
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Khong the xoa khach hang');
+      setError(error instanceof Error ? error.message : 'Không thể xóa khách hàng');
     } finally {
       setDeletingId(null);
     }

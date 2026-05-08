@@ -118,6 +118,7 @@ export const mapBackendProductToProduct = (product: BackendProduct): Product => 
     specs: buildSpecs(product),
     isFeatured: product.danhGia >= 4.5 || soLuongDaBan >= 20,
     isNew: daysSinceCreated <= 30,
+    soldQuantity: soLuongDaBan,
   };
 };
 

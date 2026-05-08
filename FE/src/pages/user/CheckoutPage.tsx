@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircleOutlined, CreditCardOutlined, FileTextOutlined, HomeOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CreditCardOutlined, FileTextOutlined, HomeOutlined, GiftOutlined } from '@ant-design/icons';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/helpers';
 import { getApiErrorMessage } from '../../utils/apiError';
+import { getVouchers } from '../../services';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import '../../assets/styles/pages/user-pages.css';
@@ -30,8 +31,6 @@ const CheckoutPage: React.FC = () => {
     ? cart.filter((item) => selectedProductIds.includes(item.productId))
     : cart;
 
-  const total = checkoutItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-
   const [form, setForm] = useState({
     name: currentUser?.name || '',
     phone: currentUser?.phone || '',
@@ -39,12 +38,43 @@ const CheckoutPage: React.FC = () => {
     note: '',
     payment: 'cod',
   });
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
 
+  const total = checkoutItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+  const discount = appliedVoucher ? (
+    appliedVoucher.discountType === 'percent'
+      ? (total * appliedVoucher.discountValue) / 100
+      : appliedVoucher.discountValue
+  ) : 0;
+
+  const finalTotal = Math.max(0, total - discount);
+
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      window.alert('Vui lòng nhập mã voucher');
+      return;
+    }
+    try {
+      const response = await getVouchers();
+      const voucher = response.data.find((v: any) => v.code.toUpperCase() === voucherCode.toUpperCase() && v.isActive);
+      if (voucher && total >= (voucher.minOrderValue || 0)) {
+        setAppliedVoucher(voucher);
+        window.alert('Áp dụng mã voucher thành công!');
+      } else {
+        window.alert('Mã voucher không hợp lệ hoặc đã hết hạn');
+      }
+    } catch (error) {
+      window.alert('Không thể kiểm tra voucher');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,7 +101,7 @@ const CheckoutPage: React.FC = () => {
 
       setSuccess(true);
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the tao don hang'));
+      window.alert(getApiErrorMessage(error, 'Không thể tạo đơn hàng'));
     } finally {
       setLoading(false);
     }
@@ -211,6 +241,39 @@ const CheckoutPage: React.FC = () => {
               ))}
             </div>
 
+            <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e5e7eb' }}>
+              <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  placeholder="Nhập mã voucher"
+                  className="checkout-field__control"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyVoucher}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                  }}
+                >
+                  <GiftOutlined /> Áp dụng
+                </button>
+              </div>
+              {appliedVoucher && (
+                <div style={{ color: '#10b981', fontSize: '14px' }}>
+                  ✓ Đã áp dụng: {appliedVoucher.code}
+                </div>
+              )}
+            </div>
+
             <div className="checkout-summary__totals">
               <div className="checkout-summary__row">
                 <span className="checkout-summary__muted">Tạm tính</span>
@@ -220,9 +283,15 @@ const CheckoutPage: React.FC = () => {
                 <span className="checkout-summary__muted">Phí vận chuyển</span>
                 <span className="checkout-summary__free">Miễn phí</span>
               </div>
+              {discount > 0 && (
+                <div className="checkout-summary__row" style={{ color: '#10b981' }}>
+                  <span className="checkout-summary__muted">Giảm giá</span>
+                  <span>-{formatCurrency(discount)}</span>
+                </div>
+              )}
               <div className="checkout-summary__row checkout-summary__row--total">
                 <span>Tổng cộng</span>
-                <span className="checkout-summary__total-value">{formatCurrency(total)}</span>
+                <span className="checkout-summary__total-value">{formatCurrency(finalTotal)}</span>
               </div>
             </div>
 

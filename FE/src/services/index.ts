@@ -14,3 +14,4 @@ export * from './orderService';
 export * from './customerService';
 export * from './newsService';
 export * from './invoiceService';
+export * from './brandService';

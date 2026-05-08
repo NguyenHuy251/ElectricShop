@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
+import { getApiErrorMessage } from '../../utils/apiError';
+import { createBrand, deleteBrand, getBrands, updateBrand } from '../../services';
 import '../../assets/styles/pages/admin-pages.css';
 
 export interface Brand {
@@ -13,55 +15,26 @@ export interface Brand {
   trangThai: boolean;
 }
 
-// Mock data - thay thế bằng API call
-const initialBrands: Brand[] = [
-  {
-    id: 1,
-    tenThuongHieu: 'Panasonic',
-    slug: 'panasonic',
-    logo: 'panasonic.png',
-    quocGia: 'Japan',
-    trangThai: true,
-  },
-  {
-    id: 2,
-    tenThuongHieu: 'Philips',
-    slug: 'philips',
-    logo: 'philips.png',
-    quocGia: 'Netherlands',
-    trangThai: true,
-  },
-  {
-    id: 3,
-    tenThuongHieu: 'Xiaomi',
-    slug: 'xiaomi',
-    logo: 'xiaomi.png',
-    quocGia: 'China',
-    trangThai: true,
-  },
-  {
-    id: 4,
-    tenThuongHieu: 'Sunhouse',
-    slug: 'sunhouse',
-    logo: 'sunhouse.png',
-    quocGia: 'Vietnam',
-    trangThai: true,
-  },
-  {
-    id: 5,
-    tenThuongHieu: 'Electrolux',
-    slug: 'electrolux',
-    logo: 'electrolux.png',
-    quocGia: 'Sweden',
-    trangThai: true,
-  },
-];
+const buildBrandFallback = (name: string): string => {
+  const letter = (name || '?').charAt(0).toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" viewBox="0 0 60 40"><rect width="60" height="40" fill="#e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#6b7280">${letter}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+const resolveBrandLogo = (logo: string, name: string): string => {
+  const trimmed = (logo || '').trim();
+  if (!trimmed) return buildBrandFallback(name);
+  if (/^(https?:|data:|blob:|\/\/)/i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('/')) return trimmed;
+  return `/brands/${trimmed}`;
+};
 
 const AdminBrandsPage: React.FC = () => {
   const { currentUser } = useAuth();
   const isReadOnly = currentUser?.role !== 'admin' && (currentUser?.isEmployee ?? false);
 
-  const [brands, setBrands] = useState<Brand[]>(initialBrands);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [formData, setFormData] = useState({
@@ -71,6 +44,21 @@ const AdminBrandsPage: React.FC = () => {
     quocGia: '',
     trangThai: true,
   });
+
+  const loadBrands = async () => {
+    try {
+      const response = await getBrands();
+      setBrands(response.data);
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Không thể tải danh sách thương hiệu'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadBrands();
+  }, []);
 
   const handleOpenModal = (brand?: Brand) => {
     if (brand) {
@@ -108,43 +96,66 @@ const AdminBrandsPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.tenThuongHieu || !formData.slug) {
-      alert('Vui lòng nhập đầy đủ thông tin');
+    if (!formData.tenThuongHieu.trim() || !formData.slug.trim()) {
+      window.alert('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
-    if (editingBrand) {
-      setBrands((prev) =>
-        prev.map((b) =>
-          b.id === editingBrand.id
-            ? { ...b, ...formData }
-            : b
-        )
-      );
-    } else {
-      const newBrand: Brand = {
-        id: Math.max(...brands.map((b) => b.id)) + 1,
-        ...formData,
-      };
-      setBrands((prev) => [...prev, newBrand]);
-    }
+    const payload = {
+      tenThuongHieu: formData.tenThuongHieu.trim(),
+      slug: formData.slug.trim(),
+      logo: formData.logo.trim(),
+      quocGia: formData.quocGia.trim(),
+      trangThai: formData.trangThai,
+    };
 
-    handleCloseModal();
+    try {
+      if (editingBrand) {
+        const response = await updateBrand(editingBrand.id, payload);
+        setBrands((prev) => prev.map((b) => (b.id === editingBrand.id ? response.data : b)));
+        window.alert('Cập nhật thương hiệu thành công');
+      } else {
+        const response = await createBrand(payload);
+        setBrands((prev) => [response.data, ...prev]);
+        window.alert('Thêm thương hiệu thành công');
+      }
+      handleCloseModal();
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Không thể lưu thương hiệu'));
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa thương hiệu này?')) {
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa thương hiệu này?')) {
+      return;
+    }
+    try {
+      await deleteBrand(id);
       setBrands((prev) => prev.filter((b) => b.id !== id));
+      window.alert('Xóa thương hiệu thành công');
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Không thể xóa thương hiệu'));
     }
   };
 
-  const handleStatusChange = (id: number, newStatus: boolean) => {
-    setBrands((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, trangThai: newStatus } : b))
-    );
+  const handleStatusChange = async (id: number, newStatus: boolean) => {
+    const target = brands.find((b) => b.id === id);
+    if (!target) return;
+    try {
+      const response = await updateBrand(id, {
+        tenThuongHieu: target.tenThuongHieu,
+        slug: target.slug,
+        logo: target.logo,
+        quocGia: target.quocGia,
+        trangThai: newStatus,
+      });
+      setBrands((prev) => prev.map((b) => (b.id === id ? response.data : b)));
+    } catch (error: unknown) {
+      window.alert(getApiErrorMessage(error, 'Không thể cập nhật trạng thái'));
+    }
   };
 
   return (
@@ -185,7 +196,17 @@ const AdminBrandsPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {brands.map((brand) => (
+            {isLoading && (
+              <tr>
+                <td colSpan={6} className="admin-empty-state">Đang tải danh sách thương hiệu...</td>
+              </tr>
+            )}
+            {!isLoading && brands.length === 0 && (
+              <tr>
+                <td colSpan={6} className="admin-empty-state">Chưa có thương hiệu nào</td>
+              </tr>
+            )}
+            {!isLoading && brands.map((brand) => (
               <tr key={brand.id} className="admin-import-row">
                 <td className="admin-import-cell">{brand.id}</td>
                 <td className="admin-import-cell admin-import-cell-strong">
@@ -193,13 +214,15 @@ const AdminBrandsPage: React.FC = () => {
                 </td>
                 <td className="admin-import-cell admin-import-cell-muted">
                   <img
-                    src={`/brands/${brand.logo}`}
+                    src={resolveBrandLogo(brand.logo, brand.tenThuongHieu)}
                     alt={brand.tenThuongHieu}
                     className="admin-brand-logo"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://via.placeholder.com/60x40?text=' +
-                        brand.tenThuongHieu.charAt(0);
+                      const img = e.currentTarget;
+                      const fallback = buildBrandFallback(brand.tenThuongHieu);
+                      if (img.src !== fallback) {
+                        img.src = fallback;
+                      }
                     }}
                   />
                 </td>

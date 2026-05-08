@@ -67,7 +67,7 @@ const AdminOrdersPage: React.FC = () => {
             {loading && (
               <tr>
                 <td colSpan={8} className="admin-orders-empty">
-                  Dang tai don hang...
+                  Đang tải đơn hàng...
                 </td>
               </tr>
             )}
@@ -144,9 +144,9 @@ const AdminOrdersPage: React.FC = () => {
                         if (s === 'confirmed') {
                           await reloadProducts();
                         }
-                        window.alert('Cap nhat trang thai don hang thanh cong');
+                        window.alert('Cập nhật trạng thái đơn hàng thành công');
                       } catch (error: unknown) {
-                        window.alert(getApiErrorMessage(error, 'Khong the cap nhat trang thai don hang'));
+                        window.alert(getApiErrorMessage(error, 'Không thể cập nhật trạng thái đơn hàng'));
                       }
                     }}
                     style={statusButtonStyle(selectedOrder.trangThai === s, s)}

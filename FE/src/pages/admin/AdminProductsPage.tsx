@@ -16,7 +16,7 @@ import '../../assets/styles/pages/admin-pages.css';
 const emptyProduct: Omit<Product, 'id'> = {
   name: '', slug: '', categoryId: 1, price: 0, description: '',
   shortDescription: '', images: ['https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=400&fit=crop'],
-  rating: 5, reviewCount: 0, stock: 0, brand: '', specs: {}, isFeatured: false, isNew: false,
+  rating: 5, reviewCount: 0, stock: 0, soldQuantity: 0, brand: '', specs: {}, isFeatured: false, isNew: false,
 };
 
 const IMAGE_PLACEHOLDER = 'https://placehold.co/800x800?text=San+pham';
@@ -103,12 +103,12 @@ const AdminProductsPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!form.name.trim()) {
-      window.alert('Vui long nhap ten san pham');
+      window.alert('Vui lòng nhập tên sản phẩm');
       return;
     }
 
     if (!Number.isFinite(form.price) || form.price <= 0) {
-      window.alert('Gia ban khong hop le');
+      window.alert('Giá bán không hợp lệ');
       return;
     }
 
@@ -122,12 +122,12 @@ const AdminProductsPage: React.FC = () => {
         await updateProduct({ ...payload, id: editProduct.id });
       } else {
         await addProduct({ ...payload, id: Date.now() });
-        window.alert('Them san pham thanh cong');
+        window.alert('Thêm sản phẩm thành công');
       }
 
       setModalOpen(false);
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the luu san pham'));
+      window.alert(getApiErrorMessage(error, 'Không thể lưu sản phẩm'));
     }
   };
 
@@ -135,9 +135,9 @@ const AdminProductsPage: React.FC = () => {
     try {
       await deleteProduct(id);
       setDeleteConfirm(null);
-      window.alert('Xoa san pham thanh cong');
+      window.alert('Xóa sản phẩm thành công');
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the xoa san pham'));
+      window.alert(getApiErrorMessage(error, 'Không thể xóa sản phẩm'));
     }
   };
 
@@ -199,7 +199,7 @@ const AdminProductsPage: React.FC = () => {
         <table className="admin-table">
           <thead>
             <tr className="admin-table-head-row">
-              {['Sản phẩm', 'Danh mục', 'Giá', 'Tồn kho', 'Trạng thái', 'Thao tác'].map((h) => (
+              {['Sản phẩm', 'Danh mục', 'Giá', 'Tồn kho', 'Đã bán', 'Trạng thái', 'Thao tác'].map((h) => (
                 <th key={h} className="admin-table-th">
                   {h}
                 </th>
@@ -249,6 +249,11 @@ const AdminProductsPage: React.FC = () => {
                       }`}
                     >
                       {product.stock}
+                    </span>
+                  </td>
+                  <td className="admin-table-cell">
+                    <span className="admin-product-sold">
+                      {product.soldQuantity}
                     </span>
                   </td>
                   <td className="admin-table-cell">

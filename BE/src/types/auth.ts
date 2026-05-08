@@ -18,6 +18,12 @@ export interface ChangePasswordRequestBody {
   matKhauMoi: string;
 }
 
+export interface ForgotPasswordRequestBody {
+  tenDangNhap: string;
+  email: string;
+  matKhauMoi: string;
+}
+
 export interface UpdateAccountRequestBody {
   id: number;
   tenHienThi?: string;
@@ -25,6 +31,10 @@ export interface UpdateAccountRequestBody {
   sdt?: string;
   diaChi?: string;
   vaiTro?: string;
+  ngaySinh?: string | null;
+  gioiTinh?: string;
+  ngayVaoLam?: string | null;
+  boPhan?: string;
 }
 
 export interface TaiKhoanPublic {
@@ -38,4 +48,8 @@ export interface TaiKhoanPublic {
   trangThai: boolean;
   isEmployee?: boolean;
   employeeRole?: 'staff' | 'supervisor' | 'manager' | undefined;
+  ngaySinh?: string | null;
+  gioiTinh?: string | null;
+  ngayVaoLam?: string | null;
+  boPhan?: string | null;
 }

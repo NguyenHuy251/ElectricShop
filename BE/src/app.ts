@@ -17,6 +17,7 @@ import orderRouter from './routes/orderRoutes.js';
 import customerRouter from './routes/customerRoutes.js';
 import newsRouter from './routes/newsRoutes.js';
 import invoiceRouter from './routes/invoiceRoutes.js';
+import brandRouter from './routes/brandRoutes.js';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +54,7 @@ app.use('/api/orders', orderRouter);
 app.use('/api/customers', customerRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/invoices', invoiceRouter);
+app.use('/api/brands', brandRouter);
 
 app.get('/test-db', async (_req, res) => {
   try {

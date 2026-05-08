@@ -18,6 +18,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   stock: number;
+  soldQuantity: number;
   brand: string;
   specs: Record<string, string>;
   isFeatured: boolean;
@@ -92,6 +93,10 @@ export interface AuthUser {
   isEmployee?: boolean;
   employeeRole?: 'staff' | 'supervisor' | 'manager';
   vaiTro?: string;
+  ngaySinh?: string | null;
+  gioiTinh?: string | null;
+  ngayVaoLam?: string | null;
+  boPhan?: string | null;
 }
 
 export interface PaginationInfo {
@@ -119,6 +124,8 @@ export interface Employee {
   maNhanVien: string;
   hoTen: string;
   sdt: string;
+  ngaySinh: string;
+  gioiTinh: string;
   email: string;
   diaChi: string;
   chucVu: string;

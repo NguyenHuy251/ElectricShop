@@ -34,7 +34,7 @@ const AdminSuppliersPage: React.FC = () => {
       const response = await getSuppliers();
       setSuppliers(response.data);
     } catch (_error: unknown) {
-      alert('Khong the tai danh sach nha cung cap');
+      alert('Không thể tải danh sách nhà cung cấp');
     } finally {
       setIsLoading(false);
     }
@@ -82,12 +82,12 @@ const AdminSuppliersPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.tenNhaCungCap || !formData.sdt || !formData.email) {
-      alert('Vui long nhap day du thong tin bat buoc');
+      alert('Vui lòng nhập đầy đủ thông tin bắt buộc');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      alert('Email khong hop le');
+      alert('Email không hợp lệ');
       return;
     }
 
@@ -98,36 +98,36 @@ const AdminSuppliersPage: React.FC = () => {
       } else {
         const response = await createSupplier(formData);
         setSuppliers((prev) => [response.data, ...prev]);
-        window.alert('Them nha cung cap thanh cong');
+        window.alert('Thêm nhà cung cấp thành công');
       }
 
       handleCloseModal();
     } catch (error: unknown) {
-      window.alert(getApiErrorMessage(error, 'Khong the luu nha cung cap'));
+      window.alert(getApiErrorMessage(error, 'Không thể lưu nhà cung cấp'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Ban co chac chan muon xoa nha cung cap nay?')) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?')) {
       return;
     }
 
     try {
       await deleteSupplier(id);
       setSuppliers((prev) => prev.filter((s) => s.id !== id));
-      window.alert('Xoa nha cung cap thanh cong');
+      window.alert('Xóa nhà cung cấp thành công');
     } catch (error: unknown) {
-      window.alert(getApiErrorMessage(error, 'Khong the xoa nha cung cap. Co the nha cung cap da phat sinh phieu nhap.'));
+      window.alert(getApiErrorMessage(error, 'Không thể xóa nhà cung cấp. Có thể nhà cung cấp đã phát sinh phiếu nhập.'));
     }
   };
 
   return (
     <div className="admin-import-page">
       <div className="admin-page-header">
-        <h1 className="admin-import-header-title">Quan ly Nha cung cap</h1>
+        <h1 className="admin-import-header-title">Quản lý Nhà cung cấp</h1>
         {!isReadOnly && (
           <button onClick={() => handleOpenModal()} className="admin-import-create-btn">
-            <PlusOutlined /> Them nha cung cap
+            <PlusOutlined /> Thêm nhà cung cấp
           </button>
         )}
       </div>
@@ -137,17 +137,17 @@ const AdminSuppliersPage: React.FC = () => {
           <thead>
             <tr className="admin-import-head-row">
               <th className="admin-import-th">ID</th>
-              <th className="admin-import-th">Ten nha cung cap</th>
-              <th className="admin-import-th">Dien thoai</th>
+              <th className="admin-import-th">Tên nhà cung cấp</th>
+              <th className="admin-import-th">Điện thoại</th>
               <th className="admin-import-th">Email</th>
-              <th className="admin-import-th">Dia chi</th>
-              <th className="admin-import-th admin-import-th-center">Hanh dong</th>
+              <th className="admin-import-th">Địa chỉ</th>
+              <th className="admin-import-th admin-import-th-center">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={6} className="admin-empty-state">Dang tai danh sach nha cung cap...</td>
+                <td colSpan={6} className="admin-empty-state">Đang tải danh sách nhà cung cấp...</td>
               </tr>
             )}
             {!isLoading && suppliers.map((supplier) => (
@@ -176,20 +176,20 @@ const AdminSuppliersPage: React.FC = () => {
                   {!isReadOnly && (
                     <div className="admin-import-actions">
                       <button onClick={() => handleOpenModal(supplier)} className="admin-import-action-btn view">
-                        <EditOutlined /> Sua
+                        <EditOutlined /> Sửa
                       </button>
                       <button onClick={() => void handleDelete(supplier.id)} className="admin-import-action-btn delete">
-                        <DeleteOutlined /> Xoa
+                        <DeleteOutlined /> Xóa
                       </button>
                     </div>
                   )}
-                  {isReadOnly && <span className="admin-readonly-text">Chi xem</span>}
+                  {isReadOnly && <span className="admin-readonly-text">Chỉ xem</span>}
                 </td>
               </tr>
             ))}
             {!isLoading && suppliers.length === 0 && (
               <tr>
-                <td colSpan={6} className="admin-empty-state">Chua co nha cung cap nao</td>
+                <td colSpan={6} className="admin-empty-state">Chưa có nhà cung cấp nào</td>
               </tr>
             )}
           </tbody>
@@ -198,30 +198,30 @@ const AdminSuppliersPage: React.FC = () => {
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <div className="admin-import-modal-body">
-          <h2 className="admin-import-modal-title">{editingSupplier ? 'Chinh sua nha cung cap' : 'Them nha cung cap moi'}</h2>
+          <h2 className="admin-import-modal-title">{editingSupplier ? 'Chỉnh sửa nhà cung cấp' : 'Thêm nhà cung cấp mới'}</h2>
 
           <form onSubmit={handleSubmit}>
             <div className="admin-import-field">
-              <label className="admin-import-label">Ten nha cung cap <span className="admin-import-label-required">*</span></label>
+              <label className="admin-import-label">Tên nhà cung cấp <span className="admin-import-label-required">*</span></label>
               <input
                 type="text"
                 name="tenNhaCungCap"
                 value={formData.tenNhaCungCap}
                 onChange={handleInputChange}
                 className="admin-import-input"
-                placeholder="Nhap ten nha cung cap"
+                placeholder="Nhập tên nhà cung cấp"
               />
             </div>
 
             <div className="admin-import-field">
-              <label className="admin-import-label">Dien thoai <span className="admin-import-label-required">*</span></label>
+              <label className="admin-import-label">Điện thoại <span className="admin-import-label-required">*</span></label>
               <input
                 type="tel"
                 name="sdt"
                 value={formData.sdt}
                 onChange={handleInputChange}
                 className="admin-import-input"
-                placeholder="Nhap so dien thoai"
+                placeholder="Nhập số điện thoại"
               />
             </div>
 
@@ -233,25 +233,25 @@ const AdminSuppliersPage: React.FC = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className="admin-import-input"
-                placeholder="Nhap email"
+                placeholder="Nhập email"
               />
             </div>
 
             <div className="admin-import-field">
-              <label className="admin-import-label">Dia chi</label>
+              <label className="admin-import-label">Địa chỉ</label>
               <input
                 type="text"
                 name="diaChi"
                 value={formData.diaChi}
                 onChange={handleInputChange}
                 className="admin-import-input"
-                placeholder="Nhap dia chi"
+                placeholder="Nhập địa chỉ"
               />
             </div>
 
             <div className="admin-import-form-actions">
-              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">Huy</button>
-              <button type="submit" className="admin-import-btn primary">{editingSupplier ? 'Cap nhat' : 'Them moi'}</button>
+              <button type="button" onClick={handleCloseModal} className="admin-import-btn cancel">Hủy</button>
+              <button type="submit" className="admin-import-btn primary">{editingSupplier ? 'Cập nhật' : 'Thêm mới'}</button>
             </div>
           </form>
         </div>

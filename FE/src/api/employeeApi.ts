@@ -7,6 +7,8 @@ export interface EmployeePayload {
   maNhanVien: string;
   hoTen: string;
   sdt?: string;
+  ngaySinh?: string;
+  gioiTinh?: string;
   email?: string;
   diaChi?: string;
   chucVu?: string;

@@ -11,6 +11,10 @@ export interface BackendAuthUser {
   trangThai: boolean;
   isEmployee?: boolean;
   employeeRole?: 'staff' | 'supervisor' | 'manager';
+  ngaySinh?: string | null;
+  gioiTinh?: string | null;
+  ngayVaoLam?: string | null;
+  boPhan?: string | null;
 }
 
 export interface LoginResponse extends ApiResponse<BackendAuthUser> {
@@ -30,6 +34,16 @@ export interface UpdateAccountPayload {
   sdt?: string;
   diaChi?: string;
   vaiTro?: string;
+  ngaySinh?: string | null;
+  gioiTinh?: string;
+  ngayVaoLam?: string | null;
+  boPhan?: string;
+}
+
+export interface ForgotPasswordPayload {
+  tenDangNhap: string;
+  email: string;
+  matKhauMoi: string;
 }
 
 export interface RegisterPayload {

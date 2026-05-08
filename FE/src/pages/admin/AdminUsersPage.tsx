@@ -139,7 +139,7 @@ const AdminUsersPage: React.FC = () => {
       return;
     }
 
-    window.alert('Xoa tai khoan thanh cong');
+    window.alert('Xóa tài khoản thành công');
     await loadAccounts();
   };
 

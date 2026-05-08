@@ -64,12 +64,12 @@ const AdminCategoriesPage: React.FC = () => {
           slug: form.slug.trim() || undefined,
           trangThai: true,
         });
-        window.alert('Them danh muc thanh cong');
+        window.alert('Thêm danh mục thành công');
       }
 
       closeModal();
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the luu danh muc'));
+      window.alert(getApiErrorMessage(error, 'Không thể lưu danh mục'));
     }
   };
 
@@ -81,9 +81,9 @@ const AdminCategoriesPage: React.FC = () => {
 
     try {
       await removeCategory(id);
-      window.alert('Xoa danh muc thanh cong');
+      window.alert('Xóa danh mục thành công');
     } catch (error) {
-      window.alert(getApiErrorMessage(error, 'Khong the xoa danh muc'));
+      window.alert(getApiErrorMessage(error, 'Không thể xóa danh mục'));
     }
   };
 

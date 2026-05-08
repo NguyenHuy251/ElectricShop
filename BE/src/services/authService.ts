@@ -11,6 +11,7 @@ import {
 import type { TaiKhoanRow } from '../repositories/authRepository.js';
 import type {
   ChangePasswordRequestBody,
+  ForgotPasswordRequestBody,
   LoginRequestBody,
   RegisterRequestBody,
   UpdateAccountRequestBody,
@@ -40,6 +41,12 @@ const mapTaiKhoan = (row: TaiKhoanRow): TaiKhoanPublic => {
   const isEmployee = !isAdmin && (row.isEmployee ?? isEmployeeByRole);
   const employeeRole = isEmployee ? 'staff' : undefined;
 
+  const toDateStr = (value: Date | string | null | undefined): string | null => {
+    if (!value) return null;
+    const d = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  };
+
   return {
     id: row.id,
     tenDangNhap: row.tenDangNhap,
@@ -51,6 +58,10 @@ const mapTaiKhoan = (row: TaiKhoanRow): TaiKhoanPublic => {
     trangThai: row.trangThai,
     isEmployee,
     employeeRole: employeeRole as 'staff' | 'supervisor' | 'manager' | undefined,
+    ngaySinh: toDateStr(row.ngaySinh),
+    gioiTinh: row.gioiTinh ?? null,
+    ngayVaoLam: toDateStr(row.ngayVaoLam),
+    boPhan: row.boPhan ?? null,
   };
 };
 
@@ -117,6 +128,37 @@ export const changePassword = async (payload: ChangePasswordRequestBody): Promis
   await updatePasswordById(payload.id, payload.matKhauMoi);
 };
 
+export const forgotPassword = async (payload: ForgotPasswordRequestBody): Promise<void> => {
+  const tenDangNhap = (payload.tenDangNhap ?? '').trim();
+  const email = (payload.email ?? '').trim().toLowerCase();
+  const matKhauMoi = payload.matKhauMoi ?? '';
+
+  if (!tenDangNhap || !email || !matKhauMoi) {
+    throw new AuthError('Vui lòng nhập đầy đủ thông tin', 400);
+  }
+
+  if (matKhauMoi.length < 6) {
+    throw new AuthError('Mật khẩu mới phải có ít nhất 6 ký tự', 400);
+  }
+
+  const user = await getLoginByUsername(tenDangNhap);
+
+  if (!user) {
+    throw new AuthError('Tên đăng nhập không tồn tại', 404);
+  }
+
+  if (!user.trangThai) {
+    throw new AuthError('Tài khoản đã bị khóa hoặc xóa', 403);
+  }
+
+  const userEmail = (user.email ?? '').trim().toLowerCase();
+  if (!userEmail || userEmail !== email) {
+    throw new AuthError('Email không khớp với tài khoản', 400);
+  }
+
+  await updatePasswordById(user.id, matKhauMoi);
+};
+
 export const deleteAccount = async (id: number): Promise<void> => {
   const affectedRows = await softDeleteAccountById(id);
 
@@ -148,6 +190,10 @@ export const updateAccountInfo = async (payload: UpdateAccountRequestBody): Prom
     sdt?: string;
     diaChi?: string;
     vaiTro?: string;
+    ngaySinh?: string | null;
+    gioiTinh?: string;
+    ngayVaoLam?: string | null;
+    boPhan?: string;
   } = { id: payload.id };
 
   if (payload.tenHienThi !== undefined) {
@@ -164,6 +210,18 @@ export const updateAccountInfo = async (payload: UpdateAccountRequestBody): Prom
   }
   if (payload.vaiTro !== undefined) {
     updates.vaiTro = payload.vaiTro;
+  }
+  if (payload.ngaySinh !== undefined) {
+    updates.ngaySinh = payload.ngaySinh;
+  }
+  if (payload.gioiTinh !== undefined) {
+    updates.gioiTinh = payload.gioiTinh;
+  }
+  if (payload.ngayVaoLam !== undefined) {
+    updates.ngayVaoLam = payload.ngayVaoLam;
+  }
+  if (payload.boPhan !== undefined) {
+    updates.boPhan = payload.boPhan;
   }
 
   const updated = await updateAccount(updates);
