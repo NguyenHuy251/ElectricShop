@@ -45,3 +45,22 @@ export const getTopProductsApi = async (params?: {
   const response = await httpClient.get<ApiResponse<BackendTopProduct[]>>('/api/reports/top-products', { params });
   return response.data;
 };
+
+export const createSnapshotApi = async (payload: {
+  tuNgay: string;
+  denNgay: string;
+  tongSoHoaDonBan: number;
+  tongSoHoaDonNhap: number;
+  tongDoanhThuBan: number;
+  tongChiPhiNhap: number;
+  tongDoanhThu: number;
+  idNhanVien?: number | null;
+}): Promise<ApiResponse<{ id: number }>> => {
+  const response = await httpClient.post<ApiResponse<{ id: number }>>('/api/reports/snapshots', payload);
+  return response.data;
+};
+
+export const getSnapshotsApi = async (params?: { topN?: number }): Promise<ApiResponse<any[]>> => {
+  const response = await httpClient.get<ApiResponse<any[]>>('/api/reports/snapshots', { params });
+  return response.data;
+};

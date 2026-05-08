@@ -38,6 +38,8 @@ const AdminVouchersPage: React.FC = () => {
 
   const [voucherList, setVoucherList] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const [form, setForm] = useState<VoucherFormState>(emptyForm);
@@ -72,6 +74,28 @@ const AdminVouchersPage: React.FC = () => {
     () => voucherList.filter((v) => v.isActive && new Date(v.expiredAt) >= new Date()).length,
     [voucherList],
   );
+
+  const filteredVouchers = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return voucherList.filter((voucher) => {
+      const active = voucher.isActive && new Date(voucher.expiredAt) >= new Date();
+      const statusMatches =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+            ? active
+            : !active;
+
+      const searchMatches =
+        !keyword ||
+        [voucher.code, voucher.title, voucher.description]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(keyword));
+
+      return statusMatches && searchMatches;
+    });
+  }, [search, statusFilter, voucherList]);
 
   const openCreateModal = () => {
     setEditingVoucher(null);
@@ -170,6 +194,26 @@ const AdminVouchersPage: React.FC = () => {
         </button>}
       </div>
 
+      <div className="admin-search-wrap">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo mã voucher, tiêu đề hoặc mô tả..."
+        />
+        <div className="admin-filter-row" style={{ marginTop: 12 }}>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Hết hiệu lực</option>
+          </select>
+        </div>
+      </div>
+
       {loading && <div className="admin-info-box">Đang tải voucher...</div>}
 
       <div className="admin-news-wrap">
@@ -184,7 +228,7 @@ const AdminVouchersPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {voucherList.map((voucher) => {
+            {filteredVouchers.map((voucher) => {
               const active = voucher.isActive && new Date(voucher.expiredAt) >= new Date();
               return (
                 <tr key={voucher.id} className="dashboard-table-row">
@@ -228,6 +272,11 @@ const AdminVouchersPage: React.FC = () => {
                 </tr>
               );
             })}
+            {!loading && filteredVouchers.length === 0 && (
+              <tr>
+                <td colSpan={7} className="admin-empty-state">Không tìm thấy voucher phù hợp</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

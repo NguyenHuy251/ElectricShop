@@ -2044,6 +2044,29 @@ BEGIN
 END
 GO
 
+IF OBJECT_ID('dbo.BaoCaoDoanhThu', 'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.BaoCaoDoanhThu;
+END
+GO
+
+CREATE TABLE dbo.BaoCaoDoanhThu(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    tuNgay DATE NOT NULL,
+    denNgay DATE NOT NULL,
+    tongSoHoaDonBan INT NOT NULL DEFAULT 0,
+    tongSoHoaDonNhap INT NOT NULL DEFAULT 0,
+    tongDoanhThuBan DECIMAL(18,2) NOT NULL DEFAULT 0,
+    tongChiPhiNhap DECIMAL(18,2) NOT NULL DEFAULT 0,
+    tongDoanhThu DECIMAL(18,2) NOT NULL DEFAULT 0,
+    idNhanVien INT NULL,
+    ngayTao DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+CREATE INDEX IX_BaoCaoDoanhThu_TuNgay ON dbo.BaoCaoDoanhThu(tuNgay DESC);
+GO
+
 IF OBJECT_ID('dbo.sp_GioHang_LayTheoTaiKhoan', 'P') IS NOT NULL
 BEGIN
     DROP PROCEDURE dbo.sp_GioHang_LayTheoTaiKhoan;

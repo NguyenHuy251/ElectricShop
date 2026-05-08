@@ -16,6 +16,7 @@ import {
   CreditCardOutlined,
   HomeOutlined,
   MessageOutlined,
+  PieChartOutlined,
   StarOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -239,6 +240,16 @@ const AdminSidebar: React.FC = () => {
             )}
           </>
         )}
+
+        <NavLink
+          to="/admin/reports"
+          className={({ isActive }) => `admin-sidebar-link admin-sidebar-link-bottom ${isActive ? 'active' : ''}`}
+        >
+          <span className="admin-sidebar-icon">
+            <PieChartOutlined />
+          </span>
+          Báo cáo
+        </NavLink>
       </nav>
 
       {/* Bottom Actions */}

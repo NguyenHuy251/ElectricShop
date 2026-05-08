@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
@@ -35,6 +35,8 @@ const AdminBrandsPage: React.FC = () => {
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [formData, setFormData] = useState({
@@ -59,6 +61,27 @@ const AdminBrandsPage: React.FC = () => {
   useEffect(() => {
     void loadBrands();
   }, []);
+
+  const filteredBrands = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return brands.filter((brand) => {
+      const statusMatches =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+            ? brand.trangThai
+            : !brand.trangThai;
+
+      const searchMatches =
+        !keyword ||
+        [brand.tenThuongHieu, brand.slug, brand.quocGia]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(keyword));
+
+      return statusMatches && searchMatches;
+    });
+  }, [brands, search, statusFilter]);
 
   const handleOpenModal = (brand?: Brand) => {
     if (brand) {
@@ -171,6 +194,27 @@ const AdminBrandsPage: React.FC = () => {
         )}
       </div>
 
+      <div className="admin-search-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo tên thương hiệu, slug hoặc quốc gia..."
+        />
+        <div className="admin-filter-row" style={{ marginTop: 12 }}>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Tạm dừng</option>
+          </select>
+        </div>
+      </div>
+
       <div className="admin-import-table-wrap">
         <table className="admin-table">
           <thead>
@@ -206,7 +250,7 @@ const AdminBrandsPage: React.FC = () => {
                 <td colSpan={6} className="admin-empty-state">Chưa có thương hiệu nào</td>
               </tr>
             )}
-            {!isLoading && brands.map((brand) => (
+            {!isLoading && filteredBrands.map((brand) => (
               <tr key={brand.id} className="admin-import-row">
                 <td className="admin-import-cell">{brand.id}</td>
                 <td className="admin-import-cell admin-import-cell-strong">
@@ -259,6 +303,11 @@ const AdminBrandsPage: React.FC = () => {
                 </td>
               </tr>
             ))}
+            {!isLoading && filteredBrands.length === 0 && (
+              <tr>
+                <td colSpan={6} className="admin-empty-state">Không tìm thấy thương hiệu phù hợp</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

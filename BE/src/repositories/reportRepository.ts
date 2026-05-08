@@ -56,3 +56,58 @@ export const getTopProducts = async (
   const result = await request.execute('sp_BaoCao_SanPhamBanChay');
   return result.recordset as ReportTopProductRow[];
 };
+
+export const createBaoCaoDoanhThu = async (payload: {
+  tuNgay: string;
+  denNgay: string;
+  tongSoHoaDonBan: number;
+  tongSoHoaDonNhap: number;
+  tongDoanhThuBan: number;
+  tongChiPhiNhap: number;
+  tongDoanhThu: number;
+  idNhanVien?: number | null;
+}): Promise<number> => {
+  const pool = await connectToDatabase();
+  const request = pool.request();
+  request.input('tuNgay', sql.Date, new Date(payload.tuNgay));
+  request.input('denNgay', sql.Date, new Date(payload.denNgay));
+  request.input('tongSoHoaDonBan', sql.Int, payload.tongSoHoaDonBan);
+  request.input('tongSoHoaDonNhap', sql.Int, payload.tongSoHoaDonNhap);
+  request.input('tongDoanhThuBan', sql.Decimal(18, 2), payload.tongDoanhThuBan);
+  request.input('tongChiPhiNhap', sql.Decimal(18, 2), payload.tongChiPhiNhap);
+  request.input('tongDoanhThu', sql.Decimal(18, 2), payload.tongDoanhThu);
+  request.input('idNhanVien', sql.Int, payload.idNhanVien ?? null);
+
+  const insertQuery = `
+    INSERT INTO dbo.BaoCaoDoanhThu (tuNgay, denNgay, tongSoHoaDonBan, tongSoHoaDonNhap, tongDoanhThuBan, tongChiPhiNhap, tongDoanhThu, idNhanVien)
+    VALUES (@tuNgay, @denNgay, @tongSoHoaDonBan, @tongSoHoaDonNhap, @tongDoanhThuBan, @tongChiPhiNhap, @tongDoanhThu, @idNhanVien);
+    SELECT SCOPE_IDENTITY() AS id;`;
+
+  const result = await request.query(insertQuery);
+  const insertedId = result.recordset?.[0]?.id;
+  return Number(insertedId ?? 0);
+};
+
+export const getBaoCaoDoanhThuList = async (topN = 50): Promise<any[]> => {
+  const pool = await connectToDatabase();
+  const request = pool.request();
+  request.input('topN', sql.Int, topN);
+  const result = await request.query(`
+    SELECT TOP (@topN)
+      bcdt.id,
+      bcdt.tuNgay,
+      bcdt.denNgay,
+      bcdt.tongSoHoaDonBan,
+      bcdt.tongSoHoaDonNhap,
+      bcdt.tongDoanhThuBan,
+      bcdt.tongChiPhiNhap,
+      bcdt.tongDoanhThu,
+      bcdt.idNhanVien,
+      nv.hoTen AS tenNhanVien,
+      bcdt.ngayTao
+    FROM dbo.BaoCaoDoanhThu bcdt
+    LEFT JOIN dbo.NhanVien nv ON nv.id = bcdt.idNhanVien
+    ORDER BY bcdt.ngayTao DESC;
+  `);
+  return result.recordset as any[];
+};

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useProducts } from '../../hooks/useProducts';
 import { useCategories } from '../../hooks/useCategories';
@@ -41,6 +41,8 @@ const AdminProductsPage: React.FC = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
   const { categories } = useCategories();
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'featured' | 'new' | 'outStock' | 'lowStock'>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, 'id'>>(emptyProduct);
@@ -48,11 +50,31 @@ const AdminProductsPage: React.FC = () => {
   const [savedImages, setSavedImages] = useState<SavedImageItem[]>([]);
   const [isLoadingSavedImages, setIsLoadingSavedImages] = useState(false);
 
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const categoryMatches = categoryFilter === 'all' || product.categoryId === categoryFilter;
+      const statusMatches =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'featured'
+            ? product.isFeatured
+            : statusFilter === 'new'
+              ? product.isNew
+              : statusFilter === 'outStock'
+                ? product.stock <= 0
+                : product.stock > 0 && product.stock <= 5;
+
+      const searchMatches =
+        !keyword ||
+        [product.name, product.brand, product.slug]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(keyword));
+
+      return categoryMatches && statusMatches && searchMatches;
+    });
+  }, [categoryFilter, products, search, statusFilter]);
 
   const openAdd = () => {
     setEditProduct(null);
@@ -193,6 +215,29 @@ const AdminProductsPage: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="admin-search-input"
         />
+        <div className="admin-filter-row" style={{ marginTop: 12 }}>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả danh mục</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
+            ))}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="featured">Nổi bật</option>
+            <option value="new">Mới</option>
+            <option value="lowStock">Sắp hết hàng</option>
+            <option value="outStock">Hết hàng</option>
+          </select>
+        </div>
       </div>
 
       <div className="admin-table-wrap">
@@ -289,6 +334,11 @@ const AdminProductsPage: React.FC = () => {
                 </tr>
               );
             })}
+            {!filtered.length && (
+              <tr>
+                <td colSpan={7} className="admin-empty-state">Không tìm thấy sản phẩm phù hợp</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

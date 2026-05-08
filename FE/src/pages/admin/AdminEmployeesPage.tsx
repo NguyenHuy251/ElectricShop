@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -26,6 +26,9 @@ export interface Employee {
 const AdminEmployeesPage: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [genderFilter, setGenderFilter] = useState<'all' | 'Nam' | 'Nữ' | 'Khác'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [formData, setFormData] = useState({
@@ -68,6 +71,31 @@ const AdminEmployeesPage: React.FC = () => {
       isMounted = false;
     };
   }, []);
+
+  const filteredEmployees = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return employees.filter((employee) => {
+      const statusMatches =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+            ? employee.trangThai
+            : !employee.trangThai;
+      const genderMatches = genderFilter === 'all' || (employee.gioiTinh || '') === genderFilter;
+      const searchMatches = !keyword || [
+        employee.hoTen,
+        employee.email,
+        employee.sdt,
+        employee.chucVu,
+        employee.boPhan,
+      ]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(keyword));
+
+      return statusMatches && genderMatches && searchMatches;
+    });
+  }, [employees, genderFilter, search, statusFilter]);
 
   const handleOpenModal = (employee?: Employee) => {
     if (employee) {
@@ -192,15 +220,52 @@ const AdminEmployeesPage: React.FC = () => {
 
       {loading && <div className="admin-info-box">Đang tải nhân viên...</div>}
 
+      <div className="admin-search-wrap admin-filter-toolbar">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo tên, email, chức vụ hoặc bộ phận..."
+        />
+        <div className="admin-filter-row">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="inactive">Tạm dừng</option>
+          </select>
+          <select
+            value={genderFilter}
+            onChange={(e) => setGenderFilter(e.target.value as 'all' | 'Nam' | 'Nữ' | 'Khác')}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả giới tính</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+      </div>
+
       <div className="admin-import-table-wrap">
         <table className="admin-table">
           <thead>
             <tr className="admin-import-head-row">
               <th className="admin-import-th">
-                Mã NV
+                Họ tên
               </th>
               <th className="admin-import-th">
-                Họ tên
+                Giới tính
+              </th>
+              <th className="admin-import-th">
+                Ngày sinh
+              </th>
+              <th className="admin-import-th">
+                Ngày vào làm
               </th>
               <th className="admin-import-th">
                 Chức vụ
@@ -220,13 +285,22 @@ const AdminEmployeesPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {employees.map((employee) => (
+            {filteredEmployees.map((employee) => (
               <tr key={employee.id} className="admin-import-row">
-                <td className="admin-import-cell admin-import-cell-strong">
-                  {employee.maNhanVien}
-                </td>
                 <td className="admin-import-cell">
-                  {employee.hoTen}
+                  <div className="admin-employee-name">
+                    <div className="admin-import-cell-strong">{employee.hoTen}</div>
+                    <div className="admin-import-cell-muted">{employee.maNhanVien}</div>
+                  </div>
+                </td>
+                <td className="admin-import-cell admin-import-cell-muted">
+                  {employee.gioiTinh || '-'}
+                </td>
+                <td className="admin-import-cell admin-import-cell-muted">
+                  {employee.ngaySinh ? formatDate(employee.ngaySinh) : '-'}
+                </td>
+                <td className="admin-import-cell admin-import-cell-muted">
+                  {employee.ngayVaoLam ? formatDate(employee.ngayVaoLam) : '-'}
                 </td>
                 <td className="admin-import-cell admin-import-cell-muted">
                   {employee.chucVu}
@@ -259,6 +333,11 @@ const AdminEmployeesPage: React.FC = () => {
                 </td>
               </tr>
             ))}
+            {!loading && filteredEmployees.length === 0 && (
+              <tr>
+                <td colSpan={7} className="admin-empty-state">Không tìm thấy nhân viên phù hợp</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

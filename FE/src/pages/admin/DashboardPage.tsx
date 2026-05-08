@@ -151,21 +151,46 @@ const DashboardPage: React.FC = () => {
             })}
           </div>
 
-          <div className="dashboard-card">
-            <h3 className="dashboard-card-title-sm">Sản phẩm bán chạy</h3>
+          <div className="dashboard-card dashboard-top-products-card">
+            <div className="dashboard-card-head-row">
+              <div>
+                <h3 className="dashboard-card-title-sm">Sản phẩm bán chạy</h3>
+                <p className="dashboard-top-products-subtitle">Top sản phẩm theo số lượng bán ra trong kỳ</p>
+              </div>
+              {topProducts[0] && (
+                <div className="dashboard-top-products-highlight">
+                  <span className="dashboard-top-products-highlight-label">Dẫn đầu</span>
+                  <strong>{topProducts[0].tenSanPham}</strong>
+                </div>
+              )}
+            </div>
+
             {topProducts.length > 0 ? (
-              <div className="dashboard-top-products">
-                {topProducts.map((product, index) => (
-                  <div key={product.idSanPham} className="dashboard-top-product-row">
-                    <span className="dashboard-top-product-rank">#{index + 1}</span>
-                    <div className="dashboard-top-product-info">
-                      <div className="dashboard-top-product-name">{product.tenSanPham}</div>
-                      <div className="dashboard-top-product-meta">
-                        {product.soLuongBan} sản phẩm • {formatCurrency(product.doanhThu)}
+              <div className="dashboard-top-products-list">
+                {topProducts.map((product, index) => {
+                  const maxSold = topProducts[0]?.soLuongBan || 1;
+                  const progress = (product.soLuongBan / maxSold) * 100;
+
+                  return (
+                    <div key={product.idSanPham} className="dashboard-top-product-card">
+                      <div className="dashboard-top-product-badge">#{index + 1}</div>
+                      <div className="dashboard-top-product-body">
+                        <div className="dashboard-top-product-head">
+                          <div>
+                            <div className="dashboard-top-product-name">{product.tenSanPham}</div>
+                            <div className="dashboard-top-product-meta">
+                              {product.soLuongBan} sản phẩm đã bán
+                            </div>
+                          </div>
+                          <div className="dashboard-top-product-revenue">{formatCurrency(product.doanhThu)}</div>
+                        </div>
+                        <div className="dashboard-top-product-track">
+                          <div className="dashboard-top-product-fill" style={{ width: `${progress}%` }} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="dashboard-pending-label">Chưa có dữ liệu bán chạy</div>

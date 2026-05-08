@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
@@ -18,7 +18,21 @@ const AdminCategoriesPage: React.FC = () => {
   const { products } = useProducts();
   const [addModal, setAddModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', icon: '', slug: '' });
+
+  const filteredCategories = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) {
+      return categories;
+    }
+
+    return categories.filter((category) => {
+      return [category.name, category.slug, category.icon || '']
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(q));
+    });
+  }, [categories, search]);
 
   const openAdd = () => {
     setEditingId(null);
@@ -99,8 +113,18 @@ const AdminCategoriesPage: React.FC = () => {
         {!isReadOnly && <Button onClick={openAdd}><PlusOutlined /> Thêm danh mục</Button>}
       </div>
 
+      <div className="admin-search-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo tên, slug hoặc icon..."
+        />
+      </div>
+
       <div className="admin-categories-grid">
-        {categories.map((cat) => {
+        {filteredCategories.map((cat) => {
           const count = products.filter((p) => p.categoryId === cat.id).length;
           return (
             <div key={cat.id} className="admin-categories-card">
@@ -129,6 +153,8 @@ const AdminCategoriesPage: React.FC = () => {
           );
         })}
       </div>
+
+      {!filteredCategories.length && <div className="admin-empty-state">Không tìm thấy danh mục phù hợp</div>}
 
       {!isReadOnly && <Modal isOpen={addModal} onClose={closeModal} title={editingId ? 'Sửa danh mục' : 'Thêm danh mục mới'} size="sm">
         <div className="admin-form-column">

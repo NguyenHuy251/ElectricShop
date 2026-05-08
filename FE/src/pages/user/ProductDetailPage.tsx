@@ -98,6 +98,17 @@ const ProductDetailPage: React.FC = () => {
     };
   }, [product]);
 
+  // Ensure page is at top when navigating to a product detail
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    } catch (err) {
+      // ignore if not running in browser-like env
+    }
+    // also reset active tab to description when product changes
+    setActiveTab('desc');
+  }, [id]);
+
   if (!product) {
     return (
       <div className="product-not-found">

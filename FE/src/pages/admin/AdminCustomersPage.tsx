@@ -13,6 +13,7 @@ const AdminCustomersPage: React.FC = () => {
   const { currentUser } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -48,18 +49,23 @@ const AdminCustomersPage: React.FC = () => {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) {
-      return customers;
-    }
-
     return customers.filter((u) => {
-      return (
+      const statusMatches =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+            ? u.trangThai !== false
+            : u.trangThai === false;
+
+      const searchMatches =
+        !q ||
         u.hoTen.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
-        (u.tenDangNhap || '').toLowerCase().includes(q)
-      );
+        (u.tenDangNhap || '').toLowerCase().includes(q);
+
+      return statusMatches && searchMatches;
     });
-  }, [customers, search]);
+  }, [customers, search, statusFilter]);
 
   const handleEdit = (account: Customer) => {
     if (!isAdmin) {
@@ -173,6 +179,17 @@ const AdminCustomersPage: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="admin-search-input"
         />
+        <div className="admin-filter-row" style={{ marginTop: 12 }}>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Đã khóa</option>
+          </select>
+        </div>
       </div>
 
       {error && (

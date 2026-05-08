@@ -32,6 +32,7 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
 // Admin Pages
 import DashboardPage from './pages/admin/DashboardPage';
+import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
@@ -186,6 +187,16 @@ function App() {
           <ProtectedRoute requireAdmin allowEmployee>
             <AdminLayout>
               <AdminProductsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute requireAdmin allowEmployee>
+            <AdminLayout>
+              <AdminReportsPage />
             </AdminLayout>
           </ProtectedRoute>
         }

@@ -12,6 +12,8 @@ const AdminUsersPage: React.FC = () => {
   const { currentUser, getAccounts, deleteAccount, updateAccount } = useAuth();
   const [accounts, setAccounts] = useState<AuthUser[]>([]);
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'employee' | 'user'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -47,18 +49,32 @@ const AdminUsersPage: React.FC = () => {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) {
-      return accounts;
-    }
-
     return accounts.filter((u) => {
-      return (
+      const roleMatches =
+        roleFilter === 'all'
+          ? true
+          : roleFilter === 'admin'
+            ? u.role === 'admin'
+            : roleFilter === 'employee'
+              ? !!u.isEmployee && u.role !== 'admin'
+              : u.role !== 'admin' && !u.isEmployee;
+
+      const statusMatches =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+            ? u.isActive !== false
+            : u.isActive === false;
+
+      const searchMatches =
+        !q ||
         u.name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
-        (u.username || '').toLowerCase().includes(q)
-      );
+        (u.username || '').toLowerCase().includes(q);
+
+      return roleMatches && statusMatches && searchMatches;
     });
-  }, [accounts, search]);
+  }, [accounts, roleFilter, search, statusFilter]);
 
   const handleEdit = (account: AuthUser) => {
     setEditingAccount(account);
@@ -189,6 +205,27 @@ const AdminUsersPage: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="admin-search-input"
         />
+        <div className="admin-filter-row" style={{ marginTop: 12 }}>
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả vai trò</option>
+            <option value="user">Khách hàng</option>
+            <option value="employee">Nhân viên</option>
+            <option value="admin">Quản trị viên</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            className="admin-filter-select"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Đã khóa</option>
+          </select>
+        </div>
       </div>
 
       {error && (

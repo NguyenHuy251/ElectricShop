@@ -2,6 +2,8 @@ import {
   getRevenueByDate,
   getReportSummary,
   getTopProducts,
+  createBaoCaoDoanhThu,
+  getBaoCaoDoanhThuList,
 } from '../repositories/reportRepository.js';
 import type {
   ReportRevenueByDatePublic,
@@ -56,4 +58,23 @@ export const getTopProductsService = async (
     soLuongBan: Number(row.soLuongBan ?? 0),
     doanhThu: Number(row.doanhThu ?? 0),
   }));
+};
+
+export const createBaoCaoDoanhThuService = async (payload: {
+  tuNgay: string;
+  denNgay: string;
+  tongSoHoaDonBan: number;
+  tongSoHoaDonNhap: number;
+  tongDoanhThuBan: number;
+  tongChiPhiNhap: number;
+  tongDoanhThu: number;
+  idNhanVien?: number | null;
+}): Promise<number> => {
+  const id = await createBaoCaoDoanhThu(payload);
+  return id;
+};
+
+export const getBaoCaoDoanhThuListService = async (topN = 50): Promise<any[]> => {
+  const rows = await getBaoCaoDoanhThuList(topN);
+  return rows;
 };

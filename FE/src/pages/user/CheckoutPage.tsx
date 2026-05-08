@@ -5,6 +5,8 @@ import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrders } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/helpers';
+import vnpayImg from '../../assets/images/vnpayqr.png';
+import mbankImg from '../../assets/images/mbankqr.png';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { getVouchers } from '../../services';
 import Button from '../../components/ui/Button';
@@ -184,6 +186,7 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
             </div>
+            {/* QR previews moved inline under each payment option */}
 
             <div className="checkout-panel">
               <h3 className="checkout-panel__title">
@@ -212,6 +215,16 @@ const CheckoutPage: React.FC = () => {
                     <div className="checkout-payment-option__title">{option.label}</div>
                     <div className="checkout-payment-option__desc">{option.desc}</div>
                   </div>
+                  {option.value === 'bank' && form.payment === 'bank' && (
+                    <div className="checkout-qr-inline">
+                      <img src={mbankImg} alt="QR chuyển khoản" className="checkout-qr-img" />
+                    </div>
+                  )}
+                  {option.value === 'vnpay' && form.payment === 'vnpay' && (
+                    <div className="checkout-qr-inline">
+                      <img src={vnpayImg} alt="QR VNPay" className="checkout-qr-img" />
+                    </div>
+                  )}
                 </label>
               ))}
             </div>

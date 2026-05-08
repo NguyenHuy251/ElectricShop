@@ -38,6 +38,7 @@ const AdminImportReceiptsPage: React.FC = () => {
   const { products, reloadProducts } = useProducts();
 
   const [receipts, setReceipts] = useState<ImportReceipt[]>([]);
+  const [search, setSearch] = useState('');
   const [suppliers, setSuppliers] = useState<Array<{ id: number; tenNhaCungCap: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,6 +53,19 @@ const AdminImportReceiptsPage: React.FC = () => {
     () => products.map((product) => ({ id: product.id, tenSanPham: product.name })),
     [products],
   );
+
+  const filteredReceipts = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) {
+      return receipts;
+    }
+
+    return receipts.filter((receipt) => {
+      return [String(receipt.id), receipt.tenNhaCungCap, receipt.tenNhanVienLap || '']
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(keyword));
+    });
+  }, [receipts, search]);
 
   const loadData = async () => {
     try {
@@ -213,6 +227,16 @@ const AdminImportReceiptsPage: React.FC = () => {
         </button>
       </div>
 
+      <div className="admin-search-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo mã phiếu, nhà cung cấp hoặc người thực hiện..."
+        />
+      </div>
+
       <div className="admin-import-table-wrap">
         <table className="admin-table">
           <thead>
@@ -231,7 +255,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                 <td colSpan={6} className="admin-empty-state">Đang tải dữ liệu phiếu nhập...</td>
               </tr>
             )}
-            {!isLoading && receipts.map((receipt) => (
+            {!isLoading && filteredReceipts.map((receipt) => (
               <tr key={receipt.id} className="admin-import-row">
                 <td className="admin-import-cell admin-import-cell-strong">#{receipt.id}</td>
                 <td className="admin-import-cell">{receipt.tenNhaCungCap}</td>
@@ -252,7 +276,7 @@ const AdminImportReceiptsPage: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {!isLoading && receipts.length === 0 && (
+            {!isLoading && filteredReceipts.length === 0 && (
               <tr>
                 <td colSpan={6} className="admin-empty-state">Chưa có phiếu nhập nào</td>
               </tr>

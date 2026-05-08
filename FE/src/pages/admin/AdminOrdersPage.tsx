@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EnvironmentOutlined, FileTextOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useOrders } from '../../hooks/useOrders';
 import { useAuth } from '../../hooks/useAuth';
@@ -19,9 +19,23 @@ const AdminOrdersPage: React.FC = () => {
   const { orders, updateOrderStatus, loading } = useOrders();
   const { reloadProducts } = useProducts();
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
+  const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const filtered = filterStatus === 'all' ? orders : orders.filter((o) => o.trangThai === filterStatus);
+  const filtered = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return orders.filter((order) => {
+      const statusMatches = filterStatus === 'all' || order.trangThai === filterStatus;
+      const searchMatches =
+        !keyword ||
+        [String(order.id), order.soDienThoai, order.diaChi, order.tenNguoiXacNhan || '']
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(keyword));
+
+      return statusMatches && searchMatches;
+    });
+  }, [filterStatus, orders, search]);
 
   return (
     <div>
@@ -50,6 +64,16 @@ const AdminOrdersPage: React.FC = () => {
             {getOrderStatusLabel(s)} ({orders.filter((o) => o.trangThai === s).length})
           </button>
         ))}
+      </div>
+
+      <div className="admin-search-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Tìm theo mã đơn, số điện thoại, địa chỉ hoặc người xác nhận..."
+          className="admin-search-input"
+        />
       </div>
 
       <div className="admin-table-wrap">
@@ -111,7 +135,7 @@ const AdminOrdersPage: React.FC = () => {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="admin-orders-empty">
+                <td colSpan={8} className="admin-orders-empty">
                   Không có đơn hàng nào
                 </td>
               </tr>

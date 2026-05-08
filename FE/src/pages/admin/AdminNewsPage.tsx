@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { Employee, NewsArticle } from '../../types';
@@ -31,6 +31,7 @@ const AdminNewsPage: React.FC = () => {
   const [newsList, setNewsList] = useState<NewsArticle[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [form, setForm] = useState<NewsFormState>(emptyForm);
@@ -61,6 +62,19 @@ const AdminNewsPage: React.FC = () => {
       isMounted = false;
     };
   }, []);
+
+  const filteredNews = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) {
+      return newsList;
+    }
+
+    return newsList.filter((news) => {
+      return [news.tieuDe, news.slug, news.tenNhanVienDang || '']
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(keyword));
+    });
+  }, [newsList, search]);
 
   const openCreateModal = () => {
     setEditingNews(null);
@@ -157,6 +171,16 @@ const AdminNewsPage: React.FC = () => {
         </button>
       </div>
 
+      <div className="admin-search-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo tiêu đề, slug hoặc tác giả..."
+        />
+      </div>
+
       <div className="admin-news-wrap">
         {loading && <div className="admin-info-box">Đang tải tin tức...</div>}
         <table className="admin-table">
@@ -170,7 +194,7 @@ const AdminNewsPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {newsList.map((news) => (
+            {filteredNews.map((news) => (
               <tr key={news.id} className="dashboard-table-row">
                 <td className="admin-news-cell-title">{news.tieuDe}</td>
                 <td className="admin-news-cell-muted">{news.slug}</td>
@@ -189,6 +213,11 @@ const AdminNewsPage: React.FC = () => {
                 </td>
               </tr>
             ))}
+            {!loading && filteredNews.length === 0 && (
+              <tr>
+                <td colSpan={6} className="admin-empty-state">Không tìm thấy tin tức phù hợp</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

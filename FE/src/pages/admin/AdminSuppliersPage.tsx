@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
@@ -20,6 +20,7 @@ const AdminSuppliersPage: React.FC = () => {
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [formData, setFormData] = useState({
@@ -43,6 +44,19 @@ const AdminSuppliersPage: React.FC = () => {
   useEffect(() => {
     void loadSuppliers();
   }, []);
+
+  const filteredSuppliers = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) {
+      return suppliers;
+    }
+
+    return suppliers.filter((supplier) => {
+      return [supplier.tenNhaCungCap, supplier.sdt, supplier.email, supplier.diaChi]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(keyword));
+    });
+  }, [search, suppliers]);
 
   const handleOpenModal = (supplier?: Supplier) => {
     if (supplier) {
@@ -132,6 +146,16 @@ const AdminSuppliersPage: React.FC = () => {
         )}
       </div>
 
+      <div className="admin-search-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-search-input"
+          placeholder="Tìm theo tên, số điện thoại, email hoặc địa chỉ..."
+        />
+      </div>
+
       <div className="admin-import-table-wrap">
         <table className="admin-table">
           <thead>
@@ -150,7 +174,7 @@ const AdminSuppliersPage: React.FC = () => {
                 <td colSpan={6} className="admin-empty-state">Đang tải danh sách nhà cung cấp...</td>
               </tr>
             )}
-            {!isLoading && suppliers.map((supplier) => (
+            {!isLoading && filteredSuppliers.map((supplier) => (
               <tr key={supplier.id} className="admin-import-row">
                 <td className="admin-import-cell admin-import-cell-strong">#{supplier.id}</td>
                 <td className="admin-import-cell admin-import-cell-strong">{supplier.tenNhaCungCap}</td>
@@ -187,7 +211,7 @@ const AdminSuppliersPage: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {!isLoading && suppliers.length === 0 && (
+            {!isLoading && filteredSuppliers.length === 0 && (
               <tr>
                 <td colSpan={6} className="admin-empty-state">Chưa có nhà cung cấp nào</td>
               </tr>
